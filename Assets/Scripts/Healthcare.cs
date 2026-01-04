@@ -26,7 +26,7 @@ public class Healthcare : MonoBehaviour
     [SerializeField] MeshRenderer screen;
     VideoPlayer videoPlayer;
     [SerializeField] Material videoMat;
-    [SerializeField] Drone drone;
+    //[SerializeField] Drone drone;
     bool canPlay = false, playing = false;
 
     void Awake()
@@ -145,7 +145,7 @@ public class Healthcare : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        drone.Reset();
+        //drone.Reset();
         if (!canPlay) canPlay = true;
     }
 

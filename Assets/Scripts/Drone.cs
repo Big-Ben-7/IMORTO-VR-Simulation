@@ -16,7 +16,7 @@ public class Drone : MonoBehaviour
     State state = State.Idle;
     Vector3 launchPos, launchTarget;
     Animator animator;
-    //Canvas block;
+    Canvas block;
 
     void Awake()
     {
@@ -27,7 +27,8 @@ public class Drone : MonoBehaviour
         pointCount = pathPoints.Length;
         path = new Vector3[pointCount];
         for (int i = 0; i < pointCount; i++) path[i] = pathPoints[i].position;
-        //block = myT.GetChild(11).gameObject.GetComponent<Canvas>();
+        Piano.drone = this;
+        block = myT.GetChild(11).gameObject.GetComponent<Canvas>();
     }
 
     void Start()
@@ -64,7 +65,7 @@ public class Drone : MonoBehaviour
                     audioSource.Stop();
                     animator.SetTrigger("Reset");
                     state = State.Idle;
-                    //block.enabled = true;
+                    block.enabled = true;
                 }
                 break;
         }
@@ -81,7 +82,7 @@ public class Drone : MonoBehaviour
         animator.SetTrigger("Launch");
         audioSource.PlayOneShot(launch, 0.15f);
         audioSource.Play();
-        //block.enabled = false;
+        block.enabled = false;
         state = State.Launch;
     }
 

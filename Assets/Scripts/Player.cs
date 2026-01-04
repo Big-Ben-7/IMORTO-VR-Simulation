@@ -179,6 +179,6 @@ public class Player : MonoBehaviour
 
     public static void Grab()
     {
-        audioSource.PlayOneShot(grabClip, 0.4f);
+        audioSource.PlayOneShot(grabClip, 0.5f);
     }
 }

@@ -45,11 +45,11 @@ public class UIPanel : XRGrabInteractable
     protected override void OnSelectEntered(SelectEnterEventArgs args)
     {
         base.OnSelectEntered(args);
-        if (play >= 2) 
+        /*if (play >= 2) 
         {
             audioSource.PlayOneShot(toggle);
         }
-        else play ++;
+        else play ++;*/
         if (!(args.interactorObject is NearFarInteractor))
         {
             return;
@@ -68,11 +68,11 @@ public class UIPanel : XRGrabInteractable
     protected override void OnHoverEntered(HoverEnterEventArgs args)
     {
         base.OnHoverEntered(args);
-        if (play > 2)
+        /*if (play > 2)
         {
             if (interactors == 0) audioSource.PlayOneShot(hover);
         }
-        else play ++;
+        else play ++;*/
         if (!(args.interactorObject is NearFarInteractor))
         {
             lf.enabled = initialFollow;
@@ -92,5 +92,10 @@ public class UIPanel : XRGrabInteractable
             return;
         }
         interactors --;
+    }
+
+    public void Hover()
+    {
+        audioSource.PlayOneShot(hover);
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -19,7 +20,6 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
     [SerializeField] LayerMask terrainLayer, platformLayer, rockLayer;
     [SerializeField] Transform rover;
     Animator roverAnim;
-    Rigidbody rb;
     [SerializeField] float roverRotSpeed;
     [SerializeField] Camera roverCam, heliCam;
     [SerializeField] Transform lens;
@@ -32,6 +32,7 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
     [SerializeField] AudioClip scanClip, drillClip, foundClip, successClip, errorClip, uiClip, colorClip, ringClip, startClip, gravel;
     NavMeshAgent roverAgent;
     Transform[] wheels = new Transform[3];
+    Transform[] indWheels = new Transform[6];
     AudioSource roverSource;
     int rockIndex = -1;
     int rocksScanned;
@@ -46,15 +47,15 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         rectT = GetComponent<RectTransform>();
         rect = rectT.rect;
         roverAgent = rover.GetComponent<NavMeshAgent>();
-        rb = rover.GetComponent<Rigidbody>();
         roverAnim = rover.GetComponent<Animator>();
-        roverAgent.updateRotation = false;
+        //roverAgent.updateRotation = false;
         roverSource = rover.GetComponent<AudioSource>();
         lasers = lens.GetComponentsInChildren<LineRenderer>();
         laserCount = lasers.Length;
         for (int i = 0; i < laserCount; i++) lasers[i].enabled = false;
         Transform p = rover.GetChild(0);
         for (int i = 0; i < 3; i++) wheels[i] = p.GetChild(i+4);
+        for (int i = 0; i < 6; i++) indWheels[i] = p.GetChild(i+7);
         for (int i = 0; i < 5; i++)
         {
             rockObstacles[i] = rockTs[i].GetComponent<NavMeshObstacle>();
@@ -105,20 +106,30 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
                 }
             }
         }
-        //Quaternion newRot = rover.rotation;
-        //if (roverAgent.hasPath && roverAgent.velocity.sqrMagnitude > 0.01f) newRot = Quaternion.LookRotation(roverAgent.velocity);
-        //if (Physics.Raycast(rover.position + Vector3.up, Vector3.down, out RaycastHit hit, 5, terrainLayer)) newRot *= Quaternion.FromToRotation(rover.up, hit.normal);
-        //rover.rotation = Quaternion.Slerp(rover.rotation, newRot, roverRotSpeed * Time.deltaTime);
-    }
-
-    /*void FixedUpdate()
-    {
-        if (roverAgent.hasPath && roverAgent.velocity.sqrMagnitude > 0.01f)
+        /*//Quaternion newRot;
+        //if (roverAgent.hasPath && roverAgent.velocity.sqrMagnitude > 0.01f) newRot = Quaternion.LookRotation(roverAgent.velocity.normalized, rover.up);
+        //else newRot = Quaternion.LookRotation(roverAgent.destination, rover.up);
+        Vector3 normal = Vector3.zero;
+        for (int i = 0; i < 6; i++)
         {
-            rover.rotation = Quaternion.Slerp(rover.rotation, Quaternion.LookRotation(roverAgent.velocity), roverRotSpeed * Time.deltaTime);
-            rb.AddTorque(Vector3.Cross(rover.forward, roverAgent.velocity) * roverRotSpeed, ForceMode.VelocityChange);
+            if (Physics.Raycast(indWheels[i].position, Vector3.down, out RaycastHit hit, 5, terrainLayer)) normal += hit.normal;
         }
-    }*/
+        normal = -normal.normalized;
+        Vector3 forward = roverAgent.hasPath && roverAgent.velocity.sqrMagnitude > 0.01f? roverAgent.velocity : rover.forward;
+        forward = Vector3.ProjectOnPlane(forward, normal).normalized;
+        rover.rotation = Quaternion.Slerp(rover.rotation, Quaternion.LookRotation(forward, normal), roverRotSpeed * Time.deltaTime);*/
+        /*
+        Vector3[] hitPoints = new Vector3[6];
+        for (int i = 0; i < 6; i++)
+        {
+            if (Physics.Raycast(indWheels[i].position, Vector3.down, out RaycastHit hit, 5, terrainLayer)) hitPoints[i] = hit.point;
+        }
+        rover.rotation = Quaternion.Slerp(rover.rotation, rover.rotation * Quaternion.FromToRotation(rover.up, new Plane(hitPoints[0], hitPoints[3], hitPoints[5]).normal), roverRotSpeed * Time.deltaTime);*/
+        /*if (Physics.Raycast(rover.position + Vector3.up * 0.05f, -rover.up, out RaycastHit hit, 5, terrainLayer))
+        {
+            rover.rotation = Quaternion.Slerp(rover.rotation, rover.rotation * Quaternion.FromToRotation(rover.up, hit.normal), 10 * Time.deltaTime);
+        }*/
+    }
 
     IEnumerator Drill()
     {
