@@ -12,7 +12,7 @@ public class UIPanel : XRGrabInteractable
     [SerializeField] protected AudioClip toggle, hover;
     [SerializeField] GameObject socket;
     bool initialFollow;
-    int play;
+    //int play;
     LazyFollow lf;
     Transform myT;
     Quaternion initialRot;
@@ -29,11 +29,11 @@ public class UIPanel : XRGrabInteractable
         Instantiate(socket, pos, initialRot);
     }
 
-    protected override void OnEnable()
+    /*protected override void OnEnable()
     {
         base.OnEnable();
-        play = 0;
-    }
+        //play = 0;
+    }*/
 
     protected override void OnActivated(ActivateEventArgs args)
     {
@@ -54,6 +54,8 @@ public class UIPanel : XRGrabInteractable
         {
             return;
         }
+        audioSource.PlayOneShot(toggle);
+        interactors ++;
     }
 
     protected override void OnSelectExited(SelectExitEventArgs args)
@@ -63,6 +65,7 @@ public class UIPanel : XRGrabInteractable
         {
             return;
         }
+        interactors --;
     }
 
     protected override void OnHoverEntered(HoverEnterEventArgs args)
@@ -77,10 +80,10 @@ public class UIPanel : XRGrabInteractable
         {
             lf.enabled = initialFollow;
             if (!initialFollow && myT) myT.rotation = initialRot;
+            if (interactors != 0) audioSource.PlayOneShot(hover);
             //if (Player.initialized) audioSource.PlayOneShot(hover);
             return;
         }
-        interactors ++;
     }
 
     protected override void OnHoverExited(HoverExitEventArgs args)
@@ -91,7 +94,6 @@ public class UIPanel : XRGrabInteractable
             lf.enabled = true;
             return;
         }
-        interactors --;
     }
 
     public void Hover()

@@ -106,14 +106,24 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
                 }
             }
         }
-        /*if (!(roverAgent.hasPath && roverAgent.velocity.sqrMagnitude > 0.01f)) return;
-        Vector3 normal = Vector3.zero;
-        for (int i = 0; i < 6; i++)
+        //if (!roverAgent.hasPath) return;
+        /*Vector3[] hitPoints = new Vector3[3];
+        if 
+        /*for (int i = 0; i < 6; i++)
         {
-            if (Physics.Raycast(indWheels[i].position, Vector3.down, out RaycastHit hit, 5, terrainLayer)) normal += hit.normal;
+            if (Physics.Raycast(indWheels[i].position, Vector3.down, out RaycastHit hit, 5, terrainLayer)) hitPoints[i] = hit.point;
         }
-        normal.Normalize();
-        rover.rotation = Quaternion.Slerp(rover.rotation, Quaternion.LookRotation(roverAgent.velocity), roverRotSpeed * Time.deltaTime) * Quaternion.FromToRotation(rover.up, normal);*/
+        Array.Sort(hitPoints, (a, b) => a.y.CompareTo(b.y));
+        Vector3 normal = new Plane(hitPoints[0], hitPoints[3], hitPoints[5]).normal;
+        if (normal.y < 0) normal *= -1;*/
+        //rover.rotation = Quaternion.Slerp(rover.rotation, Quaternion.LookRotation(roverAgent.velocity), roverRotSpeed * Time.deltaTime);
+        /*if (Physics.Raycast(rover.position, -rover.up, out RaycastHit hit, 5, terrainLayer))
+        {
+            Debug.Log("rotating");
+            if (Physics.Raycast(indWheels[4].position, -indWheels[4].up, out RaycastHit hit1, 5, terrainLayer)) Debug.Log("2");
+            if (Physics.Raycast(indWheels[5].position, -indWheels[5].up, out RaycastHit hit2, 5, terrainLayer)) Debug.Log("3");
+            rover.rotation = Quaternion.Slerp(rover.rotation, Quaternion.LookRotation(rockTs[1].position-rover.position, new Plane(hit.point, hit1.point, hit2.point).normal), roverRotSpeed * Time.deltaTime);
+        }*/
     }
 
     IEnumerator Drill()
