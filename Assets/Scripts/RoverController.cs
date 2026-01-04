@@ -106,29 +106,14 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
                 }
             }
         }
-        /*//Quaternion newRot;
-        //if (roverAgent.hasPath && roverAgent.velocity.sqrMagnitude > 0.01f) newRot = Quaternion.LookRotation(roverAgent.velocity.normalized, rover.up);
-        //else newRot = Quaternion.LookRotation(roverAgent.destination, rover.up);
+        /*if (!(roverAgent.hasPath && roverAgent.velocity.sqrMagnitude > 0.01f)) return;
         Vector3 normal = Vector3.zero;
         for (int i = 0; i < 6; i++)
         {
             if (Physics.Raycast(indWheels[i].position, Vector3.down, out RaycastHit hit, 5, terrainLayer)) normal += hit.normal;
         }
-        normal = -normal.normalized;
-        Vector3 forward = roverAgent.hasPath && roverAgent.velocity.sqrMagnitude > 0.01f? roverAgent.velocity : rover.forward;
-        forward = Vector3.ProjectOnPlane(forward, normal).normalized;
-        rover.rotation = Quaternion.Slerp(rover.rotation, Quaternion.LookRotation(forward, normal), roverRotSpeed * Time.deltaTime);*/
-        /*
-        Vector3[] hitPoints = new Vector3[6];
-        for (int i = 0; i < 6; i++)
-        {
-            if (Physics.Raycast(indWheels[i].position, Vector3.down, out RaycastHit hit, 5, terrainLayer)) hitPoints[i] = hit.point;
-        }
-        rover.rotation = Quaternion.Slerp(rover.rotation, rover.rotation * Quaternion.FromToRotation(rover.up, new Plane(hitPoints[0], hitPoints[3], hitPoints[5]).normal), roverRotSpeed * Time.deltaTime);*/
-        /*if (Physics.Raycast(rover.position + Vector3.up * 0.05f, -rover.up, out RaycastHit hit, 5, terrainLayer))
-        {
-            rover.rotation = Quaternion.Slerp(rover.rotation, rover.rotation * Quaternion.FromToRotation(rover.up, hit.normal), 10 * Time.deltaTime);
-        }*/
+        normal.Normalize();
+        rover.rotation = Quaternion.Slerp(rover.rotation, Quaternion.LookRotation(roverAgent.velocity), roverRotSpeed * Time.deltaTime) * Quaternion.FromToRotation(rover.up, normal);*/
     }
 
     IEnumerator Drill()
