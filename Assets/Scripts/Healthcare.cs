@@ -20,6 +20,7 @@ public class Healthcare : MonoBehaviour
     bool[] grabbed = new bool[3];
     Vector3[] armVectors1 = new Vector3[] {Vector3.down, Vector3.down, Vector3.up, Vector3.up};
     Vector3[] needleVectors2 = new Vector3[] {Vector3.back, Vector3.forward, Vector3.back, Vector3.forward};
+    GameObject[,,] arrows = new GameObject[4, 3, 2];
 
     [Header("Triggers")]
     [SerializeField] Camera mainCam;
@@ -32,18 +33,27 @@ public class Healthcare : MonoBehaviour
     void Awake()
     {
         videoPlayer = screen.GetComponent<VideoPlayer>();
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 4; i++)
         {
-            cols[i] = joysticks[i].GetComponent<Collider>();
-            attaches[i] = joysticks[i].GetChild(0);
-            initialPos[i] = attaches[i].position;
-            midArms[i] = arms[i].GetChild(0);
-            lowArms[i] = midArms[i].GetChild(0);
-            needles[i] = lowArms[i].GetChild(0);
+            if (i < 3)
+            {
+                cols[i] = joysticks[i].GetComponent<Collider>();
+                attaches[i] = joysticks[i].GetChild(0);
+                initialPos[i] = attaches[i].position;
+            }
+
+            Transform arm = arms[i];
+            Transform mid = midArms[i] = arm.GetChild(0);
+            Transform low = lowArms[i] = mid.GetChild(0);
+            Transform needle = needles[i] = low.GetChild(0);
+
+            arrows[i, 0, 0] = arm.parent.GetChild(i+7).gameObject;
+            arrows[i, 0, 1] = arm.GetChild(1).gameObject;
+            arrows[i, 1, 0] = low.GetChild(1).gameObject;
+            arrows[i, 1, 1] = mid.GetChild(1).gameObject;
+            arrows[i, 2, 0] = needle.GetChild(0).gameObject;
+            arrows[i, 2, 1] = low.GetChild(2).gameObject;
         }
-        midArms[3] = arms[3].GetChild(0);
-        lowArms[3] = midArms[3].GetChild(0);
-        needles[3] = lowArms[3].GetChild(0);
     }
 
     void Update()
@@ -90,6 +100,20 @@ public class Healthcare : MonoBehaviour
         else if (lowX) needles[arm].rotation = needleRot;
         if (d.z > dead) needles[arm].Rotate(needleVectors2[arm] * (d.z - dead));
         else if (d.z < -dead) needles[arm].Rotate(needleVectors2[arm] * (d.z + dead));
+    }
+
+    public void Hover(int n)
+    {
+        if (arm == -1) return;
+        arrows[arm, n, 0].SetActive(true);
+        arrows[arm, n, 1].SetActive(true);
+    }
+
+    public void ExitHover(int n)
+    {
+        if (arm == -1) return;
+        arrows[arm, n, 0].SetActive(false);
+        arrows[arm, n, 1].SetActive(false);
     }
 
     public void SetArm(int a)

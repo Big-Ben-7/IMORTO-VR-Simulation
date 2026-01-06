@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -26,13 +25,15 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
     [SerializeField] float laserSpeed;
     LineRenderer[] lasers;
     int laserCount;
+    Transform ingenuity;
     Transform heli;
     float initialHeight, initialSize;
     [SerializeField] GameObject screen;
     [SerializeField] AudioClip scanClip, drillClip, foundClip, successClip, errorClip, uiClip, colorClip, ringClip, startClip, gravel;
     NavMeshAgent roverAgent;
+    //Rigidbody rb;
     Transform[] wheels = new Transform[3];
-    Transform[] indWheels = new Transform[6];
+    //Transform[] indWheels = new Transform[6];
     AudioSource roverSource;
     int rockIndex = -1;
     int rocksScanned;
@@ -41,12 +42,21 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
     Rect rect;
     WaitForSeconds second = new WaitForSeconds(1);
     WaitForSeconds halfSecond = new WaitForSeconds(0.5f);
+    [SerializeField] Transform[] joysticks;
+    Transform origin;
+    Transform[] marks = new Transform[2];
+    Vector3[]initialPos = new Vector3[2];
+    [SerializeField] LayerMask body;
+    [SerializeField] float deadZone, speed;
+    Collider[] cols = new Collider[2];
+    bool[] grabbed = new bool[] {false, false};
 
     void Awake()
     {
         rectT = GetComponent<RectTransform>();
         rect = rectT.rect;
         roverAgent = rover.GetComponent<NavMeshAgent>();
+        //rb = rover.GetComponent<Rigidbody>();
         roverAnim = rover.GetComponent<Animator>();
         //roverAgent.updateRotation = false;
         roverSource = rover.GetComponent<AudioSource>();
@@ -54,8 +64,15 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         laserCount = lasers.Length;
         for (int i = 0; i < laserCount; i++) lasers[i].enabled = false;
         Transform p = rover.GetChild(0);
+        cols[0] = joysticks[0].GetComponent<Collider>();
+        cols[1] = joysticks[1].GetComponent<Collider>();
+        origin = joysticks[0].parent.GetChild(1);
+        Transform t = marks[0] = joysticks[0].GetChild(0);
+        initialPos[0] = origin.InverseTransformPoint(t.position);
+        t = marks[1] = joysticks[1].GetChild(0);
+        initialPos[1] = origin.InverseTransformPoint(t.position);
         for (int i = 0; i < 3; i++) wheels[i] = p.GetChild(i+4);
-        for (int i = 0; i < 6; i++) indWheels[i] = p.GetChild(i+7);
+        //for (int i = 0; i < 6; i++) indWheels[i] = p.GetChild(i+7);
         for (int i = 0; i < 5; i++)
         {
             rockObstacles[i] = rockTs[i].GetComponent<NavMeshObstacle>();
@@ -64,12 +81,54 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         }
         animators[5] = targetRing.GetComponent<Animator>();
         heli = heliCam.transform;
+        ingenuity = heli.parent;
         initialHeight = heli.position.y;
         initialSize = heliCam.orthographicSize;
     }
 
     void Update()
     {
+        Vector3 d = origin.InverseTransformPoint(marks[0].position) - initialPos[0];
+        float dy = (origin.InverseTransformPoint(marks[1].position) - initialPos[1]).z;
+        if (Mathf.Abs(d.x) < deadZone) d.x = 0;
+        else d.x -= deadZone;
+        if (Mathf.Abs(d.z) < deadZone) d.z = 0;
+        else d.z -= deadZone;
+        if (Mathf.Abs(dy) < deadZone) dy = 0;
+        else dy -= deadZone;
+        Vector3 pos = ingenuity.position;
+        if (pos.y > 3.6f)
+        {
+            dy = 0;
+            pos.y = 3.6f;
+        }
+        else if (pos.y < 1.3f)
+        {
+            dy = 0;
+            pos.y = 1.3f;
+        }
+        if (pos.z > -13)
+        {
+            d.x = 0;
+            pos.z = -13;
+        }
+        else if (pos.z < -22)
+        {
+            d.x = 0;
+            pos.z = -22;
+        }
+        if (pos.x > 25)
+        {
+            d.z = 0;
+            pos.x = 25;
+        }
+        else if (pos.x < 19)
+        {
+            d.z = 0;
+            pos.x = 19;
+        }
+        ingenuity.position = pos;
+        ingenuity.Translate(new Vector3(d.z, dy, -d.x) * speed * Time.deltaTime);
         if (heliCam.enabled) heliCam.orthographicSize = initialSize * heli.position.y / initialHeight;
         for (int i = 0; i < 5; i++)
         {
@@ -106,17 +165,32 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
                 }
             }
         }
-        //if (!roverAgent.hasPath) return;
-        /*Vector3[] hitPoints = new Vector3[3];
-        if 
-        /*for (int i = 0; i < 6; i++)
+        /*if (!roverAgent.hasPath) return;
+        rb.AddTorque(Vector3.Cross(rover.forward, roverAgent.steeringTarget - rover.position).normalized * roverRotSpeed, ForceMode.VelocityChange);
+        /*float roverSpeed = roverAgent.velocity.magnitude;
+        if (roverAgent.remainingDistance <= roverAgent.stoppingDistance && (!roverAgent.hasPath || roverSpeed < 0.1))
+            return;
+        Vector3 direction = roverAgent.pathEndPosition - rover.position;
+        if (direction.sqrMagnitude < 0.1)
+            return;
+        Vector3[] hitPoints = new Vector3[6];
+        for (int i = 0; i < 6; i++)
         {
             if (Physics.Raycast(indWheels[i].position, Vector3.down, out RaycastHit hit, 5, terrainLayer)) hitPoints[i] = hit.point;
         }
         Array.Sort(hitPoints, (a, b) => a.y.CompareTo(b.y));
-        Vector3 normal = new Plane(hitPoints[0], hitPoints[3], hitPoints[5]).normal;
-        if (normal.y < 0) normal *= -1;*/
-        //rover.rotation = Quaternion.Slerp(rover.rotation, Quaternion.LookRotation(roverAgent.velocity), roverRotSpeed * Time.deltaTime);
+        Vector3 lowPoint = hitPoints[0];
+        Vector3 r0 = (lowPoint-hitPoints[4]).normalized;
+        Vector3 r1 = (lowPoint-hitPoints[5]).normalized;
+        float xd = Vector3.Dot(r0, r1);
+        if (xd > 0.95 || xd < -0.95) lowPoint = hitPoints[1];
+        Vector3 normal = new Plane(hitPoints[4], lowPoint, hitPoints[5]).normal;
+        if (normal.y < 0) normal *= -1;
+        float cx = Vector3.Dot(normal, rover.up);
+        if (cx < 0.95) cx = 0.05f/(1-cx);
+        else cx = 1.0f;
+        rover.rotation = Quaternion.Slerp(rover.rotation, Quaternion.LookRotation(direction, rover.up), roverRotSpeed * Time.deltaTime);
+        rover.rotation =Quaternion.Slerp(rover.rotation, rover.rotation * Quaternion.FromToRotation(rover.up, normal), cx);
         /*if (Physics.Raycast(rover.position, -rover.up, out RaycastHit hit, 5, terrainLayer))
         {
             Debug.Log("rotating");
@@ -252,6 +326,12 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         StartCoroutine(ToggleCamera());
     }
 
+    public void Grab(int i)
+    {
+        grabbed[i] = !grabbed[i];
+        if (grabbed[i]) cols[i].excludeLayers = body;
+        else cols[i].excludeLayers = 0;
+    }
 
     public void OnPointerClick(PointerEventData eventData)
     {
