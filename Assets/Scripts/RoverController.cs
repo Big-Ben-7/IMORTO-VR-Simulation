@@ -15,6 +15,8 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
     [SerializeField] Transform target;
     [SerializeField] RectTransform targetRing;
     [SerializeField] GameObject[] mapColors;
+    RectTransform[] colorRects = new RectTransform[5];
+    [SerializeField] Vector2[] colorOffsets = new Vector2[5];
     Animator[] animators = new Animator[6];
     [SerializeField] LayerMask terrainLayer, platformLayer, rockLayer;
     [SerializeField] Transform rover;
@@ -27,7 +29,7 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
     int laserCount;
     Transform ingenuity;
     Transform heli;
-    float initialHeight, initialSize;
+    float initialSize;
     [SerializeField] GameObject screen;
     [SerializeField] AudioClip scanClip, drillClip, foundClip, successClip, errorClip, uiClip, colorClip, ringClip, startClip, gravel;
     NavMeshAgent roverAgent;
@@ -50,6 +52,12 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
     [SerializeField] float deadZone, speed;
     Collider[] cols = new Collider[2];
     bool[] grabbed = new bool[] {false, false};
+    enum State {Idle, Launch, Fly, Reset};
+    State state = State.Idle;
+    Vector3 launchPos;
+    AudioSource heliSource;
+    [SerializeField] AudioClip launchClip;
+    Animator heliAnim;
 
     void Awake()
     {
@@ -76,60 +84,95 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         for (int i = 0; i < 5; i++)
         {
             rockObstacles[i] = rockTs[i].GetComponent<NavMeshObstacle>();
+            //Vector3 vp = heliCam.WorldToViewportPoint(rockTs[i].position);
+            //colorOffsets[i] = mapColors[i].GetComponent<RectTransform>().anchoredPosition - new Vector2(vp.x, vp.y);
+            colorRects[i] = mapColors[i].GetComponent<RectTransform>();
             animators[i] = mapColors[i].GetComponent<Animator>();
             scanCanvases[i] = scans[i].GetChild(1).GetComponent<Canvas>();
         }
         animators[5] = targetRing.GetComponent<Animator>();
         heli = heliCam.transform;
         ingenuity = heli.parent;
-        initialHeight = heli.position.y;
+        heliSource = ingenuity.GetComponent<AudioSource>();
+        heliAnim = ingenuity.GetComponent<Animator>();
+        launchPos = ingenuity.position;
         initialSize = heliCam.orthographicSize;
     }
 
     void Update()
     {
-        Vector3 d = origin.InverseTransformPoint(marks[0].position) - initialPos[0];
-        float dy = (origin.InverseTransformPoint(marks[1].position) - initialPos[1]).z;
-        if (Mathf.Abs(d.x) < deadZone) d.x = 0;
-        else d.x -= deadZone;
-        if (Mathf.Abs(d.z) < deadZone) d.z = 0;
-        else d.z -= deadZone;
-        if (Mathf.Abs(dy) < deadZone) dy = 0;
-        else dy -= deadZone;
-        Vector3 pos = ingenuity.position;
-        if (pos.y > 3.6f)
+        switch (state)
         {
-            dy = 0;
-            pos.y = 3.6f;
+            case State.Idle:
+                break;
+            case State.Launch:
+                Vector3 pos = ingenuity.position;
+                ingenuity.position = Vector3.MoveTowards(pos, new Vector3(22, 2.9f, -17.5f), Time.deltaTime);
+                Vector3 d =  new Vector3(22, 2.9f, -17.5f) - ingenuity.position;
+                if (Mathf.Abs(d.x) < 0.01f && Mathf.Abs(d.y) < 0.01f && Mathf.Abs(d.z) < 0.01f)
+                {
+                    ingenuity.position = new Vector3(22, 2.9f, -17.5f);
+                    state = State.Fly;
+                }
+                break;
+            case State.Fly:
+                d = origin.InverseTransformPoint(marks[0].position) - initialPos[0];
+                float dy = (origin.InverseTransformPoint(marks[1].position) - initialPos[1]).z;
+                if (Mathf.Abs(d.x) < deadZone) d.x = 0;
+                else d.x -= deadZone;
+                if (Mathf.Abs(d.z) < deadZone) d.z = 0;
+                else d.z -= deadZone;
+                if (Mathf.Abs(dy) < deadZone) dy = 0;
+                else dy -= deadZone;
+                pos = ingenuity.position;
+                if (pos.y > 3.6f)
+                {
+                    dy = 0;
+                    pos.y = 3.6f;
+                }
+                else if (pos.y < 1.3f)
+                {
+                    dy = 0;
+                    pos.y = 1.3f;
+                }
+                if (pos.z > -13)
+                {
+                    d.x = 0;
+                    pos.z = -13;
+                }
+                else if (pos.z < -22)
+                {
+                    d.x = 0;
+                    pos.z = -22;
+                }
+                if (pos.x > 25)
+                {
+                    d.z = 0;
+                    pos.x = 25;
+                }
+                else if (pos.x < 19)
+                {
+                    d.z = 0;
+                    pos.x = 19;
+                }
+                ingenuity.position = pos;
+                ingenuity.Translate(new Vector3(d.z, dy, -d.x) * speed * Time.deltaTime);
+                break;
+            case State.Reset:
+                pos = ingenuity.position;
+                ingenuity.position = Vector3.MoveTowards(pos, launchPos, Time.deltaTime);
+                d = launchPos - ingenuity.position;
+                if (Mathf.Abs(d.x) < 0.01f && Mathf.Abs(d.y) < 0.01f && Mathf.Abs(d.z) < 0.01f)
+                {
+                    ingenuity.position = launchPos;
+                    heliSource.Stop();
+                    heliAnim.SetTrigger("Reset");
+                    state = State.Idle;
+                    heliCam.enabled = false;
+                }
+                break;
         }
-        else if (pos.y < 1.3f)
-        {
-            dy = 0;
-            pos.y = 1.3f;
-        }
-        if (pos.z > -13)
-        {
-            d.x = 0;
-            pos.z = -13;
-        }
-        else if (pos.z < -22)
-        {
-            d.x = 0;
-            pos.z = -22;
-        }
-        if (pos.x > 25)
-        {
-            d.z = 0;
-            pos.x = 25;
-        }
-        else if (pos.x < 19)
-        {
-            d.z = 0;
-            pos.x = 19;
-        }
-        ingenuity.position = pos;
-        ingenuity.Translate(new Vector3(d.z, dy, -d.x) * speed * Time.deltaTime);
-        if (heliCam.enabled) heliCam.orthographicSize = initialSize * heli.position.y / initialHeight;
+        if (heliCam.enabled) heliCam.orthographicSize = initialSize * heli.position.y / 3;
         for (int i = 0; i < 5; i++)
         {
             Vector3 vp = heliCam.WorldToViewportPoint(rockTs[i].position);
@@ -140,6 +183,7 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
                 if (!buttons[i].gameObject.activeSelf) buttons[i].gameObject.SetActive(true);
                 buttons[i].anchoredPosition = Rect.NormalizedToPoint(rect, new Vector2(x, y) + (y < 0.5f ? Vector2.up : Vector2.down) * 0.12f);
             }
+            if (mapColors[i].activeSelf) colorRects[i].anchoredPosition = new Vector2(vp.x, vp.y) + colorOffsets[i];
         }
         if (traveling)
         {
@@ -198,6 +242,27 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
             if (Physics.Raycast(indWheels[5].position, -indWheels[5].up, out RaycastHit hit2, 5, terrainLayer)) Debug.Log("3");
             rover.rotation = Quaternion.Slerp(rover.rotation, Quaternion.LookRotation(rockTs[1].position-rover.position, new Plane(hit.point, hit1.point, hit2.point).normal), roverRotSpeed * Time.deltaTime);
         }*/
+    }
+
+    public void Launch()
+    {
+        Player.Click();
+        if (state != State.Idle)
+        {
+            Reset();
+            return;
+        }
+        heliAnim.SetTrigger("Launch");
+        heliSource.PlayOneShot(launchClip, 0.2f);
+        heliSource.Play();
+        heliCam.enabled = true;
+        state = State.Launch;
+    }
+
+    public void Reset()
+    {
+        if (state == State.Idle || state == State.Reset) return;
+        state = State.Reset;
     }
 
     IEnumerator Drill()

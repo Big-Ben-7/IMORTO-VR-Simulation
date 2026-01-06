@@ -10,8 +10,6 @@ public class Healthcare : MonoBehaviour
     [SerializeField] float speed, deadZone;
     [SerializeField] LayerMask body;
     [SerializeField] TMP_Text armText;
-    [SerializeField] AudioSource[] audioSources;
-    [SerializeField] AudioClip buttonPress;
     [SerializeField] int arm = -1;
     Transform[] attaches = new Transform[3];
     Vector3[] initialPos = new Vector3[3];
@@ -138,7 +136,7 @@ public class Healthcare : MonoBehaviour
                 armText.SetText("Selected Arm: Top-Right");
                 break;
         }
-        audioSources[a].PlayOneShot(buttonPress);
+        Player.Click();
     }
 
     /*public void ReleasedArmJoystick()

@@ -50,7 +50,8 @@ public class Drone : MonoBehaviour
                 break;
             case State.Fly:
                 myT.position = Vector3.MoveTowards(pos, path[nextPoint], speed * Time.deltaTime);
-                if (Vector3.Distance(pos, path[nextPoint]) < 0.1f)
+                Vector3 d = path[nextPoint] - pos;
+                if (Mathf.Abs(d.x) < 0.01f && Mathf.Abs(d.y) < 0.01f && Mathf.Abs(d.z) < 0.01f)
                 {
                     if (nextPoint == pointCount - 1) nextPoint = 0;
                     else nextPoint++;
@@ -59,7 +60,8 @@ public class Drone : MonoBehaviour
                 break;
             case State.Reset:
                 myT.position = Vector3.MoveTowards(pos, launchPos, speed * Time.deltaTime);
-                if (Vector3.Distance(pos, launchPos) < 0.1f)
+                d = launchPos - pos;
+                if (Mathf.Abs(d.x) < 0.01f && Mathf.Abs(d.y) < 0.01f && Mathf.Abs(d.z) < 0.01f)
                 {
                     myT.position = launchPos;
                     audioSource.Stop();
@@ -74,6 +76,7 @@ public class Drone : MonoBehaviour
 
     public void Launch()
     {
+        Player.Click();
         if (state != State.Idle)
         {
             Reset();

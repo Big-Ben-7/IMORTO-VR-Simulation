@@ -1,17 +1,18 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
     [SerializeField] InputActionProperty leftGripInput, rightGripInput;
     InputAction leftGrip, rightGrip;
     [SerializeField] Animator leftHand, rightHand;
-    [SerializeField] AudioClip teleport, jumpLand, grab;
+    [SerializeField] AudioClip teleport, jumpLand, grab, button;
     [SerializeField] CanvasGroup fadeCanvas;
     public static bool initialized;
     public static AudioSource audioSource;
-    public static AudioClip grabClip;
+    public static AudioClip grabClip, buttonClip;
     AudioSource walkSource, bgSource;
     WaitForSeconds twentiethSecond = new WaitForSeconds(0.05f);
 
@@ -54,6 +55,7 @@ public class Player : MonoBehaviour
         rightGrip = rightGripInput.action;
         fadeCanvas.alpha = 0;
         grabClip = grab;
+        buttonClip = button;
         Door.rooms = new GameObject[] {lobby, ent, health, expl, manu};
         UIPanel.audioSource = audioSource;
         //ent.SetActive(false);
@@ -180,5 +182,10 @@ public class Player : MonoBehaviour
     public static void Grab()
     {
         audioSource.PlayOneShot(grabClip, 0.5f);
+    }
+
+    public static void Click()
+    {
+        audioSource.PlayOneShot(buttonClip, 0.7f);
     }
 }
