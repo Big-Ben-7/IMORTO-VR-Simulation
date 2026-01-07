@@ -173,18 +173,29 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
                 }
                 break;
         }
-        if (heliCam.enabled) heliCam.orthographicSize = initialSize * heli.position.y / 3;
+        float scaleFactor = heli.position.y / 3;
+        if (heliCam.enabled) heliCam.orthographicSize = initialSize * scaleFactor;
         for (int i = 0; i < 5; i++)
         {
             Vector3 vp = heliCam.WorldToViewportPoint(rockTs[i].position);
             float x = vp.x, y = vp.y;
             //if (vp.z <= 0 || x > 1 || x < 0 || y > 1 || y < 0 || disable[i]) buttons[i].gameObject.SetActive(false);
-            /*else*/ if (!disable[i])
+            if (disable[i]) buttons[i].gameObject.SetActive(false);
+            else
             {
                 if (!buttons[i].gameObject.activeSelf) buttons[i].gameObject.SetActive(true);
                 buttons[i].anchoredPosition = PosToPoint(rect, new Vector2(x, y) + (y < 0.5f ? Vector2.up : Vector2.down) * 0.12f);
             }
-            if (mapColors[i].activeSelf) colorRects[i].anchoredPosition = PosToPoint(rect, heliCam.WorldToViewportPoint(colorPos[i]));
+            if (mapColors[i].activeSelf)
+            {
+                colorRects[i].anchoredPosition = PosToPoint(rect, heliCam.WorldToViewportPoint(colorPos[i]));
+                colorRects[i].localScale = Vector3.one / scaleFactor;
+            }
+            if (targetRing.gameObject.activeSelf)
+            {
+                targetRing.anchoredPosition = PosToPoint(rect, heliCam.WorldToViewportPoint(target.position));
+                targetRing.localScale = Vector3.one / scaleFactor;
+            }
         }
         if (traveling)
         {
@@ -369,7 +380,6 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         if (rocksScanned == 5)
         {
             roverAgent.stoppingDistance = 0.1f;
-            targetRing.anchoredPosition = PosToPoint(rect, heliCam.WorldToViewportPoint(target.position));
             rockIndex = 5;
             yield return second;
             targetRing.gameObject.SetActive(true);
