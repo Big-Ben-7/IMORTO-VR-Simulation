@@ -184,7 +184,7 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
             else
             {
                 if (!buttons[i].gameObject.activeSelf) buttons[i].gameObject.SetActive(true);
-                buttons[i].anchoredPosition = PosToPoint(rect, new Vector2(x, y) + (y < 0.5f ? Vector2.up : Vector2.down) * 0.12f);
+                buttons[i].anchoredPosition = PosToPoint(rect, new Vector2(x, y) + (y < 0.5f ? Vector2.up : Vector2.down) * 0.12f / scaleFactor);
             }
             if (mapColors[i].activeSelf)
             {
