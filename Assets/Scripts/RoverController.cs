@@ -16,13 +16,14 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
     [SerializeField] RectTransform targetRing;
     [SerializeField] GameObject[] mapColors;
     RectTransform[] colorRects = new RectTransform[5];
-    [SerializeField] Vector2[] colorOffsets = new Vector2[5];
+    [SerializeField] Vector3[] colorPos = new Vector3[5];
     Animator[] animators = new Animator[6];
     [SerializeField] LayerMask terrainLayer, platformLayer, rockLayer;
     [SerializeField] Transform rover;
     Animator roverAnim;
     [SerializeField] float roverRotSpeed;
     [SerializeField] Camera roverCam, heliCam;
+    Canvas block;
     [SerializeField] Transform lens;
     [SerializeField] float laserSpeed;
     LineRenderer[] lasers;
@@ -84,9 +85,8 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         for (int i = 0; i < 5; i++)
         {
             rockObstacles[i] = rockTs[i].GetComponent<NavMeshObstacle>();
-            //Vector3 vp = heliCam.WorldToViewportPoint(rockTs[i].position);
-            //colorOffsets[i] = mapColors[i].GetComponent<RectTransform>().anchoredPosition - new Vector2(vp.x, vp.y);
-            colorRects[i] = mapColors[i].GetComponent<RectTransform>();
+            /*RectTransform rectT = */colorRects[i] = mapColors[i].GetComponent<RectTransform>();
+            //if (Physics.Raycast(heliCam.ViewportPointToRay(Rect.PointToNormalized(rect, rectT.anchoredPosition)), out RaycastHit hit, 20, terrainLayer)) colorPos[i] = hit.point;
             animators[i] = mapColors[i].GetComponent<Animator>();
             scanCanvases[i] = scans[i].GetChild(1).GetComponent<Canvas>();
         }
@@ -95,6 +95,7 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         ingenuity = heli.parent;
         heliSource = ingenuity.GetComponent<AudioSource>();
         heliAnim = ingenuity.GetComponent<Animator>();
+        block = ingenuity.GetChild(1).GetComponent<Canvas>();
         launchPos = ingenuity.position;
         initialSize = heliCam.orthographicSize;
     }
@@ -107,11 +108,11 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
                 break;
             case State.Launch:
                 Vector3 pos = ingenuity.position;
-                ingenuity.position = Vector3.MoveTowards(pos, new Vector3(22, 2.9f, -17.5f), Time.deltaTime);
-                Vector3 d =  new Vector3(22, 2.9f, -17.5f) - ingenuity.position;
+                ingenuity.position = Vector3.MoveTowards(pos, new Vector3(22, 3, -17.5f), Time.deltaTime);
+                Vector3 d =  new Vector3(22, 3, -17.5f) - ingenuity.position;
                 if (Mathf.Abs(d.x) < 0.01f && Mathf.Abs(d.y) < 0.01f && Mathf.Abs(d.z) < 0.01f)
                 {
-                    ingenuity.position = new Vector3(22, 2.9f, -17.5f);
+                    ingenuity.position = new Vector3(22, 3, -17.5f);
                     state = State.Fly;
                 }
                 break;
@@ -168,7 +169,7 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
                     heliSource.Stop();
                     heliAnim.SetTrigger("Reset");
                     state = State.Idle;
-                    heliCam.enabled = false;
+                    block.enabled = true;
                 }
                 break;
         }
@@ -177,13 +178,13 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         {
             Vector3 vp = heliCam.WorldToViewportPoint(rockTs[i].position);
             float x = vp.x, y = vp.y;
-            if (vp.z <= 0 || x > 1 || x < 0 || y > 1 || y < 0 || disable[i]) buttons[i].gameObject.SetActive(false);
-            else if (!disable[i])
+            //if (vp.z <= 0 || x > 1 || x < 0 || y > 1 || y < 0 || disable[i]) buttons[i].gameObject.SetActive(false);
+            /*else*/ if (!disable[i])
             {
                 if (!buttons[i].gameObject.activeSelf) buttons[i].gameObject.SetActive(true);
-                buttons[i].anchoredPosition = Rect.NormalizedToPoint(rect, new Vector2(x, y) + (y < 0.5f ? Vector2.up : Vector2.down) * 0.12f);
+                buttons[i].anchoredPosition = PosToPoint(rect, new Vector2(x, y) + (y < 0.5f ? Vector2.up : Vector2.down) * 0.12f);
             }
-            if (mapColors[i].activeSelf) colorRects[i].anchoredPosition = new Vector2(vp.x, vp.y) + colorOffsets[i];
+            if (mapColors[i].activeSelf) colorRects[i].anchoredPosition = PosToPoint(rect, heliCam.WorldToViewportPoint(colorPos[i]));
         }
         if (traveling)
         {
@@ -244,6 +245,11 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         }*/
     }
 
+    Vector2 PosToPoint(Rect rect, Vector2 point)
+    {
+        return new Vector2( rect.xMin + rect.width * point.x, rect.yMin + rect.height * point.y );
+    }
+
     public void Launch()
     {
         Player.Click();
@@ -256,6 +262,7 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         heliSource.PlayOneShot(launchClip, 0.2f);
         heliSource.Play();
         heliCam.enabled = true;
+        block.enabled = false;
         state = State.Launch;
     }
 
@@ -279,7 +286,7 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         if ((rover.position - target.position).sqrMagnitude < 1)
         {
             target.GetChild(0).gameObject.SetActive(true);
-            roverSource.PlayOneShot(foundClip, 0.15f);
+            roverSource.PlayOneShot(foundClip, 0.1f);
             roverSource.PlayOneShot(uiClip, 0.1f);
             yield return halfSecond;
             roverSource.PlayOneShot(successClip, 0.15f);
@@ -362,7 +369,7 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         if (rocksScanned == 5)
         {
             roverAgent.stoppingDistance = 0.1f;
-            targetRing.anchoredPosition = Rect.NormalizedToPoint(rect, heliCam.WorldToViewportPoint(target.position));
+            targetRing.anchoredPosition = PosToPoint(rect, heliCam.WorldToViewportPoint(target.position));
             rockIndex = 5;
             yield return second;
             targetRing.gameObject.SetActive(true);
