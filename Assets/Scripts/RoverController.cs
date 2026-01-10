@@ -169,6 +169,8 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
                     heliSource.Stop();
                     heliAnim.SetTrigger("Reset");
                     state = State.Idle;
+                    screen.SetActive(false);
+                    roverCam.enabled = false;
                     block.enabled = true;
                 }
                 break;
@@ -273,6 +275,7 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         heliSource.PlayOneShot(launchClip, 0.2f);
         heliSource.Play();
         heliCam.enabled = true;
+        screen.SetActive(true);
         block.enabled = false;
         state = State.Launch;
     }
