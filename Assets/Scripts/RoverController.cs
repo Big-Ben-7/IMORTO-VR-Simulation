@@ -16,7 +16,8 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
     [SerializeField] RectTransform targetRing;
     [SerializeField] GameObject[] mapColors;
     RectTransform[] colorRects = new RectTransform[5];
-    [SerializeField] Vector3[] colorPos = new Vector3[5];
+    [SerializeField] Transform colorMarkers;
+    Vector3[] colorPos = new Vector3[5];
     Animator[] animators = new Animator[6];
     [SerializeField] LayerMask terrainLayer, platformLayer, rockLayer;
     [SerializeField] Transform rover;
@@ -48,7 +49,7 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
     [SerializeField] Transform[] joysticks;
     Transform origin;
     Transform[] marks = new Transform[2];
-    Vector3[]initialPos = new Vector3[2];
+    Vector3[] initialPos = new Vector3[2];
     [SerializeField] LayerMask body;
     [SerializeField] float deadZone, speed;
     Collider[] cols = new Collider[2];
@@ -56,6 +57,9 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
     enum State {Idle, Launch, Fly, Reset};
     State state = State.Idle;
     Vector3 launchPos;
+    [SerializeField] Transform ingenuityTarget, bounds1, bounds2;
+    float xMin, xMax, yMin, yMax, zMin, zMax;
+    Vector3 launchTarget;
     AudioSource heliSource;
     [SerializeField] AudioClip launchClip;
     Animator heliAnim;
@@ -89,6 +93,7 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
             //if (Physics.Raycast(heliCam.ViewportPointToRay(Rect.PointToNormalized(rect, rectT.anchoredPosition)), out RaycastHit hit, 20, terrainLayer)) colorPos[i] = hit.point;
             animators[i] = mapColors[i].GetComponent<Animator>();
             scanCanvases[i] = scans[i].GetChild(1).GetComponent<Canvas>();
+            colorPos[i] = colorMarkers.GetChild(i).position;
         }
         animators[5] = targetRing.GetComponent<Animator>();
         heli = heliCam.transform;
@@ -96,8 +101,19 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         heliSource = ingenuity.GetComponent<AudioSource>();
         heliAnim = ingenuity.GetComponent<Animator>();
         block = ingenuity.GetChild(1).GetComponent<Canvas>();
+    }
+    
+    void Start()
+    {
         launchPos = ingenuity.position;
         initialSize = heliCam.orthographicSize;
+        launchTarget = ingenuityTarget.position;
+        xMin = bounds1.position.x;
+        xMax = bounds2.position.x;
+        yMin = bounds1.position.y;
+        yMax = bounds2.position.y;
+        zMin = bounds1.position.z;
+        zMax = bounds2.position.z;
     }
 
     void Update()
@@ -108,11 +124,11 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
                 break;
             case State.Launch:
                 Vector3 pos = ingenuity.position;
-                ingenuity.position = Vector3.MoveTowards(pos, new Vector3(22, 3, -17.5f), Time.deltaTime);
-                Vector3 d =  new Vector3(22, 3, -17.5f) - ingenuity.position;
+                ingenuity.position = Vector3.MoveTowards(pos, launchTarget, Time.deltaTime);
+                Vector3 d =  launchTarget - ingenuity.position;
                 if (Mathf.Abs(d.x) < 0.01f && Mathf.Abs(d.y) < 0.01f && Mathf.Abs(d.z) < 0.01f)
                 {
-                    ingenuity.position = new Vector3(22, 3, -17.5f);
+                    ingenuity.position = launchTarget;
                     state = State.Fly;
                 }
                 break;
@@ -126,35 +142,35 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
                 if (Mathf.Abs(dy) < deadZone) dy = 0;
                 else dy -= deadZone;
                 pos = ingenuity.position;
-                if (pos.y > 3.6f)
+                if (pos.y > yMax)
                 {
                     dy = 0;
-                    pos.y = 3.6f;
+                    pos.y = yMax;
                 }
-                else if (pos.y < 1.3f)
+                else if (pos.y < yMin)
                 {
                     dy = 0;
-                    pos.y = 1.3f;
+                    pos.y = yMin;
                 }
-                if (pos.z > -13)
+                if (pos.z > zMax)
                 {
                     d.x = 0;
-                    pos.z = -13;
+                    pos.z = zMax;
                 }
-                else if (pos.z < -22)
+                else if (pos.z < zMin)
                 {
                     d.x = 0;
-                    pos.z = -22;
+                    pos.z = zMin;
                 }
-                if (pos.x > 25)
+                if (pos.x > xMax)
                 {
                     d.z = 0;
-                    pos.x = 25;
+                    pos.x = xMax;
                 }
-                else if (pos.x < 19)
+                else if (pos.x < xMin)
                 {
                     d.z = 0;
-                    pos.x = 19;
+                    pos.x = xMin;
                 }
                 ingenuity.position = pos;
                 ingenuity.Translate(new Vector3(d.z, dy, -d.x) * speed * Time.deltaTime);

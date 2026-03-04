@@ -7,7 +7,7 @@ public class Ball : MonoBehaviour
 {
     [Header("Test")]
     [SerializeField] bool testing;
-    [SerializeField] Vector3 testPos;
+    [SerializeField] Transform testPos;
     [SerializeField] Vector3 testSpeed;
     [SerializeField] InputActionProperty resetBall;
     InputAction reset;
@@ -19,18 +19,22 @@ public class Ball : MonoBehaviour
     float g = Physics.gravity.magnitude;
 
     [Header("Table")]
-    [SerializeField] float netPos = -5.085f;
+    [SerializeField] Transform netMarker;
+    float netPos;
     [SerializeField] float netHeight;
     [SerializeField] float tableHeight;
-    [SerializeField] float[] returnX, returnZ;
-    [SerializeField] Vector2 leftCorner, rightCorner;
+    [SerializeField] Transform returnMarker1, returnMarker2;
+    float[] returnX = new float[2], returnZ = new float[2];
+    [SerializeField] Transform leftCornerMarker, rightCornerMarker;
+    Vector2 leftCorner, rightCorner;
 
     [Header("Bot")]
     [SerializeField] Transform middle;
     [SerializeField] Transform top;
     [SerializeField] Transform holder;
     [SerializeField] float midL, topL, holdL;
-    [SerializeField] Vector3 basePos;
+    [SerializeField] Transform baseMarker;
+    Vector3 basePos;
     [SerializeField] float minSpeed, maxSpeed;
     float contactTime, currentTime;
     Vector3 contact;
@@ -63,7 +67,7 @@ public class Ball : MonoBehaviour
     {
         rb.linearVelocity = Vector3.zero;
         rb.isKinematic = true;
-        if (testPos != Vector3.zero) rb.position = testPos;
+        if (testPos.position != Vector3.zero) rb.position = testPos.position;
         else
         {
             rb.position = new Vector3(Random.Range(returnX[0], returnX[1]), netHeight + 0.5f, Random.Range(returnZ[0], returnZ[1]));
@@ -96,6 +100,14 @@ public class Ball : MonoBehaviour
     {
         if (testing && test == null) test = StartCoroutine(Test());
         rightDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+        basePos = baseMarker.position;
+        leftCorner = new Vector2(leftCornerMarker.position.x, leftCornerMarker.position.z);
+        rightCorner = new Vector2(rightCornerMarker.position.x, rightCornerMarker.position.z);
+        returnX[0] = returnMarker1.position.x;
+        returnX[1] = returnMarker2.position.x;
+        returnZ[0] = returnMarker1.position.z;
+        returnZ[1] = returnMarker2.position.z;
+        netPos = netMarker.position.z;
         //if (rightDevice.isValid && rightDevice.TryGetHapticCapabilities(out HapticCapabilities capabilities) && capabilities.supportsImpulse) rightHaptics = true;
         //else rightHaptics = false;
         //leftDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
