@@ -33,6 +33,9 @@ namespace Unity.VRTemplate
 
         int m_CurrentStepIndex = 0;
 
+        [SerializeField] string endText = "Restart";
+        [SerializeField] bool closeOnEnd;
+
         void Awake()
         {
             if (m_StepList.Count != 0) return;
@@ -41,7 +44,7 @@ namespace Unity.VRTemplate
             for (int i = 2; i < n; i++)
             {
                 Transform card = cards.GetChild(i);
-                m_StepList.Add(new Step(card, i == n-1 ? "Restart" : "Continue"));
+                m_StepList.Add(new Step(card, i == n-1 ? endText : "Continue"));
                 Transform dots = card.GetChild(1);
                 for (int j = 0; j < n-2; j++)
                 {
@@ -57,6 +60,7 @@ namespace Unity.VRTemplate
             m_CurrentStepIndex = (m_CurrentStepIndex + 1) % m_StepList.Count;
             m_StepList[m_CurrentStepIndex].stepObject.SetActive(true);
             m_StepButtonTextField.text = m_StepList[m_CurrentStepIndex].buttonText;
+            if (m_CurrentStepIndex == 0 && closeOnEnd) transform.parent.gameObject.SetActive(false);
         }
     }
 }

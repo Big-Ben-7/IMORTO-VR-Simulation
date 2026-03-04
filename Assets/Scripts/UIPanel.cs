@@ -11,6 +11,7 @@ public class UIPanel : XRGrabInteractable
     public static AudioSource audioSource;
     [SerializeField] protected AudioClip toggle, hover;
     [SerializeField] GameObject socket;
+    GameObject mySocket;
     bool initialFollow;
     //int play;
     LazyFollow lf;
@@ -26,7 +27,7 @@ public class UIPanel : XRGrabInteractable
         lf = GetComponent<LazyFollow>();
         initialFollow = lf.enabled;
         myT.GetPositionAndRotation(out Vector3 pos, out initialRot);
-        Instantiate(socket, pos, initialRot);
+        mySocket = Instantiate(socket, pos, initialRot);
     }
 
     /*protected override void OnEnable()
@@ -50,22 +51,20 @@ public class UIPanel : XRGrabInteractable
             audioSource.PlayOneShot(toggle);
         }
         else play ++;*/
-        if (!(args.interactorObject is NearFarInteractor))
+        if (args.interactorObject is XRSocketInteractor)
         {
             return;
         }
         audioSource.PlayOneShot(toggle);
-        interactors ++;
     }
 
     protected override void OnSelectExited(SelectExitEventArgs args)
     {
         base.OnSelectExited(args);
-        if (!(args.interactorObject is NearFarInteractor))
+        if (args.interactorObject is XRSocketInteractor)
         {
             return;
         }
-        interactors --;
     }
 
     protected override void OnHoverEntered(HoverEnterEventArgs args)
@@ -76,28 +75,41 @@ public class UIPanel : XRGrabInteractable
             if (interactors == 0) audioSource.PlayOneShot(hover);
         }
         else play ++;*/
-        if (!(args.interactorObject is NearFarInteractor))
+        if (args.interactorObject is XRSocketInteractor)
         {
             lf.enabled = initialFollow;
             if (!initialFollow && myT) myT.rotation = initialRot;
-            if (interactors != 0) audioSource.PlayOneShot(hover);
-            //if (Player.initialized) audioSource.PlayOneShot(hover);
+            if (Player.initialized) audioSource.PlayOneShot(hover);
             return;
         }
+        if (Player.initialized && interactors == 0) audioSource.PlayOneShot(hover);
+        interactors ++;
     }
 
     protected override void OnHoverExited(HoverExitEventArgs args)
     {
         base.OnHoverExited(args);
-        if (!(args.interactorObject is NearFarInteractor))
+        if (args.interactorObject is XRSocketInteractor)
         {
             lf.enabled = true;
             return;
         }
+        interactors --;
     }
 
     public void Hover()
     {
         audioSource.PlayOneShot(hover);
+    }
+
+    public void Select()
+    {
+        audioSource.PlayOneShot(toggle);
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        mySocket.SetActive(false);
     }
 }
