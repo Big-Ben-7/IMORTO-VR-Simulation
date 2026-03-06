@@ -47,8 +47,8 @@ public class Ball : MonoBehaviour
     int racketLength;
     AudioSource audioSource;
     UnityEngine.XR.InputDevice rightDevice;
-    //UnityEngine.XR.InputDevice leftDevice;
-    //bool leftHaptics = true, rightHaptics = true;
+    UnityEngine.XR.InputDevice leftDevice;
+    bool leftHaptics = true, rightHaptics = true;
 
     [Header("Booleans")]
     [SerializeField] bool botTrack;
@@ -99,7 +99,6 @@ public class Ball : MonoBehaviour
     void Start()
     {
         if (testing && test == null) test = StartCoroutine(Test());
-        rightDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
         basePos = baseMarker.position;
         leftCorner = new Vector2(leftCornerMarker.position.x, leftCornerMarker.position.z);
         rightCorner = new Vector2(rightCornerMarker.position.x, rightCornerMarker.position.z);
@@ -108,11 +107,12 @@ public class Ball : MonoBehaviour
         returnZ[0] = returnMarker1.position.z;
         returnZ[1] = returnMarker2.position.z;
         netPos = netMarker.position.z;
-        //if (rightDevice.isValid && rightDevice.TryGetHapticCapabilities(out HapticCapabilities capabilities) && capabilities.supportsImpulse) rightHaptics = true;
-        //else rightHaptics = false;
-        //leftDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
-        //if (leftDevice.isValid && leftDevice.TryGetHapticCapabilities(out capabilities) && capabilities.supportsImpulse) leftHaptics = true;
-        //else leftHaptics = false;
+        rightDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+        if (rightDevice.isValid && rightDevice.TryGetHapticCapabilities(out HapticCapabilities capabilities) && capabilities.supportsImpulse) rightHaptics = true;
+        else rightHaptics = false;
+        leftDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+        if (leftDevice.isValid && leftDevice.TryGetHapticCapabilities(out capabilities) && capabilities.supportsImpulse) leftHaptics = true;
+        else leftHaptics = false;
     }
 
     void Update()
@@ -268,9 +268,16 @@ public class Ball : MonoBehaviour
             case "Player":
                 if (Racket.grabbed)
                 {
-                    //leftDevice.SendHapticImpulse(0, 0.75f, 0.1f);
                     if (farSide && !IsPastNet()) farSide = false;
-                    rightDevice.SendHapticImpulse(0, 0.75f, 0.1f);
+                    switch(Racket.handeness)
+                    {
+                        case Racket.Handedness.Left:
+                            if (leftHaptics) leftDevice.SendHapticImpulse(0, 0.75f, 0.1f);
+                            break;
+                        case Racket.Handedness.Right:
+                            if (rightHaptics) rightDevice.SendHapticImpulse(0, 0.75f, 0.1f);
+                            break;
+                    }
                     ForceAim();
                 }
                 break;

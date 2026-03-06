@@ -1,7 +1,11 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.XR;
+using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
-public class Racket : MonoBehaviour
+public class Racket : XRGrabInteractable
 {
     Collider col;
     AudioSource audioSource;
@@ -11,10 +15,13 @@ public class Racket : MonoBehaviour
     WaitForSeconds fifthSecond = new WaitForSeconds(0.2f);
     Coroutine collisionCoroutine;
     public static bool grabbed;
+    public enum Handedness { Left, Right, None }
+    public static Handedness handeness = Handedness.None;
     WaitForSeconds second = new WaitForSeconds(1);
 
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         col = transform.GetChild(1).GetComponent<Collider>();
         audioSource = GetComponent<AudioSource>();
     }
@@ -41,15 +48,32 @@ public class Racket : MonoBehaviour
         if (lastCollision == t) lastCollision = "";
     }
 
-    public void Grab()
+    protected override void OnSelectEntered(SelectEnterEventArgs args)
     {
-        grabbed = !grabbed;
-        if (grabbed)
+        base.OnSelectEntered(args);
+        grabbed = true;
+        col.excludeLayers = body;
+        Player.Grab();
+        switch(args.interactorObject.transform.GetComponent<XRBaseInteractor>().handedness)
         {
-            col.excludeLayers = body;
-            Player.Grab();
+            case InteractorHandedness.Left:
+                handeness = Handedness.Left;
+                break;
+            case InteractorHandedness.Right:
+                handeness = Handedness.Right;
+                break;
+            default:
+                handeness = Handedness.None;
+                break;
         }
-        else StartCoroutine(Release());
+    }
+
+    protected override void OnSelectExited(SelectExitEventArgs args)
+    {
+        base.OnSelectExited(args);
+        grabbed = false;
+        StartCoroutine(Release());
+        handeness = Handedness.None;
     }
 
     IEnumerator Release()
