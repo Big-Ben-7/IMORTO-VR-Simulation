@@ -15,6 +15,7 @@ public class Player : MonoBehaviour
     public static AudioClip grabClip, buttonClip;
     AudioSource walkSource, bgSource;
     WaitForSeconds twentiethSecond = new WaitForSeconds(0.05f);
+    //WaitForSeconds halfSecond = new WaitForSeconds(0.5f);
 
     [Header("Physics")]
     [SerializeField] CapsuleCollider col;
@@ -33,7 +34,7 @@ public class Player : MonoBehaviour
     Vector2 lastPos;
     float vel;
     WaitForSeconds velocityWait = new WaitForSeconds(0.1f);
-    //public static bool tp;
+    public static bool tp;
 
     [Header("Other")]
     [SerializeField] Transform piano;
@@ -151,7 +152,7 @@ public class Player : MonoBehaviour
 
     IEnumerator Fade(float duration = 0.2f)
     {
-        /*tp = */rb.isKinematic = true;
+        tp = rb.isKinematic = true;
         float elapsedTime = 0;
         float alpha = 0;
         while (alpha <= 0.99f)
@@ -170,7 +171,9 @@ public class Player : MonoBehaviour
             yield return null;
         }
         fadeCanvas.alpha = 0;
-        /*tp = */rb.isKinematic = false;
+        rb.isKinematic = false;
+        //yield return halfSecond;
+        tp = false;
     }
 
     IEnumerator Initialize()

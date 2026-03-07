@@ -6,10 +6,11 @@ public class Door : MonoBehaviour
     [SerializeField] AudioClip slide;
     Animator animator;
     AudioSource[] audioSources = new AudioSource[2];
-    bool canTrigger = true;
+    //bool canTrigger = true;
     WaitForSeconds wait = new WaitForSeconds(0.3f);
     public static GameObject[] rooms;
     [SerializeField] int negRoom, posRoom;
+    int triggerCount;
 
     void Awake()
     {
@@ -20,8 +21,7 @@ public class Door : MonoBehaviour
     }
     void OnTriggerEnter(Collider other)
     {
-        if (!canTrigger) return;
-        if (other.gameObject.CompareTag("Player")) Debug.Log("Enter");
+        //if (!canTrigger) return;
         GameObject enteredObject = other.gameObject;
         if (enteredObject.CompareTag("Player"))
         {
@@ -33,13 +33,20 @@ public class Door : MonoBehaviour
                 }
                 else if (!rooms[posRoom].activeSelf) rooms[posRoom].SetActive(true);
             }*/
-            /*if (Player.tp)
+            if (Player.tp)
             {
-                canTrigger = false;
-                StartCoroutine(ResetTrigger());
-            }*/
-            canTrigger = false;
-            StartCoroutine(ResetTrigger());
+                Player.tp = false;
+                triggerCount = 1;
+                return;
+            }
+            if (triggerCount == 1)
+            {
+                triggerCount = 2;
+                return;
+            }
+            if (triggerCount == 2) triggerCount = 0;
+            //canTrigger = false;
+            //StartCoroutine(ResetTrigger());
             animator.SetTrigger("Open");
             for (int i = 0; i < 2; i++) audioSources[i].PlayOneShot(slide);
         }
@@ -48,13 +55,24 @@ public class Door : MonoBehaviour
 
     void OnTriggerExit(Collider other)
     {
-        if (!canTrigger) return;
-        if (other.gameObject.CompareTag("Player")) Debug.Log("Exit");
+        //if (!canTrigger) return;
         GameObject enteredObject = other.gameObject;
         if (enteredObject.CompareTag("Player"))
         {
-            canTrigger = false;
-            StartCoroutine(ResetTrigger());
+            //canTrigger = false;
+            //StartCoroutine(ResetTrigger());
+            if (Player.tp)
+            {
+                Player.tp = false;
+                triggerCount = 1;
+                return;
+            }
+            if (triggerCount == 1)
+            {
+                triggerCount = 2;
+                return;
+            }
+            if (triggerCount == 2) triggerCount = 0;
             animator.SetTrigger("Close");
             for (int i = 0; i < 2; i++) audioSources[i].PlayOneShot(slide);
             //StartCoroutine(DisableRoom(enteredObject.transform.position));
@@ -74,9 +92,9 @@ public class Door : MonoBehaviour
         }
     }
 
-    IEnumerator ResetTrigger()
+    /*IEnumerator ResetTrigger()
     {
         yield return wait;
         canTrigger = true;
-    }
+    }*/
 }
