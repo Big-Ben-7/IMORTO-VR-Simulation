@@ -242,7 +242,7 @@ public class BacteriaSpray : XRGrabInteractable
         base.OnSelectEntered(args);
         if (args.interactorObject is XRSocketInteractor)
         {
-            audioSource.PlayOneShot(hit, 0.4f);
+            if (Player.initialized) audioSource.PlayOneShot(hit, 0.4f);
             return;
         }
         grabbed = true;

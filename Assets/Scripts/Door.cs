@@ -7,7 +7,7 @@ public class Door : MonoBehaviour
     Animator animator;
     AudioSource[] audioSources = new AudioSource[2];
     bool canTrigger = true;
-    WaitForSeconds wait = new WaitForSeconds(0.5f);
+    WaitForSeconds wait = new WaitForSeconds(0.3f);
     public static GameObject[] rooms;
     [SerializeField] int negRoom, posRoom;
 
@@ -21,6 +21,7 @@ public class Door : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         if (!canTrigger) return;
+        if (other.gameObject.CompareTag("Player")) Debug.Log("Enter");
         GameObject enteredObject = other.gameObject;
         if (enteredObject.CompareTag("Player"))
         {
@@ -32,11 +33,13 @@ public class Door : MonoBehaviour
                 }
                 else if (!rooms[posRoom].activeSelf) rooms[posRoom].SetActive(true);
             }*/
-            if (Player.tp)
+            /*if (Player.tp)
             {
                 canTrigger = false;
                 StartCoroutine(ResetTrigger());
-            }
+            }*/
+            canTrigger = false;
+            StartCoroutine(ResetTrigger());
             animator.SetTrigger("Open");
             for (int i = 0; i < 2; i++) audioSources[i].PlayOneShot(slide);
         }
@@ -46,9 +49,12 @@ public class Door : MonoBehaviour
     void OnTriggerExit(Collider other)
     {
         if (!canTrigger) return;
+        if (other.gameObject.CompareTag("Player")) Debug.Log("Exit");
         GameObject enteredObject = other.gameObject;
         if (enteredObject.CompareTag("Player"))
         {
+            canTrigger = false;
+            StartCoroutine(ResetTrigger());
             animator.SetTrigger("Close");
             for (int i = 0; i < 2; i++) audioSources[i].PlayOneShot(slide);
             //StartCoroutine(DisableRoom(enteredObject.transform.position));
