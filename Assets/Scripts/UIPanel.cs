@@ -56,6 +56,7 @@ public class UIPanel : XRGrabInteractable
             return;
         }
         audioSource.PlayOneShot(toggle);
+        interactors ++;
     }
 
     protected override void OnSelectExited(SelectExitEventArgs args)
@@ -65,6 +66,7 @@ public class UIPanel : XRGrabInteractable
         {
             return;
         }
+        interactors --;
     }
 
     protected override void OnHoverEntered(HoverEnterEventArgs args)

@@ -272,10 +272,10 @@ public class Ball : MonoBehaviour
                     switch(Racket.handeness)
                     {
                         case Racket.Handedness.Left:
-                            if (leftHaptics) leftDevice.SendHapticImpulse(0, 0.75f, 0.1f);
+                            if (leftHaptics) leftDevice.SendHapticImpulse(0, 1, 0.1f);
                             break;
                         case Racket.Handedness.Right:
-                            if (rightHaptics) rightDevice.SendHapticImpulse(0, 0.75f, 0.1f);
+                            if (rightHaptics) rightDevice.SendHapticImpulse(0, 1, 0.1f);
                             break;
                     }
                     ForceAim();

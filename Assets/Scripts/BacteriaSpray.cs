@@ -4,8 +4,12 @@ using System.Collections.Generic;
 using UnityEngine.AI;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
+using UnityEngine.ProBuilder.MeshOperations;
 
-public class BacteriaSpray : MonoBehaviour
+public class BacteriaSpray : XRGrabInteractable
 {
     [SerializeField] GameObject /*bacteriaPrefab,*/ bacteriaQuad;
     [SerializeField] LayerMask body, sprayMask;//, sprayableMask;
@@ -38,8 +42,9 @@ public class BacteriaSpray : MonoBehaviour
     State botState = State.Idle;
     Transform healthcare;
 
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         audioSource = GetComponent<AudioSource>();
         col = GetComponent<Collider>();
         volumeObject = volume.gameObject;
@@ -128,8 +133,9 @@ public class BacteriaSpray : MonoBehaviour
         if (lastCollision == t) lastCollision = "";
     }
 
-    public void SprayBacteria()
+    protected override void OnActivated(ActivateEventArgs args)
     {
+        base.OnActivated(args);
         RaycastHit hit;
         if (Physics.Raycast(squirt.position, squirt.forward, out hit, 3, sprayMask))
         {
@@ -231,15 +237,25 @@ public class BacteriaSpray : MonoBehaviour
         //if (!botSource.isPlaying) botSource.Play();
     }
 
-    public void Grab()
+    protected override void OnSelectEntered(SelectEnterEventArgs args)
     {
-        grabbed = !grabbed;
-        if (grabbed)
+        base.OnSelectEntered(args);
+        if (args.interactorObject is XRSocketInteractor)
         {
-            col.excludeLayers = body;
-            Player.Grab();
+            audioSource.PlayOneShot(hit, 0.4f);
+            return;
         }
-        else StartCoroutine(Release());
+        grabbed = true;
+        col.excludeLayers = body;
+        Player.Grab();
+    }
+
+    protected override void OnSelectExited(SelectExitEventArgs args)
+    {
+        base.OnSelectExited(args);
+        if (args.interactorObject is XRSocketInteractor) return;
+        grabbed = false;
+        StartCoroutine(Release());
     }
 
     IEnumerator Release()
