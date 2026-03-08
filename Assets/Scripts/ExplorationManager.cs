@@ -3,9 +3,9 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 
-public class RoverController : MonoBehaviour, IPointerClickHandler
+public class ExplorationManager : MonoBehaviour, IPointerClickHandler
 {
-
+    [Header("Rover")]
     [SerializeField] Transform[] rockTs;
     NavMeshObstacle[] rockObstacles = new NavMeshObstacle[5];
     [SerializeField] RectTransform[] buttons;
@@ -64,6 +64,12 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
     [SerializeField] AudioClip launchClip;
     Animator heliAnim;
 
+    [Header("Solar System")]
+    [SerializeField] Transform solarSystem;
+    [SerializeField] float[] revSpeeds = new float[8], rotSpeeds = new float[9];
+    Transform[] planetPivots = new Transform[8], planetAnchors = new Transform[8], planets = new Transform[8];
+    Transform sun;
+
     void Awake()
     {
         rectT = GetComponent<RectTransform>();
@@ -101,6 +107,13 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
         heliSource = ingenuity.GetComponent<AudioSource>();
         heliAnim = ingenuity.GetComponent<Animator>();
         block = ingenuity.GetChild(1).GetComponent<Canvas>();
+        for (int i = 0; i < 8; i++)
+        {
+            Transform pivot = planetPivots[i] = solarSystem.GetChild(i+1);
+            Transform anchor = planetAnchors[i] = pivot.GetChild(0);
+            planets[i] = anchor.GetChild(0);
+        }
+        sun = solarSystem.GetChild(0);
     }
     
     void Start()
@@ -272,6 +285,14 @@ public class RoverController : MonoBehaviour, IPointerClickHandler
             if (Physics.Raycast(indWheels[5].position, -indWheels[5].up, out RaycastHit hit2, 5, terrainLayer)) Debug.Log("3");
             rover.rotation = Quaternion.Slerp(rover.rotation, Quaternion.LookRotation(rockTs[1].position-rover.position, new Plane(hit.point, hit1.point, hit2.point).normal), roverRotSpeed * Time.deltaTime);
         }*/
+        for (int i = 0; i < 8; i++)
+        {
+            float speed = revSpeeds[i] * Time.deltaTime;
+            planetPivots[i].Rotate(Vector3.down, speed);
+            planetAnchors[i].Rotate(Vector3.down, -speed);
+            planets[i].Rotate(Vector3.down, rotSpeeds[i] * Time.deltaTime);
+        }
+        sun.Rotate(Vector3.down, rotSpeeds[8] * Time.deltaTime);
     }
 
     Vector2 PosToPoint(Rect rect, Vector2 point)
