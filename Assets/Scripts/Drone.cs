@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class Drone : MonoBehaviour
@@ -17,6 +18,8 @@ public class Drone : MonoBehaviour
     Vector3 launchPos, launchTarget;
     Animator animator;
     Canvas block;
+    WaitForSeconds fifthSecond = new WaitForSeconds(0.2f);
+    bool cooldown;
 
     void Awake()
     {
@@ -76,6 +79,9 @@ public class Drone : MonoBehaviour
 
     public void Launch()
     {
+        if (cooldown) return;
+        cooldown = true;
+        StartCoroutine(ResetCooldown());
         Player.Click();
         if (state != State.Idle)
         {
@@ -95,5 +101,11 @@ public class Drone : MonoBehaviour
         nextPoint = 1;
         path[1] = pathPoints[1].position;
         state = State.Reset;
+    }
+
+    IEnumerator ResetCooldown()
+    {
+        yield return fifthSecond;
+        cooldown = false;
     }
 }

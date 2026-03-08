@@ -46,6 +46,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
     Rect rect;
     WaitForSeconds second = new WaitForSeconds(1);
     WaitForSeconds halfSecond = new WaitForSeconds(0.5f);
+    WaitForSeconds fifthSecond = new WaitForSeconds(0.2f);
     [SerializeField] Transform[] joysticks;
     Transform origin;
     Transform[] marks = new Transform[2];
@@ -63,6 +64,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
     AudioSource heliSource;
     [SerializeField] AudioClip launchClip;
     Animator heliAnim;
+    bool cooldown;
 
     [Header("Solar System")]
     [SerializeField] Transform solarSystem;
@@ -302,6 +304,9 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
 
     public void Launch()
     {
+        if (cooldown) return;
+        cooldown = true;
+        StartCoroutine(ResetCooldown());
         Player.Click();
         if (state != State.Idle)
         {
@@ -315,6 +320,12 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         screen.SetActive(true);
         block.enabled = false;
         state = State.Launch;
+    }
+
+    IEnumerator ResetCooldown()
+    {
+        yield return fifthSecond;
+        cooldown = false;
     }
 
     public void Reset()
