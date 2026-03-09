@@ -3,16 +3,16 @@ using UnityEngine;
 
 public class Drone : MonoBehaviour
 {
-    [SerializeField] Transform[] pathPoints;
+    [SerializeField] Transform pathPoints;
     Vector3[] path;
     [SerializeField] Transform aim;
     Vector3 aimPos;
-    [SerializeField] int speed;
+    [SerializeField] float speed;
     [SerializeField] float launchSpeed = 0.3f;
     [SerializeField] AudioClip launch;
     AudioSource audioSource;
     Transform myT;
-    int pointCount, nextPoint = 1;
+    int pointCount, nextPoint = 0;
     enum State {Idle, Launch, Fly, Reset};
     State state = State.Idle;
     Vector3 launchPos, launchTarget;
@@ -27,9 +27,9 @@ public class Drone : MonoBehaviour
         animator = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
         aimPos = aim.position;
-        pointCount = pathPoints.Length;
+        pointCount = pathPoints.childCount;
         path = new Vector3[pointCount];
-        for (int i = 0; i < pointCount; i++) path[i] = pathPoints[i].position;
+        for (int i = 0; i < pointCount; i++) path[i] = pathPoints.GetChild(i).position;
         Piano.drone = this;
         block = myT.GetChild(11).gameObject.GetComponent<Canvas>();
     }
@@ -58,7 +58,7 @@ public class Drone : MonoBehaviour
                 {
                     if (nextPoint == pointCount - 1) nextPoint = 0;
                     else nextPoint++;
-                    path[nextPoint].y = Random.Range(2, 3.5f);
+                    path[nextPoint].y = Random.Range(2, 4);
                 }
                 break;
             case State.Reset:
@@ -98,8 +98,8 @@ public class Drone : MonoBehaviour
     public void Reset()
     {
         if (state == State.Idle || state == State.Reset) return;
-        nextPoint = 1;
-        path[1] = pathPoints[1].position;
+        nextPoint = 0;
+        path[nextPoint].y = Random.Range(2, 4);
         state = State.Reset;
     }
 

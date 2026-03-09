@@ -32,7 +32,7 @@ Material:
     m_TexEnvs:
     - _BaseMap:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 5.625, y: 2.8125}
+        m_Scale: {x: 10, y: 3}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
@@ -56,7 +56,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 5.625, y: 2.8125}
+        m_Scale: {x: 10, y: 3}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
@@ -121,8 +121,8 @@ Material:
     - _XRMotionVectorsPass: 1
     - _ZWrite: 0
     m_Colors:
-    - _BaseColor: {r: 0.4811321, g: 0.4811321, b: 0.4811321, a: 0.7294118}
-    - _Color: {r: 0.4811321, g: 0.4811321, b: 0.4811321, a: 0.7294118}
+    - _BaseColor: {r: 0.4811321, g: 0.4811321, b: 0.4811321, a: 0.5882353}
+    - _Color: {r: 0.4811321, g: 0.4811321, b: 0.4811321, a: 0.5882353}
     - _EmissionColor: {r: 0.28301883, g: 0.28301883, b: 0.28301883, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
