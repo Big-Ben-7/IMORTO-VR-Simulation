@@ -10,6 +10,7 @@ TagManager:
   - Floor
   - Wall
   - Sprayable
+  - Grass
   layers:
   - Default
   - TransparentFX

@@ -1,14 +1,15 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
     [SerializeField] InputActionProperty leftGripInput, rightGripInput;
     InputAction leftGrip, rightGrip;
     [SerializeField] Animator leftHand, rightHand;
-    [SerializeField] AudioClip teleport, jumpLand, grab, button;
+    [SerializeField] AudioClip teleport, grab, button, solidWalk, grassWalk, gravelWalk;
+    [SerializeField] AudioClip[] solidLands, grassLands, gravelLands;
+    int solidCount, grassCount, gravelCount;
     [SerializeField] CanvasGroup fadeCanvas;
     public static bool initialized;
     public static AudioSource audioSource;
@@ -40,7 +41,6 @@ public class Player : MonoBehaviour
     [SerializeField] Transform piano;
     [SerializeField] GameObject lobby, ent, health, expl, manu;
 
-
     void Awake()
     {
         Transform xr = transform.GetChild(0);
@@ -59,6 +59,9 @@ public class Player : MonoBehaviour
         buttonClip = button;
         Door.rooms = new GameObject[] {lobby, ent, health, expl, manu};
         UIPanel.audioSource = audioSource;
+        solidCount = solidLands.Length;
+        grassCount = grassLands.Length;
+        gravelCount = gravelLands.Length;
         //ent.SetActive(false);
         //health.SetActive(false);
         //expl.SetActive(false);
@@ -89,13 +92,52 @@ public class Player : MonoBehaviour
         }
         else
         {
-            if (vel > 0.5f)
+            //bool play = true;
+            if (hit.transform.gameObject.CompareTag("Grass"))
             {
-                if (!walkSource.isPlaying) walkSource.Play();
+                if (Vector2.SqrMagnitude(new Vector2(start.x, start.z)) <= 441)
+                {
+                    if (walkSource.clip != gravelWalk)
+                    {
+                        walkSource.volume = 0.5f;
+                        walkSource.clip = gravelWalk;
+                    }
+                    //else play = false;
+                    if (!isGrounded) audioSource.PlayOneShot(gravelLands[Random.Range(0, gravelCount)], 0.5f);
+                }
+                else
+                {
+                    if (walkSource.clip != grassWalk)
+                    {
+                        walkSource.volume = 0.05f;
+                        walkSource.clip = grassWalk;
+                    }
+                    //else play = false;
+                    if (!isGrounded) audioSource.PlayOneShot(grassLands[Random.Range(0, grassCount)], 0.4f);
+                }
+            }
+            else
+            {
+                if (walkSource.clip != solidWalk)
+                {
+                    walkSource.volume = 0.2f;
+                    walkSource.clip = solidWalk;
+                }
+                //else play = false;
+                if (!isGrounded) audioSource.PlayOneShot(solidLands[Random.Range(0, solidCount)], 0.5f);
+            }
+            if (vel > 0.2f)
+            {
+                if (!walkSource.isPlaying)
+                {
+                    walkSource.Play();
+                    //if (play) walkSource.Play();
+                    //else walkSource.UnPause();
+                }
             }
             else if (walkSource.isPlaying) walkSource.Stop();
 
-            if (!isGrounded) audioSource.PlayOneShot(jumpLand, 0.5f);
+
             if (jumpInput.action.WasPressedThisFrame())
             {
                 //float handSpeed = ((leftRb.linearVelocity - rb.linearVelocity).sqrMagnitude + (rightRb.linearVelocity - rb.linearVelocity).sqrMagnitude) / 2;
