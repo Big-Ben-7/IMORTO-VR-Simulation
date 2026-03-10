@@ -144,47 +144,46 @@ public class Ball : MonoBehaviour
     {
         GameObject go = other.gameObject;
         string name = go.name;
-        switch (go.tag)
+        if (go.CompareTag("Table"))
         {
-            case "Table":
-                //Hit net
-                if (!grabbed && lastCollision != name)
-                {
-                    audioSource.PlayOneShot(net, Mathf.Clamp01(Mathf.Log10(rb.linearVelocity.magnitude + 1)));
-                    lastCollision = name;
-                    if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
-                    collisionCoroutine = StartCoroutine(ResetLastCollision());
-                    rb.linearVelocity = 0.5f * Vector3.Reflect(rb.linearVelocity, IsPastNet() ? Vector3.back : Vector3.forward);
-                }
-                if (botTrack) botTrack = false;
-                break;
-            case "BotRacket":
-                if (!botTrack) break;
-                if (!testing && serving) serving = false;
-                //col.isTrigger = true;
-                botTrack = false;
-                Vector3 vel = SetReturnVel();
-                rb.linearVelocity = vel;
-                if (hitCoroutine != null)
-                {
-                    StopCoroutine(hitCoroutine);
-                    hitting = false;
-                }
-                hitCoroutine = StartCoroutine(Hit(Quaternion.LookRotation(-vel.normalized, holder.up)));
-                if (!grabbed && lastCollision != name)
-                {
-                    audioSource.PlayOneShot(racketHits[Random.Range(0, racketLength)], Mathf.Clamp01(Mathf.Log10(rb.linearVelocity.magnitude / 2 + 1)));
-                    lastCollision = name;
-                    if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
-                    collisionCoroutine = StartCoroutine(ResetLastCollision());
-                }
-                break;
+            //Hit net
+            if (!grabbed && lastCollision != name)
+            {
+                audioSource.PlayOneShot(net, Mathf.Clamp01(Mathf.Log10(rb.linearVelocity.magnitude + 1)));
+                lastCollision = name;
+                if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
+                collisionCoroutine = StartCoroutine(ResetLastCollision());
+                rb.linearVelocity = 0.5f * Vector3.Reflect(rb.linearVelocity, IsPastNet() ? Vector3.back : Vector3.forward);
+            }
+            if (botTrack) botTrack = false;
+        }
+        else if (go.CompareTag("BotRacket"))
+        {
+            if (!botTrack) return;
+            if (!testing && serving) serving = false;
+            //col.isTrigger = true;
+            botTrack = false;
+            Vector3 vel = SetReturnVel();
+            rb.linearVelocity = vel;
+            if (hitCoroutine != null)
+            {
+                StopCoroutine(hitCoroutine);
+                hitting = false;
+            }
+            hitCoroutine = StartCoroutine(Hit(Quaternion.LookRotation(-vel.normalized, holder.up)));
+            if (!grabbed && lastCollision != name)
+            {
+                audioSource.PlayOneShot(racketHits[Random.Range(0, racketLength)], Mathf.Clamp01(Mathf.Log10(rb.linearVelocity.magnitude / 2 + 1)));
+                lastCollision = name;
+                if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
+                collisionCoroutine = StartCoroutine(ResetLastCollision());
+            }
         }
     }
 
     /*void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.tag == "BotRacket") col.isTrigger = false;
+        if (other.gameObject.CompareTag("BotRacket")) col.isTrigger = false;
     }*/
 
     void OnCollisionEnter(Collision collision)
@@ -192,95 +191,97 @@ public class Ball : MonoBehaviour
         if (!Player.initialized) return;
         GameObject go = collision.gameObject;
         string name = go.name;
-        switch (go.tag)
+        if (go.CompareTag("Table"))
         {
-            case "Table":
-                if (!grabbed && lastCollision != name)
-                {
-                    audioSource.PlayOneShot(table, Mathf.Clamp01(Mathf.Log10(collision.relativeVelocity.magnitude / 3 + 1)));
-                    lastCollision = name;
-                    if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
-                    collisionCoroutine = StartCoroutine(ResetLastCollision());
-                }
-                break;
-            case "Player":
-                if (!grabbed && lastCollision != name)
-                {
-                    audioSource.PlayOneShot(racketHits[Random.Range(0, racketLength)], Mathf.Clamp01(Mathf.Log10(collision.relativeVelocity.magnitude / 2 + 1)));
-                    lastCollision = name;
-                    if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
-                    collisionCoroutine = StartCoroutine(ResetLastCollision());
-                }
-                break;
-            case "Floor":
-                if (!grabbed && lastCollision != name)
-                {
-                    audioSource.PlayOneShot(floor, Mathf.Clamp01(Mathf.Log10(collision.relativeVelocity.magnitude / 3 + 1)));
-                    lastCollision = name;
-                    if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
-                    collisionCoroutine = StartCoroutine(ResetLastCollision());
-                }
-                goto default;
-            case "Wall":
-                if (!grabbed && lastCollision != name)
-                {
-                    audioSource.PlayOneShot(wall, Mathf.Clamp01(Mathf.Log10(collision.relativeVelocity.magnitude / 3 + 1)));
-                    lastCollision = name;
-                    if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
-                    collisionCoroutine = StartCoroutine(ResetLastCollision());
-                }
-                goto default;
-            default:
-                if (!grabbed && lastCollision != name && go.layer != 7)
-                {
-                    audioSource.PlayOneShot(other, Mathf.Clamp01(Mathf.Log10(collision.relativeVelocity.magnitude / 3 + 1)));
-                    lastCollision = name;
-                    if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
-                    collisionCoroutine = StartCoroutine(ResetLastCollision());
-                }
-                if (farSide) farSide = false;
-                if (botTrack) botTrack = false;
-                if (testing)
-                {
-                    if (test == null) test = StartCoroutine(Test());
-                }
-                else if (!serving && go.tag != "Player") serving = true;
-                break;
+            if (!grabbed && lastCollision != name)
+            {
+                audioSource.PlayOneShot(table, Mathf.Clamp01(Mathf.Log10(collision.relativeVelocity.magnitude / 3 + 1)));
+                lastCollision = name;
+                if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
+                collisionCoroutine = StartCoroutine(ResetLastCollision());
+            }
+            return;
         }
+        else if (go.CompareTag("Player"))
+        {
+            if (!grabbed && lastCollision != name)
+            {
+                audioSource.PlayOneShot(racketHits[Random.Range(0, racketLength)], Mathf.Clamp01(Mathf.Log10(collision.relativeVelocity.magnitude / 2 + 1)));
+                lastCollision = name;
+                if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
+                collisionCoroutine = StartCoroutine(ResetLastCollision());
+            }
+            return;
+        }
+        else if (go.CompareTag("Floor"))
+        {
+            if (!grabbed && lastCollision != name)
+            {
+                audioSource.PlayOneShot(floor, Mathf.Clamp01(Mathf.Log10(collision.relativeVelocity.magnitude / 3 + 1)));
+                lastCollision = name;
+                if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
+                collisionCoroutine = StartCoroutine(ResetLastCollision());
+            }
+        }
+        else if (go.CompareTag("Wall"))
+        {
+            if (!grabbed && lastCollision != name)
+            {
+                audioSource.PlayOneShot(wall, Mathf.Clamp01(Mathf.Log10(collision.relativeVelocity.magnitude / 3 + 1)));
+                lastCollision = name;
+                if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
+                collisionCoroutine = StartCoroutine(ResetLastCollision());
+            }
+        }
+        else if (!grabbed && lastCollision != name && go.layer != 7)
+        {
+            audioSource.PlayOneShot(other, Mathf.Clamp01(Mathf.Log10(collision.relativeVelocity.magnitude / 3 + 1)));
+            lastCollision = name;
+            if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
+            collisionCoroutine = StartCoroutine(ResetLastCollision());
+        }
+
+        if (farSide) farSide = false;
+        if (botTrack) botTrack = false;
+        if (testing)
+        {
+            if (test == null) test = StartCoroutine(Test());
+        }
+        else if (!serving && !go.CompareTag("Player")) serving = true;
     }
 
     void OnCollisionExit(Collision collision)
     {
-        switch (collision.gameObject.tag)
+        GameObject go = collision.gameObject;
+        if (go.CompareTag("Table"))
         {
-            case "Table":
-                if (IsPastNet())
+            if (IsPastNet())
+            {
+                if (!farSide && rb.linearVelocity.y > 0)
                 {
-                    if (!farSide && rb.linearVelocity.y > 0)
-                    {
-                        farSide = botTrack = true;
-                        RotateBot();
-                    }
-                    else botTrack = false;
+                    farSide = botTrack = true;
+                    RotateBot();
                 }
-                else if (farSide) farSide = botTrack = false;
-                break;
-            case "Player":
-                if (Racket.grabbed)
+                else botTrack = false;
+            }
+            else if (farSide) farSide = botTrack = false;
+        }
+        else if (go.CompareTag("Player"))
+        {
+            if (Racket.grabbed)
+            {
+                if (farSide && !IsPastNet()) farSide = false;
+                switch(Racket.handeness)
                 {
-                    if (farSide && !IsPastNet()) farSide = false;
-                    switch(Racket.handeness)
-                    {
-                        case Racket.Handedness.Left:
-                            if (leftHaptics) leftDevice.SendHapticImpulse(0, 1, 0.1f);
-                            break;
-                        case Racket.Handedness.Right:
-                            if (rightHaptics) rightDevice.SendHapticImpulse(0, 1, 0.1f);
-                            break;
-                    }
-                    ForceAim();
+                    case Racket.Handedness.Left:
+                        if (leftHaptics) leftDevice.SendHapticImpulse(0, 1, 0.1f);
+                        break;
+                    case Racket.Handedness.Right:
+                        if (rightHaptics) rightDevice.SendHapticImpulse(0, 1, 0.1f);
+                        break;
                 }
-                break;
+                ForceAim();
+            }
         }
     }
 

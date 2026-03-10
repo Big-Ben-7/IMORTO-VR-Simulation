@@ -4,10 +4,10 @@ public class Bot : MonoBehaviour
 {
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Table") Ball.collidingTable = true;
+        if (other.gameObject.CompareTag("Table")) Ball.collidingTable = true;
     }
     void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.tag == "Table") Ball.collidingTable = false;
+        if (other.gameObject.CompareTag("Table")) Ball.collidingTable = false;
     }
 }

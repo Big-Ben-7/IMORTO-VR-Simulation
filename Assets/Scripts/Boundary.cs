@@ -13,7 +13,7 @@ public class Boundary : MonoBehaviour
     }
     void OnCollisionEnter(Collision collision)
     {
-        Player.audioSource.PlayOneShot(error, 0.3f);
+        Player.audioSource.PlayOneShot(error, 0.2f);
         if (flashing != null) StopCoroutine(flashing);
         flashing = StartCoroutine(Flash());
     }

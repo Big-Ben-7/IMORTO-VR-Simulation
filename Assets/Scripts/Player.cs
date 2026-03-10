@@ -7,9 +7,10 @@ public class Player : MonoBehaviour
     [SerializeField] InputActionProperty leftGripInput, rightGripInput;
     InputAction leftGrip, rightGrip;
     [SerializeField] Animator leftHand, rightHand;
-    [SerializeField] AudioClip teleport, grab, button, solidWalk, grassWalk, gravelWalk;
-    [SerializeField] AudioClip[] solidLands, grassLands, gravelLands;
-    int solidCount, grassCount, gravelCount;
+    [SerializeField] AudioClip teleport, grab, button;
+    [SerializeField] AudioClip tileWalk, concreteWalk, grassWalk, gravelWalk;
+    [SerializeField] AudioClip[] tileLands, concreteLands, grassLands, gravelLands;
+    int tileCount, concreteCount, grassCount, gravelCount;
     [SerializeField] CanvasGroup fadeCanvas;
     public static bool initialized;
     public static AudioSource audioSource;
@@ -25,7 +26,8 @@ public class Player : MonoBehaviour
     [SerializeField] float minHeight = 0.5f, maxHeight = 2;
 
     [Header("Movement")]
-    [SerializeField] float speed = 1, turnSpeed = 60, jumpHeight = 0.8f;
+    [SerializeField] float outSpeed = 4.5f, inSpeed = 3, turnSpeed, jumpHeight;
+    float speed;
     [SerializeField] InputActionProperty moveInput, turnInput, jumpInput;
     [SerializeField] LayerMask groundMask;
     Rigidbody rb;
@@ -59,7 +61,8 @@ public class Player : MonoBehaviour
         buttonClip = button;
         Door.rooms = new GameObject[] {lobby, ent, health, expl, manu};
         UIPanel.audioSource = audioSource;
-        solidCount = solidLands.Length;
+        tileCount = tileLands.Length;
+        concreteCount = concreteLands.Length;
         grassCount = grassLands.Length;
         gravelCount = gravelLands.Length;
         //ent.SetActive(false);
@@ -84,8 +87,8 @@ public class Player : MonoBehaviour
         turnAxis = turnInput.action.ReadValue<Vector2>().x;
 
         Vector3 start = col.transform.TransformPoint(col.center);
-        float rayLength = col.height / 2 - col.radius + 0.05f;
-        bool cast = Physics.SphereCast(start, col.radius, Vector3.down, out RaycastHit hit, rayLength, groundMask);
+        bool cast = Physics.SphereCast(start, col.radius, Vector3.down, out RaycastHit hit, col.height / 2 + 0.05f, groundMask);
+        speed = outSpeed;
         if (!cast)
         {
             if (walkSource.isPlaying) walkSource.Stop();
@@ -93,17 +96,29 @@ public class Player : MonoBehaviour
         else
         {
             //bool play = true;
-            if (hit.transform.gameObject.CompareTag("Grass"))
+            GameObject go = hit.transform.gameObject;
+            if (go.CompareTag("Floor"))
+            {
+                if (walkSource.clip != tileWalk)
+                {
+                    walkSource.volume = 0.4f;
+                    walkSource.clip = tileWalk;
+                }
+                //else play = false;
+                if (!isGrounded) audioSource.PlayOneShot(tileLands[Random.Range(0, tileCount)], 0.6f);
+                speed = inSpeed;
+            }
+            else if (go.CompareTag("Grass"))
             {
                 if (Vector2.SqrMagnitude(new Vector2(start.x, start.z)) <= 441)
                 {
                     if (walkSource.clip != gravelWalk)
                     {
-                        walkSource.volume = 0.5f;
+                        walkSource.volume = 0.6f;
                         walkSource.clip = gravelWalk;
                     }
                     //else play = false;
-                    if (!isGrounded) audioSource.PlayOneShot(gravelLands[Random.Range(0, gravelCount)], 0.5f);
+                    if (!isGrounded) audioSource.PlayOneShot(gravelLands[Random.Range(0, gravelCount)], 0.6f);
                 }
                 else
                 {
@@ -118,13 +133,14 @@ public class Player : MonoBehaviour
             }
             else
             {
-                if (walkSource.clip != solidWalk)
+                if (walkSource.clip != concreteWalk)
                 {
-                    walkSource.volume = 0.2f;
-                    walkSource.clip = solidWalk;
+                    walkSource.volume = 0.5f;
+                    walkSource.clip = concreteWalk;
                 }
                 //else play = false;
-                if (!isGrounded) audioSource.PlayOneShot(solidLands[Random.Range(0, solidCount)], 0.5f);
+                if (!isGrounded) audioSource.PlayOneShot(concreteLands[Random.Range(0, concreteCount)], 0.6f);
+                //if (go.CompareTag("Stair")) speed = stairSpeed;
             }
             if (vel > 0.2f)
             {

@@ -11,6 +11,7 @@ TagManager:
   - Wall
   - Sprayable
   - Grass
+  - Stair
   layers:
   - Default
   - TransparentFX
