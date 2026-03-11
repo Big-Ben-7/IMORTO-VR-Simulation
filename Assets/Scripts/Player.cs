@@ -65,6 +65,7 @@ public class Player : MonoBehaviour
         concreteCount = concreteLands.Length;
         grassCount = grassLands.Length;
         gravelCount = gravelLands.Length;
+        speed = outSpeed;
         //ent.SetActive(false);
         //health.SetActive(false);
         //expl.SetActive(false);
@@ -87,8 +88,7 @@ public class Player : MonoBehaviour
         turnAxis = turnInput.action.ReadValue<Vector2>().x;
 
         Vector3 start = col.transform.TransformPoint(col.center);
-        bool cast = Physics.SphereCast(start, col.radius, Vector3.down, out RaycastHit hit, col.height / 2 + 0.05f, groundMask);
-        speed = outSpeed;
+        bool cast = Physics.Raycast(start, Vector3.down, out RaycastHit hit, col.height / 2 + 0.05f, groundMask);
         if (!cast)
         {
             if (walkSource.isPlaying) walkSource.Stop();
@@ -105,7 +105,7 @@ public class Player : MonoBehaviour
                     walkSource.clip = tileWalk;
                 }
                 //else play = false;
-                if (!isGrounded) audioSource.PlayOneShot(tileLands[Random.Range(0, tileCount)], 0.6f);
+                if (!isGrounded) audioSource.PlayOneShot(tileLands[Random.Range(0, tileCount)]);
                 speed = inSpeed;
             }
             else if (go.CompareTag("Grass"))
@@ -118,7 +118,7 @@ public class Player : MonoBehaviour
                         walkSource.clip = gravelWalk;
                     }
                     //else play = false;
-                    if (!isGrounded) audioSource.PlayOneShot(gravelLands[Random.Range(0, gravelCount)], 0.6f);
+                    if (!isGrounded) audioSource.PlayOneShot(gravelLands[Random.Range(0, gravelCount)]);
                 }
                 else
                 {
@@ -128,21 +128,23 @@ public class Player : MonoBehaviour
                         walkSource.clip = grassWalk;
                     }
                     //else play = false;
-                    if (!isGrounded) audioSource.PlayOneShot(grassLands[Random.Range(0, grassCount)], 0.4f);
+                    if (!isGrounded) audioSource.PlayOneShot(grassLands[Random.Range(0, grassCount)], 0.3f);
                 }
+                speed = outSpeed;
             }
             else
             {
                 if (walkSource.clip != concreteWalk)
                 {
-                    walkSource.volume = 0.5f;
+                    walkSource.volume = 0.3f;
                     walkSource.clip = concreteWalk;
                 }
                 //else play = false;
-                if (!isGrounded) audioSource.PlayOneShot(concreteLands[Random.Range(0, concreteCount)], 0.6f);
+                if (!isGrounded) audioSource.PlayOneShot(concreteLands[Random.Range(0, concreteCount)], 0.5f);
                 //if (go.CompareTag("Stair")) speed = stairSpeed;
+                speed = outSpeed;
             }
-            if (vel > 0.2f)
+            if (vel > 0.01f)
             {
                 if (!walkSource.isPlaying)
                 {
