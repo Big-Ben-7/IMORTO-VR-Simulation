@@ -1,0 +1,228 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
+-->
+<materialx version="1.38">
+  <nodegraph name="NG_Marble_Orange_Streaks">
+    <output name="base_color_output" type="color3" nodename="node_mix_0" />
+    <output name="specular_roughness_output" type="float" nodename="node_mix_1" />
+    <normal name="onthefly_2" type="vector3">
+      <input name="space" type="string" value="world" />
+    </normal>
+    <output name="coat_normal_output" type="vector3" nodename="onthefly_2" />
+    <normal name="onthefly_3" type="vector3">
+      <input name="space" type="string" value="world" />
+    </normal>
+    <output name="normal_output" type="vector3" nodename="onthefly_3" />
+    <tangent name="onthefly_4" type="vector3">
+      <input name="space" type="string" value="world" />
+    </tangent>
+    <output name="tangent_output" type="vector3" nodename="onthefly_4" />
+    <image name="node_image_color3_5" type="color3" GLSLFX_usage="baseColor" expose="true">
+      <input name="texcoord" type="vector2" nodename="node_multiply_6" />
+      <input name="file" type="filename" colorspace="srgb_texture" value="textures/Marble_Orange_Streaks_baseColor.png" />
+      <input name="layer" type="string" value="" />
+      <input name="default" type="color3" value=" 0.000000, 0.000000, 0.000000" />
+      <input name="uaddressmode" type="string" value="periodic" />
+      <input name="vaddressmode" type="string" value="periodic" />
+      <input name="filtertype" type="string" value="linear" />
+      <input name="framerange" type="string" value="" />
+      <input name="frameoffset" type="integer" value="0" />
+      <input name="frameendaction" type="string" value="constant" />
+    </image>
+    <texcoord name="node_texcoord_vector2_7" type="vector2">
+      <input name="index" type="integer" value="0" />
+    </texcoord>
+    <multiply name="node_multiply_6" type="vector2">
+      <input name="in1" type="vector2" nodename="node_texcoord_vector2_7" />
+      <input name="in2" type="float" nodename="UVScale" />
+    </multiply>
+    <mix name="node_mix_0" type="color3">
+      <input name="fg" type="color3" nodename="node_mix_8" />
+      <input name="bg" type="color3" nodename="node_image_color3_5" />
+      <input name="mix" type="float" nodename="node_convert_9" />
+    </mix>
+    <convert name="node_convert_9" type="float">
+      <input name="in" type="boolean" nodename="UseCustomColor" />
+    </convert>
+    <image name="node_image_vector3_10" type="vector3" GLSLFX_usage="any" expose="true">
+      <input name="texcoord" type="vector2" nodename="node_multiply_6" />
+      <input name="file" type="filename" value="textures/Marble_Orange_Streaks_any.png" />
+      <input name="layer" type="string" value="" />
+      <input name="default" type="vector3" value=" 0.000000, 0.000000, 0.000000" />
+      <input name="uaddressmode" type="string" value="periodic" />
+      <input name="vaddressmode" type="string" value="periodic" />
+      <input name="filtertype" type="string" value="linear" />
+      <input name="framerange" type="string" value="" />
+      <input name="frameoffset" type="integer" value="0" />
+      <input name="frameendaction" type="string" value="constant" />
+    </image>
+    <mix name="node_mix_11" type="color3">
+      <input name="fg" type="color3" nodename="StreakColor" />
+      <input name="bg" type="color3" nodename="BGColor" />
+      <input name="mix" type="float" nodename="node_extract_12" />
+    </mix>
+    <extract name="node_extract_12" type="float">
+      <input name="in" type="vector3" nodename="node_image_vector3_10" />
+      <input name="index" type="integer" value="0" />
+    </extract>
+    <extract name="node_extract_13" type="float">
+      <input name="in" type="vector3" nodename="node_image_vector3_10" />
+      <input name="index" type="integer" value="1" />
+    </extract>
+    <mix name="node_mix_14" type="color3">
+      <input name="fg" type="color3" nodename="StreakColor" />
+      <input name="bg" type="color3" nodename="node_mix_11" />
+      <input name="mix" type="float" nodename="node_mix_15" />
+    </mix>
+    <mix name="node_mix_15" type="float">
+      <input name="fg" type="float" nodename="StrokeSpread" />
+      <input name="bg" type="float" nodename="node_float_16" />
+      <input name="mix" type="float" nodename="node_extract_13" />
+    </mix>
+    <constant name="node_float_16" type="float">
+      <input name="value" type="float" value="0.0" />
+    </constant>
+    <mix name="node_mix_17" type="float">
+      <input name="fg" type="float" nodename="DirtSpread" />
+      <input name="bg" type="float" nodename="node_float_16" />
+      <input name="mix" type="float" nodename="node_extract_18" />
+    </mix>
+    <extract name="node_extract_18" type="float">
+      <input name="in" type="vector3" nodename="node_image_vector3_10" />
+      <input name="index" type="integer" value="2" />
+    </extract>
+    <mix name="node_mix_8" type="color3">
+      <input name="fg" type="color3" nodename="DirtColor" />
+      <input name="bg" type="color3" nodename="node_mix_14" />
+      <input name="mix" type="float" nodename="node_mix_17" />
+    </mix>
+    <image name="node_image_vector3_19" type="vector3" GLSLFX_usage="roughness" expose="true">
+      <input name="texcoord" type="vector2" nodename="node_multiply_6" />
+      <input name="file" type="filename" value="textures/Marble_Orange_Streaks_roughness.png" />
+      <input name="layer" type="string" value="" />
+      <input name="default" type="vector3" value=" 0.000000, 0.000000, 0.000000" />
+      <input name="uaddressmode" type="string" value="periodic" />
+      <input name="vaddressmode" type="string" value="periodic" />
+      <input name="filtertype" type="string" value="linear" />
+      <input name="framerange" type="string" value="" />
+      <input name="frameoffset" type="integer" value="0" />
+      <input name="frameendaction" type="string" value="constant" />
+    </image>
+    <extract name="node_extract_20" type="float">
+      <input name="in" type="vector3" nodename="node_image_vector3_19" />
+      <input name="index" type="integer" value="0" />
+    </extract>
+    <extract name="node_extract_21" type="float">
+      <input name="in" type="vector3" nodename="node_image_vector3_19" />
+      <input name="index" type="integer" value="1" />
+    </extract>
+    <extract name="node_extract_22" type="float">
+      <input name="in" type="vector3" nodename="node_image_vector3_19" />
+      <input name="index" type="integer" value="2" />
+    </extract>
+    <mix name="node_mix_23" type="float">
+      <input name="fg" type="float" nodename="RoughnessScratches" />
+      <input name="bg" type="float" nodename="BaseRoughness" />
+      <input name="mix" type="float" nodename="node_extract_20" />
+    </mix>
+    <mix name="node_mix_24" type="float">
+      <input name="fg" type="float" nodename="node_max_25" />
+      <input name="bg" type="float" nodename="node_mix_23" />
+      <input name="mix" type="float" nodename="node_extract_21" />
+    </mix>
+    <mix name="node_mix_1" type="float">
+      <input name="fg" type="float" nodename="node_max_26" />
+      <input name="bg" type="float" nodename="node_mix_24" />
+      <input name="mix" type="float" nodename="node_extract_22" />
+    </mix>
+    <max name="node_max_26" type="float">
+      <input name="in1" type="float" nodename="RoughnessDust" />
+      <input name="in2" type="float" nodename="node_mix_24" />
+    </max>
+    <max name="node_max_25" type="float">
+      <input name="in1" type="float" nodename="RoughnessSmears" />
+      <input name="in2" type="float" nodename="node_mix_23" />
+    </max>
+    <constant name="UVScale" type="float">
+      <input name="value" type="float" value="2.0" />
+    </constant>
+    <constant name="UseCustomColor" type="boolean">
+      <input name="value" type="boolean" value="false" />
+    </constant>
+    <constant name="BGColor" type="color3">
+      <input name="value" type="color3" value=" 0.000774, 0.000774, 0.000706" />
+    </constant>
+    <constant name="StreakColor" type="color3">
+      <input name="value" type="color3" value=" 0.003936, 0.000000, 0.348510" />
+    </constant>
+    <constant name="StrokeSpread" type="float">
+      <input name="value" type="float" value="0.14500001072883606" />
+    </constant>
+    <constant name="DirtColor" type="color3">
+      <input name="value" type="color3" value=" 0.223414, 0.203653, 0.194338" />
+    </constant>
+    <constant name="DirtSpread" type="float">
+      <input name="value" type="float" value="0.5160000324249268" />
+    </constant>
+    <constant name="BaseRoughness" type="float">
+      <input name="value" type="float" value="0.0560000017285347" />
+    </constant>
+    <constant name="RoughnessScratches" type="float">
+      <input name="value" type="float" value="0.9690000414848328" />
+    </constant>
+    <constant name="RoughnessSmears" type="float">
+      <input name="value" type="float" value="1.0" />
+    </constant>
+    <constant name="RoughnessDust" type="float">
+      <input name="value" type="float" value="0.3020000159740448" />
+    </constant>
+  </nodegraph>
+  <standard_surface name="SR_Marble_Orange_Streaks" type="surfaceshader">
+    <input name="base" type="float" value="0.800000011920929" />
+    <input name="base_color" type="color3" output="base_color_output" nodegraph="NG_Marble_Orange_Streaks" />
+    <input name="diffuse_roughness" type="float" value="0.0" />
+    <input name="metalness" type="float" value="0.0" />
+    <input name="specular" type="float" value="1.0" />
+    <input name="specular_color" type="color3" value=" 1.000000, 1.000000, 1.000000" />
+    <input name="specular_roughness" type="float" output="specular_roughness_output" nodegraph="NG_Marble_Orange_Streaks" />
+    <input name="specular_IOR" type="float" value="1.5" />
+    <input name="specular_anisotropy" type="float" value="0.0" />
+    <input name="specular_rotation" type="float" value="0.0" />
+    <input name="transmission" type="float" value="0.0" />
+    <input name="transmission_color" type="color3" value=" 1.000000, 1.000000, 1.000000" />
+    <input name="transmission_depth" type="float" value="0.0" />
+    <input name="transmission_scatter" type="color3" value=" 0.000000, 0.000000, 0.000000" />
+    <input name="transmission_scatter_anisotropy" type="float" value="0.0" />
+    <input name="transmission_dispersion" type="float" value="0.0" />
+    <input name="transmission_extra_roughness" type="float" value="0.0" />
+    <input name="subsurface" type="float" value="0.0" />
+    <input name="subsurface_color" type="color3" value=" 1.000000, 1.000000, 1.000000" />
+    <input name="subsurface_radius" type="color3" value=" 1.000000, 1.000000, 1.000000" />
+    <input name="subsurface_scale" type="float" value="1.0" />
+    <input name="subsurface_anisotropy" type="float" value="0.0" />
+    <input name="sheen" type="float" value="0.0" />
+    <input name="sheen_color" type="color3" value=" 1.000000, 1.000000, 1.000000" />
+    <input name="sheen_roughness" type="float" value="0.30000001192092896" />
+    <input name="coat" type="float" value="0.0" />
+    <input name="coat_color" type="color3" value=" 1.000000, 1.000000, 1.000000" />
+    <input name="coat_roughness" type="float" value="0.10000000149011612" />
+    <input name="coat_anisotropy" type="float" value="0.0" />
+    <input name="coat_rotation" type="float" value="0.0" />
+    <input name="coat_IOR" type="float" value="1.5" />
+    <input name="coat_normal" type="vector3" output="coat_normal_output" nodegraph="NG_Marble_Orange_Streaks" />
+    <input name="coat_affect_color" type="float" value="0.0" />
+    <input name="coat_affect_roughness" type="float" value="0.0" />
+    <input name="thin_film_thickness" type="float" value="0.0" />
+    <input name="thin_film_IOR" type="float" value="1.5" />
+    <input name="emission" type="float" value="0.0" />
+    <input name="emission_color" type="color3" value=" 1.000000, 1.000000, 1.000000" />
+    <input name="opacity" type="color3" value=" 1.000000, 1.000000, 1.000000" />
+    <input name="thin_walled" type="boolean" value="false" />
+    <input name="normal" type="vector3" output="normal_output" nodegraph="NG_Marble_Orange_Streaks" />
+    <input name="tangent" type="vector3" output="tangent_output" nodegraph="NG_Marble_Orange_Streaks" />
+  </standard_surface>
+  <surfacematerial name="Marble_Orange_Streaks" type="material">
+    <input name="surfaceshader" type="surfaceshader" nodename="SR_Marble_Orange_Streaks" />
+  </surfacematerial>
+</materialx>

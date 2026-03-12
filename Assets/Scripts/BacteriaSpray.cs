@@ -42,6 +42,7 @@ public class BacteriaSpray : XRGrabInteractable
     enum State { Idle, Moving, Returning, Acting};
     State botState = State.Idle;
     Transform healthcare;
+    Animator animator; 
 
     protected override void Awake()
     {
@@ -58,6 +59,7 @@ public class BacteriaSpray : XRGrabInteractable
         cameraData.renderPostProcessing = false;
         squirt = transform.GetChild(6);
         healthcare = transform.parent;
+        animator = GetComponent<Animator>();
     }
 
     void Start()
@@ -166,6 +168,7 @@ public class BacteriaSpray : XRGrabInteractable
                 bacteria = Instantiate(bacteriaPrefab, hitPoint + (squirt.position - hitPoint).normalized * 0.3f, Quaternion.LookRotation(squirt.forward, up), healthcare);
                 bacteria.GetComponent<DecalProjector>().size = new Vector3(randomSize, randomSize, 3);
             }
+            animator.SetTrigger("Spray");
             bacteria.GetComponent<Animator>().SetTrigger("FadeIn");
             hitPoints.Add(hitPoint);
             bacterias.Add(bacteria);
