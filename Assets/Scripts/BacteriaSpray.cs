@@ -13,8 +13,9 @@ public class BacteriaSpray : XRGrabInteractable
 {
     [SerializeField] GameObject bacteriaPrefab, bacteriaQuad;
     [SerializeField] LayerMask body, sprayMask;//, sprayableMask;
-    [SerializeField] Transform bot, leftWall, rightWall, backWall, frontWall, dome;
-    float leftBound, rightBound, backBound, frontBound, radius;
+    [SerializeField] Transform bot, leftWall, rightWall, backWall, frontWall;
+    float leftBound, rightBound, backBound, frontBound;
+    [SerializeField]float radius = 9;
     [SerializeField] float botRotSpeed;
     [SerializeField] Volume volume;
     [SerializeField] AudioClip hit, spray, buzz;
@@ -53,6 +54,7 @@ public class BacteriaSpray : XRGrabInteractable
         volumeObject.SetActive(false);
         botAgent = bot.GetComponent<NavMeshAgent>();
         botSource = bot.GetComponent<AudioSource>();
+        radius *= radius;
         mat = bot.GetChild(0).GetChild(2).GetComponent<MeshRenderer>().material;
         mat.DisableKeyword("_EMISSION");
         Camera.main.TryGetComponent<UniversalAdditionalCameraData>(out cameraData);
@@ -71,8 +73,6 @@ public class BacteriaSpray : XRGrabInteractable
         rightBound = rightWall.position.x;
         backBound = backWall.position.z;
         frontBound = frontWall.position.z;
-        radius = dome.localScale.x / 25 + 0.1f;
-        radius *= radius;
     }
 
     void Update()
@@ -147,25 +147,26 @@ public class BacteriaSpray : XRGrabInteractable
         base.OnActivated(args);
         RaycastHit hit;
         Vector3 pos = squirt.position;
-        if (Physics.Raycast(squirt.position, squirt.forward, out hit, 3, sprayMask))
+        if (Physics.Raycast(pos, squirt.forward, out hit, 3, sprayMask))
         {
             GameObject go = hit.collider.gameObject;
             //if ((sprayableMask.value & (1 << go.layer)) == 0) return;
-            if (!go.CompareTag("Sprayable") || pos.x < leftBound || pos.x > rightBound || pos.z < backBound || pos.z > frontBound || Vector2.SqrMagnitude(new Vector2(pos.x, pos.z)) < radius) return;
+            Vector3 hitPoint = hit.point;
+            if (!go.CompareTag("Sprayable") && !go.CompareTag("Wall") && !go.CompareTag("Pane")|| hitPoint.x < leftBound || hitPoint.x > rightBound || hitPoint.z < backBound || hitPoint.z > frontBound || Vector2.SqrMagnitude(new Vector2(hitPoint.x, hitPoint.z)) < radius) return;
             Vector3 up = squirt.TransformDirection(new Vector3(Random.Range(-1, 1), Random.Range(-1, 1), 0).normalized);
             float randomSize = Random.Range(0.1f, 0.5f);
-            Vector3 hitPoint = hit.point, normal = hit.normal;
+            Vector3 normal = hit.normal;
             //GameObject bacteria = Instantiate(bacteriaQuad, hitPoint + 0.01f * normal, Quaternion.LookRotation(-normal, up), healthcare);
             //bacteria.transform.localScale = randomSize * Vector3.one;
             GameObject bacteria;
-            if (go.name == "Pane")
+            if (go.CompareTag("Pane"))
             {
                 bacteria = Instantiate(bacteriaQuad, hitPoint + 0.01f * normal, Quaternion.LookRotation(-normal, up), healthcare);
                 bacteria.transform.localScale = randomSize * Vector3.one;
             }
             else
             {
-                bacteria = Instantiate(bacteriaPrefab, hitPoint + (squirt.position - hitPoint).normalized * 0.3f, Quaternion.LookRotation(squirt.forward, up), healthcare);
+                bacteria = Instantiate(bacteriaPrefab, hitPoint + (pos - hitPoint).normalized * 0.3f, Quaternion.LookRotation(squirt.forward, up), healthcare);
                 bacteria.GetComponent<DecalProjector>().size = new Vector3(randomSize, randomSize, 3);
             }
             animator.SetTrigger("Spray");

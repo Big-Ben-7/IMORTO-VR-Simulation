@@ -32,12 +32,8 @@ public class Drone : MonoBehaviour
         for (int i = 0; i < pointCount; i++) path[i] = pathPoints.GetChild(i).position;
         Piano.drone = this;
         screen.SetActive(false);
-    }
-
-    void Start()
-    {
         launchPos = myT.position;
-        launchTarget = new Vector3(launchPos.x, 3, launchPos.z);
+        launchTarget = new Vector3(path[0].x, 3, launchPos.z);
     }
 
     void Update()
