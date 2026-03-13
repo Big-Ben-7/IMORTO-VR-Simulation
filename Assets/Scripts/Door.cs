@@ -61,9 +61,9 @@ public class Door : MonoBehaviour
         {
             //canTrigger = false;
             //StartCoroutine(ResetTrigger());
-            if (Player.tp)
+            if (Player.tp && triggerCount == 0)
             {
-                Player.tp = false;
+                //Player.tp = false;
                 triggerCount = 1;
                 return;
             }

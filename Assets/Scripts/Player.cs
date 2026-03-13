@@ -144,7 +144,7 @@ public class Player : MonoBehaviour
                 //if (go.CompareTag("Stair")) speed = stairSpeed;
                 speed = outSpeed;
             }
-            if (vel > 0.01f)
+            if (vel > 0.5f)
             {
                 if (!walkSource.isPlaying)
                 {
