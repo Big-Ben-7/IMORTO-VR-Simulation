@@ -2,11 +2,13 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR;
+using UnityEngine.UI;
 
 public class Ball : MonoBehaviour
 {
     [Header("Test")]
     [SerializeField] bool testing;
+    [SerializeField] int difficulty;
     [SerializeField] Transform testPos;
     [SerializeField] Vector3 testSpeed;
     [SerializeField] InputActionProperty resetBall;
@@ -34,8 +36,12 @@ public class Ball : MonoBehaviour
     [SerializeField] Transform holder;
     [SerializeField] float midL, topL, holdL;
     [SerializeField] Transform baseMarker;
+    [SerializeField] Transform racket;
     Vector3 basePos;
     [SerializeField] float minSpeed, maxSpeed;
+    [SerializeField] float easyMinSpeed, easyMaxSpeed;
+    Color selectedColor, normalColor;
+    [SerializeField] Image[] diffButtons;
     float contactTime, currentTime;
     Vector3 contact;
     Coroutine hitCoroutine;
@@ -113,6 +119,14 @@ public class Ball : MonoBehaviour
         leftDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
         if (leftDevice.isValid && leftDevice.TryGetHapticCapabilities(out capabilities) && capabilities.supportsImpulse) leftHaptics = true;
         else leftHaptics = false;
+        selectedColor = diffButtons[0].color;
+        normalColor = diffButtons[1].color;
+        if (!testing) difficulty = 0;
+        else
+        {
+            diffButtons[0].color = normalColor;
+            diffButtons[difficulty].color = selectedColor;
+        }
     }
 
     void Update()
@@ -404,8 +418,9 @@ public class Ball : MonoBehaviour
         //Set variables
         float y0 = contact.y, z0 = contact.z, y = tableHeight, h;
         float targetZ = Random.Range(returnZ[0], returnZ[1]);
-        float v = Random.Range(minSpeed, maxSpeed);
-        float a = Random.Range(returnX[0], returnX[1]) - contact.x, b = targetZ - z0;
+        float v = (difficulty > 0) ? Random.Range(minSpeed, maxSpeed) : Random.Range(easyMinSpeed, easyMaxSpeed);
+        float randomX = (difficulty > 1) ? Random.Range(returnX[0], returnX[1]) : Mathf.Clamp(racket.position.x, returnX[0], returnX[1]);
+        float a = randomX - contact.x, b = targetZ - z0;
         float x = Mathf.Sqrt(a * a + b * b);
         float k = (netPos - z0) / (targetZ - z0);
         float hMin = y0 * (1 - k) + k * y + 0.5f * g * k * (1 - k) * (x / v) * (x / v);
@@ -494,5 +509,13 @@ public class Ball : MonoBehaviour
     {
         yield return halfSecond;
         if (!grabbed) col.excludeLayers = 0;
+    }
+
+    public void SetDifficulty(int d)
+    {
+        diffButtons[difficulty].color = normalColor;
+        difficulty = d;
+        diffButtons[d].color = selectedColor;
+        Player.Click();
     }
 }
