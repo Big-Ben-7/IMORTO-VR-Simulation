@@ -33,9 +33,9 @@ public class Door : MonoBehaviour
                 }
                 else if (!rooms[posRoom].activeSelf) rooms[posRoom].SetActive(true);
             }*/
-            if (Player.tp)
+            if (Player.tp && triggerCount == 0)
             {
-                Player.tp = false;
+                //Player.tp = false;
                 triggerCount = 1;
                 return;
             }

@@ -3,102 +3,7 @@ guid: 5be2585da1efb4c84b5c393f1b471bb4
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Entertainment (Purple)
-    second: {fileID: 2100000, guid: fdc3a722880134d80843cc9d2715c062, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Entertainment Arch
-    second: {fileID: 2100000, guid: 5946137d3e4de49a4bfd7551bd1453fa, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Exploration Arch
-    second: {fileID: 2100000, guid: 53f99372e4d634239bf7a022f7312c18, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Exploration Room
-    second: {fileID: 2100000, guid: 2d45f322b16a4454fa14a07a6734b4a9, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Exterior white
-    second: {fileID: 2100000, guid: e17229c5a00e74f16bc8c1d15ed492ef, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Front entry
-    second: {fileID: 2100000, guid: d1d25cb09e4f64ae9b1068a10531ece9, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Front entry Arch
-    second: {fileID: 2100000, guid: 394925ded8b2c40eb81fb5c76ffbc347, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Glass
-    second: {fileID: 2100000, guid: 3ef2e08e406a84b438fb4cf413c8467f, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Glass.001
-    second: {fileID: 2100000, guid: ccba2ad05a3574e758f95bf5453d298e, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Glass.002
-    second: {fileID: 2100000, guid: c1958c9a20e894cd496a031ee8d2b545, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Glass.003
-    second: {fileID: 2100000, guid: 558ab4998d6c04d288ce424500471afc, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Glass.004
-    second: {fileID: 2100000, guid: 7eddb7d4b3b1e42c292a212475bfba69, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Inside Cupola
-    second: {fileID: 2100000, guid: 82e2da976a6054311ab7f7724f5c3aba, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Interior white Wall
-    second: {fileID: 2100000, guid: 2cc66413ca0804f1b96d34033d3f2210, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Manufacturing (Yellow)
-    second: {fileID: 2100000, guid: 0d4d6a7c4454a4ec1963d4032a82ace6, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Manufacturing Arch
-    second: {fileID: 2100000, guid: 5bb7c8b0f1d404b3c9e70d2c539fe999, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Medical
-    second: {fileID: 2100000, guid: a40c2d1e22d8b40d393ce72c02f54cab, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Medical Arch
-    second: {fileID: 2100000, guid: 01e2ae2ca579c46129c9556a7dbc0951, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Metal
-    second: {fileID: 2100000, guid: 0c8c04e9d1b2e45f4867678916e20971, type: 2}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -174,7 +79,7 @@ ModelImporter:
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
   referencedClips: []
-  importAnimation: 0
+  importAnimation: 1
   humanDescription:
     serializedVersion: 3
     human: []

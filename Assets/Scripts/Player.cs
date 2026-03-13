@@ -118,7 +118,7 @@ public class Player : MonoBehaviour
                         walkSource.clip = gravelWalk;
                     }
                     //else play = false;
-                    if (!isGrounded) audioSource.PlayOneShot(gravelLands[Random.Range(0, gravelCount)]);
+                    if (!isGrounded) audioSource.PlayOneShot(gravelLands[Random.Range(0, gravelCount)], 0.8f);
                 }
                 else
                 {
