@@ -5,6 +5,8 @@ using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using System.Collections.Generic;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
+using UnityEngine.InputSystem;
 
 public class BallLauncher : XRGrabInteractable
 {
@@ -34,18 +36,28 @@ public class BallLauncher : XRGrabInteractable
     [SerializeField] float minLaunchSpeed, maxLaunchSpeed;
     Ball[] balls;
     int ballCount, currentBall = 0;
-    Transform launchMarker;
+    Transform arm, launchMarker;
+    Rigidbody rb;
     WaitForSeconds fifthSecond = new WaitForSeconds(0.2f);
-    bool cooldown;
+    bool cooldown, grabbed;
+    enum Handedness { Left, Right, None }
+    Handedness handeness = Handedness.None;
+    [SerializeField] InputActionProperty leftRotateProp, rightRotateProp;
+    InputAction leftRotate, rightRotate;
+    [SerializeField] float rotSpeed;
+    [SerializeField] AudioClip launch;
 
     protected override void Awake()
     {
         base.Awake();
-        launchMarker = transform.GetChild(0).GetChild(0);
+        rb = GetComponent<Rigidbody>();
+        arm = transform.GetChild(0);
+        launchMarker = arm.GetChild(0);
         balls = ballParent.GetComponentsInChildren<Ball>(true);
         // balls[0];
         ballCount = balls.Length;
-
+        leftRotate = leftRotateProp.action;
+        rightRotate = rightRotateProp.action;
         Ball.rightDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
         if (Ball.rightDevice.isValid && Ball.rightDevice.TryGetHapticCapabilities(out HapticCapabilities capabilities) && capabilities.supportsImpulse) Ball.rightHaptics = true;
         else Ball.rightHaptics = false;
@@ -98,6 +110,21 @@ public class BallLauncher : XRGrabInteractable
     void Update()
     {
         if (Ball.instance == null) Ball.ResetBot();
+        Debug.Log (grabbed + ", " + handeness + ", " + leftRotate.ReadValue<Vector2>() + ", " + rightRotate.ReadValue<Vector2>());
+        if (grabbed)
+        {
+            switch (handeness)
+            {
+                case Handedness.Left:
+                    Vector2 rot = leftRotate.ReadValue<Vector2>();
+                    if (rot.x > 0.1f || rot.x < -0.1f) arm.Rotate(0, rot.x * Time.deltaTime, 0, Space.World);
+                    break;
+                case Handedness.Right:
+                    rot = rightRotate.ReadValue<Vector2>();
+                    if (rot.x > 0.1f || rot.x < -0.1f) arm.Rotate(0, rot.x * Time.deltaTime, 0, Space.World);
+                    break;
+            }
+        }
     }
 
     protected override void OnActivated(ActivateEventArgs args)
@@ -106,6 +133,7 @@ public class BallLauncher : XRGrabInteractable
         if (cooldown) return;
         cooldown = true;
         StartCoroutine(Cooldown());
+        Player.audioSource.PlayOneShot(launch, 0.1f);
 
         currentBall++;
         if (currentBall == ballCount) currentBall = 0;
@@ -132,7 +160,7 @@ public class BallLauncher : XRGrabInteractable
             }
         }
         if (!ball.gameObject.activeSelf) ball.gameObject.SetActive(true);
-        ball.Activate(launchMarker.position, launchMarker.forward * Random.Range(minLaunchSpeed, maxLaunchSpeed) * Mathf.Sqrt((launchMarker.position.z - baseZ) / baseDistance)/*, launchMarker*/);
+        ball.Activate(launchMarker.position, launchMarker.forward * Random.Range(minLaunchSpeed, maxLaunchSpeed) * Mathf.Sqrt(Mathf.Abs(launchMarker.position.z - baseZ) / baseDistance)/*, launchMarker*/);
     }
 
     IEnumerator Cooldown()
@@ -147,5 +175,31 @@ public class BallLauncher : XRGrabInteractable
         Ball.difficulty = d;
         diffButtons[d].color = selectedColor;
         Player.Click();
+    }
+
+    protected override void OnSelectEntered(SelectEnterEventArgs args)
+    {
+        base.OnSelectEntered(args);
+        grabbed = true;
+        //Player.Grab();
+        switch(args.interactorObject.transform.GetComponent<XRBaseInteractor>().handedness)
+        {
+            case InteractorHandedness.Left:
+                handeness = Handedness.Left;
+                break;
+            case InteractorHandedness.Right:
+                handeness = Handedness.Right;
+                break;
+            default:
+                handeness = Handedness.None;
+                break;
+        }
+    }
+
+    protected override void OnSelectExited(SelectExitEventArgs args)
+    {
+        base.OnSelectExited(args);
+        grabbed = false;
+        handeness = Handedness.None;
     }
 }

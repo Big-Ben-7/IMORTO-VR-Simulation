@@ -7,13 +7,33 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Material
-    second: {fileID: 2100000, guid: 979cfabbf207f4293b878624a58eca7c, type: 2}
+      name: Adenine
+    second: {fileID: 2100000, guid: ed316f18a0a6d4c86bc66cb92bd977dc, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Material.001
-    second: {fileID: 2100000, guid: 39197a145f975405da2e5d5f5c1bb865, type: 2}
+      name: Backbones
+    second: {fileID: 2100000, guid: 590c948933cf84eb583998390d08c442, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cytosine
+    second: {fileID: 2100000, guid: f3a942c2f2e864246a4af423128f5bdd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Guanine
+    second: {fileID: 2100000, guid: a2daa7165c73f47c7ae8976ccf92c8bc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Metal plate
+    second: {fileID: 2100000, guid: 93e44a2c006bd4238b347b803af5fcad, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Thymine
+    second: {fileID: 2100000, guid: 7850a66436d494f36ad4a2f0c59ebc7f, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -51,8 +71,8 @@ ModelImporter:
     importPhysicalCameras: 1
     importVisibility: 1
     importBlendShapes: 1
-    importCameras: 0
-    importLights: 0
+    importCameras: 1
+    importLights: 1
     nodeNameCollisionStrategy: 1
     fileIdsGeneration: 2
     swapUVChannels: 0
