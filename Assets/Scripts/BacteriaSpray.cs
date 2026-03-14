@@ -169,7 +169,6 @@ public class BacteriaSpray : XRGrabInteractable
                 bacteria = Instantiate(bacteriaPrefab, hitPoint + (pos - hitPoint).normalized * 0.3f, Quaternion.LookRotation(squirt.forward, up), healthcare);
                 bacteria.GetComponent<DecalProjector>().size = new Vector3(randomSize, randomSize, 3);
             }
-            animator.SetTrigger("Spray");
             bacteria.GetComponent<Animator>().SetTrigger("FadeIn");
             hitPoints.Add(hitPoint);
             bacterias.Add(bacteria);
@@ -177,6 +176,7 @@ public class BacteriaSpray : XRGrabInteractable
             destinations.Add(new Vector3(hitPoint.x, 0, hitPoint.z));
             audioSource.PlayOneShot(spray);
         }
+        animator.SetTrigger("Spray");
         //else audioSource.PlayOneShot(spray, 0.1f);
     }
 

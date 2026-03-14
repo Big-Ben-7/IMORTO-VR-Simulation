@@ -112,6 +112,6 @@ public class UIPanel : XRGrabInteractable
     protected override void OnDisable()
     {
         base.OnDisable();
-        mySocket.SetActive(false);
+        if (mySocket) mySocket.SetActive(false);
     }
 }

@@ -101,11 +101,11 @@ public class Player : MonoBehaviour
             {
                 if (walkSource.clip != tileWalk)
                 {
-                    walkSource.volume = 0.4f;
+                    walkSource.volume = 0.3f;
                     walkSource.clip = tileWalk;
                 }
                 //else play = false;
-                if (!isGrounded) audioSource.PlayOneShot(tileLands[Random.Range(0, tileCount)]);
+                if (!isGrounded) audioSource.PlayOneShot(tileLands[Random.Range(0, tileCount)], 0.7f);
                 speed = inSpeed;
             }
             else if (go.CompareTag("Grass"))
@@ -114,21 +114,21 @@ public class Player : MonoBehaviour
                 {
                     if (walkSource.clip != gravelWalk)
                     {
-                        walkSource.volume = 0.6f;
+                        walkSource.volume = 0.2f;
                         walkSource.clip = gravelWalk;
                     }
                     //else play = false;
-                    if (!isGrounded) audioSource.PlayOneShot(gravelLands[Random.Range(0, gravelCount)], 0.8f);
+                    if (!isGrounded) audioSource.PlayOneShot(gravelLands[Random.Range(0, gravelCount)], 0.6f);
                 }
                 else
                 {
                     if (walkSource.clip != grassWalk)
                     {
-                        walkSource.volume = 0.05f;
+                        walkSource.volume = 0.07f;
                         walkSource.clip = grassWalk;
                     }
                     //else play = false;
-                    if (!isGrounded) audioSource.PlayOneShot(grassLands[Random.Range(0, grassCount)], 0.3f);
+                    if (!isGrounded) audioSource.PlayOneShot(grassLands[Random.Range(0, grassCount)], 0.4f);
                 }
                 speed = outSpeed;
             }
@@ -140,7 +140,7 @@ public class Player : MonoBehaviour
                     walkSource.clip = concreteWalk;
                 }
                 //else play = false;
-                if (!isGrounded) audioSource.PlayOneShot(concreteLands[Random.Range(0, concreteCount)], 0.5f);
+                if (!isGrounded) audioSource.PlayOneShot(concreteLands[Random.Range(0, concreteCount)], 0.7f);
                 //if (go.CompareTag("Stair")) speed = stairSpeed;
                 speed = outSpeed;
             }

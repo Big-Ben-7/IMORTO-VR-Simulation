@@ -21,6 +21,6 @@ public class Piano : MonoBehaviour
     {
         Transform p = transform.parent;
         p.GetChild(0).GetComponent<AudioSource>().Play();
-        p.GetComponent<Animator>().SetTrigger("Play");
+        p.GetComponent<Animation>().Play();
     }
 }

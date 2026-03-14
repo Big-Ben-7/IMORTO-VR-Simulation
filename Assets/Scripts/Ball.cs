@@ -1,18 +1,15 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.XR;
-using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class Ball : MonoBehaviour
 {
-    [Header("Test")]
+    [Header("Testing")]
     [SerializeField] bool testing;
-    [SerializeField] int difficulty;
     [SerializeField] Transform testPos;
     [SerializeField] Vector3 testSpeed;
-    [SerializeField] InputActionProperty resetBall;
-    InputAction reset;
+    //[SerializeField] InputActionProperty resetBall;
+    //InputAction reset;
     Vector3 initialPos;
     Coroutine test;
 
@@ -20,54 +17,47 @@ public class Ball : MonoBehaviour
     Collider col;
     float g = Physics.gravity.magnitude;
 
-    [Header("Table")]
-    [SerializeField] Transform netMarker;
-    float netPos;
-    [SerializeField] float netHeight;
-    [SerializeField] float tableHeight;
-    [SerializeField] Transform returnMarker1, returnMarker2;
-    float[] returnX = new float[2], returnZ = new float[2];
-    [SerializeField] Transform leftCornerMarker, rightCornerMarker;
-    Vector2 leftCorner, rightCorner;
+    //Table
+    public static float netPos, netHeight, tableHeight;
+    public static float[] returnX = new float[2], returnZ = new float[2], launchZ = new float[2];
+    public static Vector2 leftCorner, rightCorner;
 
-    [Header("Bot")]
-    [SerializeField] Transform middle;
-    [SerializeField] Transform top;
-    [SerializeField] Transform holder;
-    [SerializeField] float midL, topL, holdL;
-    [SerializeField] Transform baseMarker;
-    [SerializeField] Transform racket;
-    Vector3 basePos;
-    [SerializeField] float minSpeed, maxSpeed;
-    [SerializeField] float easyMinSpeed, easyMaxSpeed;
-    Color selectedColor, normalColor;
-    [SerializeField] Image[] diffButtons;
+    //Bot
+    public static Transform middle, top, holder;
+    public static float midL, topL, holdL;
+    public static Transform racket;
+    public static Vector3 basePos;
+    public static float minSpeed, maxSpeed, easyMinSpeed, easyMaxSpeed, hardMinSpeed, hardMaxSpeed;
     float contactTime, currentTime;
     Vector3 contact;
     Coroutine hitCoroutine;
     Quaternion[] botRotations = new Quaternion[3];
+    public static int difficulty = 0;
 
-    [Header("Audio/FX")]
-    [SerializeField] AudioClip[] racketHits;
-    [SerializeField] AudioClip table, floor, wall, net, bot, other;
-    int racketLength;
+    //Audio/FX
+    public static AudioClip[] racketHits;
+    public static AudioClip table, floor, wall, net, bot, other;
+    public static int racketLength;
     AudioSource audioSource;
-    UnityEngine.XR.InputDevice rightDevice;
-    UnityEngine.XR.InputDevice leftDevice;
-    bool leftHaptics = true, rightHaptics = true;
+    public static UnityEngine.XR.InputDevice rightDevice;
+    public static UnityEngine.XR.InputDevice leftDevice;
+    public static bool leftHaptics = true, rightHaptics = true;
 
     [Header("Booleans")]
     [SerializeField] bool botTrack;
     [SerializeField] bool hitting;
     [SerializeField] bool farSide;
     [SerializeField] bool serving = true;
-    [SerializeField] LayerMask body;
+    public static LayerMask body, defaultLayer;
     public static bool collidingTable;
     bool grabbed;
     string lastCollision = "";
-    WaitForSeconds fifthSecond = new WaitForSeconds(0.2f);
-    WaitForSeconds halfSecond = new WaitForSeconds(0.5f);
+    public static WaitForSeconds fifthSecond;
+    public static WaitForSeconds halfSecond;
     Coroutine collisionCoroutine;
+    public static Ball instance;
+    public static List<Ball> nextActive;
+    bool active;
 
     IEnumerator Test()
     {
@@ -96,41 +86,42 @@ public class Ball : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         initialPos = rb.position;
-        reset = resetBall.action;
+        //reset = resetBall.action;
         audioSource = GetComponent<AudioSource>();
-        racketLength = racketHits.Length;
         col = GetComponent<Collider>();
     }
 
     void Start()
     {
         if (testing && test == null) test = StartCoroutine(Test());
-        basePos = baseMarker.position;
-        leftCorner = new Vector2(leftCornerMarker.position.x, leftCornerMarker.position.z);
-        rightCorner = new Vector2(rightCornerMarker.position.x, rightCornerMarker.position.z);
-        returnX[0] = returnMarker1.position.x;
-        returnX[1] = returnMarker2.position.x;
-        returnZ[0] = returnMarker1.position.z;
-        returnZ[1] = returnMarker2.position.z;
-        netPos = netMarker.position.z;
-        rightDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
-        if (rightDevice.isValid && rightDevice.TryGetHapticCapabilities(out HapticCapabilities capabilities) && capabilities.supportsImpulse) rightHaptics = true;
-        else rightHaptics = false;
-        leftDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
-        if (leftDevice.isValid && leftDevice.TryGetHapticCapabilities(out capabilities) && capabilities.supportsImpulse) leftHaptics = true;
-        else leftHaptics = false;
-        selectedColor = diffButtons[0].color;
-        normalColor = diffButtons[1].color;
-        if (!testing) difficulty = 0;
-        else
-        {
-            diffButtons[0].color = normalColor;
-            diffButtons[difficulty].color = selectedColor;
-        }
+    }
+
+    public void Activate(Vector3 pos, /*float v*/ Vector3 vel/*, Transform refT*/)
+    {
+        //instance = this;
+        farSide = botTrack = hitting = false;
+        serving = true;
+        rb.linearVelocity = Vector3.zero;
+        rb.isKinematic = true;
+        col.excludeLayers = defaultLayer;
+        rb.position = pos;
+        rb.isKinematic = false;
+        rb.linearVelocity = vel;
+        StartCoroutine(Release(fifthSecond));
+        /*float randomZ = Random.Range(launchZ[0], launchZ[1]);
+        Vector3 refPos = refT.position;
+        rb.linearVelocity = CalcReturnVel(pos.x, pos.y, pos.z, tableHeight, randomZ, v, (randomZ - refPos.z)/Mathf.Tan(refT.rotation.eulerAngles.y * Mathf.Deg2Rad) + refPos.x);*/
+        ForceAim();
     }
 
     void Update()
     {
+        if (instance != this)
+        {
+            //if (botTrack) botTrack = false;
+            //if (hitting) hitting = false;
+            return;
+        }
         if (botTrack)
         {
             if (!collidingTable)
@@ -145,22 +136,25 @@ public class Ball : MonoBehaviour
                 currentTime += Time.deltaTime;
             }
         }
-        else if (!hitting)
-        {
-            middle.localRotation = Quaternion.Slerp(middle.localRotation, Quaternion.identity, Time.deltaTime * 4);
-            top.localRotation = Quaternion.Slerp(top.localRotation, Quaternion.identity, Time.deltaTime * 4);
-            holder.localRotation = Quaternion.Slerp(holder.localRotation, Quaternion.identity, Time.deltaTime * 4);
-        }
+        else if (!hitting) ResetBot();
         //if (reset.WasPressedThisFrame()) Reset();
+    }
+
+    public static void ResetBot()
+    {
+        if (Quaternion.Angle(holder.rotation, Quaternion.identity) < 0.1f) return;
+        middle.localRotation = Quaternion.Slerp(middle.localRotation, Quaternion.identity, Time.deltaTime * 4);
+        top.localRotation = Quaternion.Slerp(top.localRotation, Quaternion.identity, Time.deltaTime * 4);
+        holder.localRotation = Quaternion.Slerp(holder.localRotation, Quaternion.identity, Time.deltaTime * 4);
     }
 
     void OnTriggerEnter(Collider other)
     {
         GameObject go = other.gameObject;
         string name = go.name;
+        //Hits net
         if (go.CompareTag("Table"))
         {
-            //Hit net
             if (!grabbed && lastCollision != name)
             {
                 audioSource.PlayOneShot(net, Mathf.Clamp01(Mathf.Log10(rb.linearVelocity.magnitude + 1)));
@@ -170,21 +164,10 @@ public class Ball : MonoBehaviour
                 rb.linearVelocity = 0.5f * Vector3.Reflect(rb.linearVelocity, IsPastNet() ? Vector3.back : Vector3.forward);
             }
             if (botTrack) botTrack = false;
+            SetNextActive();
         }
         else if (go.CompareTag("BotRacket"))
         {
-            if (!botTrack) return;
-            if (!testing && serving) serving = false;
-            //col.isTrigger = true;
-            botTrack = false;
-            Vector3 vel = SetReturnVel();
-            rb.linearVelocity = vel;
-            if (hitCoroutine != null)
-            {
-                StopCoroutine(hitCoroutine);
-                hitting = false;
-            }
-            hitCoroutine = StartCoroutine(Hit(Quaternion.LookRotation(-vel.normalized, holder.up)));
             if (!grabbed && lastCollision != name)
             {
                 audioSource.PlayOneShot(racketHits[Random.Range(0, racketLength)], Mathf.Clamp01(Mathf.Log10(rb.linearVelocity.magnitude / 2 + 1)));
@@ -192,6 +175,44 @@ public class Ball : MonoBehaviour
                 if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
                 collisionCoroutine = StartCoroutine(ResetLastCollision());
             }
+            if (!botTrack) return;
+            if (!testing && serving) serving = false;
+            //col.isTrigger = true;
+            botTrack = false;
+
+            if (instance != this) return;
+            float v, randomX;
+            switch (difficulty)
+            {
+                //No mercy: fast, random return
+                case 3:
+                    v = Random.Range(hardMinSpeed, hardMaxSpeed);
+                    randomX = Random.Range(leftCorner.x, rightCorner.x);
+                    break;
+                //Tough: random return
+                case 2:
+                    v = Random.Range(minSpeed, maxSpeed);
+                    randomX = Random.Range(returnX[0], returnX[1]);
+                    break;
+                //Serious: aimed return
+                case 1:
+                    v = Random.Range(minSpeed, maxSpeed);
+                    randomX = Mathf.Clamp(racket.position.x, returnX[0], returnX[1]);
+                    break;
+                //Friendly: slow, aimed return
+                default:
+                    v = Random.Range(easyMinSpeed, easyMaxSpeed);
+                    randomX = Mathf.Clamp(racket.position.x, returnX[0], returnX[1]);
+                    break;
+            }
+            Vector3 vel = CalcReturnVel(contact.x, contact.y, contact.z, tableHeight, Random.Range(returnZ[0], returnZ[1]), v, randomX);
+            rb.linearVelocity = vel;
+            if (hitCoroutine != null)
+            {
+                StopCoroutine(hitCoroutine);
+                hitting = false;
+            }
+            hitCoroutine = StartCoroutine(Hit(Quaternion.LookRotation(-vel.normalized, holder.up)));
         }
     }
 
@@ -216,7 +237,7 @@ public class Ball : MonoBehaviour
             }
             return;
         }
-        else if (go.CompareTag("Player"))
+        else if (go.CompareTag("Racket"))
         {
             if (!grabbed && lastCollision != name)
             {
@@ -257,11 +278,12 @@ public class Ball : MonoBehaviour
 
         if (farSide) farSide = false;
         if (botTrack) botTrack = false;
+        SetNextActive();
         if (testing)
         {
-            if (test == null) test = StartCoroutine(Test());
+            if (/*instance == this &&*/ test == null) test = StartCoroutine(Test());
         }
-        else if (!serving && !go.CompareTag("Player")) serving = true;
+        else if (!serving) serving = true;
     }
 
     void OnCollisionExit(Collision collision)
@@ -273,18 +295,34 @@ public class Ball : MonoBehaviour
             {
                 if (!farSide && rb.linearVelocity.y > 0)
                 {
-                    farSide = botTrack = true;
+                    farSide = true;
+                    //if (instance == this)
+                    //{
+                    botTrack = true;
                     RotateBot();
+                    if (instance == null) instance = this;
+                    else
+                    {
+                        nextActive.Add(this);
+                        active = true;
+                    }
+                    //}
                 }
                 else botTrack = false;
             }
-            else if (farSide) farSide = botTrack = false;
+            else
+            {
+                if (botTrack) botTrack = false;
+                if (farSide) farSide = false;
+                SetNextActive();
+            }
         }
-        else if (go.CompareTag("Player"))
+        else if (go.CompareTag("Racket"))
         {
             if (Racket.grabbed)
             {
                 if (farSide && !IsPastNet()) farSide = false;
+                SetNextActive();
                 switch(Racket.handeness)
                 {
                     case Racket.Handedness.Left:
@@ -301,6 +339,7 @@ public class Ball : MonoBehaviour
 
     void ForceAim()
     {
+        //if (instance != this) return;
         Vector3 pos = rb.position, vel = rb.linearVelocity;
         float theta = Mathf.Atan2(-vel.z, vel.x);
         float leftAng = Mathf.Atan2(pos.z - leftCorner.y, leftCorner.x - pos.x), rightAng = Mathf.Atan2(pos.z - rightCorner.y, rightCorner.x - pos.x);
@@ -350,6 +389,7 @@ public class Ball : MonoBehaviour
 
     void RotateBot()
     {
+        //if (instance != this) return;
         //Generate contact point
         Vector3 pos = rb.position;
         Vector3 vel = rb.linearVelocity;
@@ -413,14 +453,9 @@ public class Ball : MonoBehaviour
         audioSource.PlayOneShot(bot, 0.1f);
     }*/
 
-    Vector3 SetReturnVel()
+    Vector3 CalcReturnVel(float x0, float y0, float z0, float y, float targetZ, float v, float randomX)
     {
-        //Set variables
-        float y0 = contact.y, z0 = contact.z, y = tableHeight, h;
-        float targetZ = Random.Range(returnZ[0], returnZ[1]);
-        float v = (difficulty > 0) ? Random.Range(minSpeed, maxSpeed) : Random.Range(easyMinSpeed, easyMaxSpeed);
-        float randomX = (difficulty > 1) ? Random.Range(returnX[0], returnX[1]) : Mathf.Clamp(racket.position.x, returnX[0], returnX[1]);
-        float a = randomX - contact.x, b = targetZ - z0;
+        float h, a = randomX - x0, b = targetZ - z0;
         float x = Mathf.Sqrt(a * a + b * b);
         float k = (netPos - z0) / (targetZ - z0);
         float hMin = y0 * (1 - k) + k * y + 0.5f * g * k * (1 - k) * (x / v) * (x / v);
@@ -454,11 +489,32 @@ public class Ball : MonoBehaviour
         hitting = true;
         while (Quaternion.Angle(holder.rotation, rot) >= 0.1f)
         {
+            if (instance != this) break;
             holder.rotation = Quaternion.Slerp(holder.rotation, rot, Time.deltaTime * 20);
             yield return null;
         }
         hitting = false;
         hitCoroutine = null;
+        SetNextActive();
+    }
+
+    void SetNextActive()
+    {
+        if (instance == this)
+        {
+            if (nextActive.Count > 0)
+            {
+                instance = nextActive[0];
+                nextActive.RemoveAt(0);
+                instance.active = false;
+            }
+            else instance = null;
+        }
+        else if (active)
+        {
+            nextActive.Remove(this);
+            active = false;
+        }
     }
 
     bool IsPastNet()
@@ -501,21 +557,13 @@ public class Ball : MonoBehaviour
         else
         {
             rb.interpolation = RigidbodyInterpolation.Interpolate;
-            StartCoroutine(Release());
+            StartCoroutine(Release(halfSecond));
         }
     }
 
-    IEnumerator Release()
+    IEnumerator Release(WaitForSeconds wait)
     {
-        yield return halfSecond;
+        yield return wait;
         if (!grabbed) col.excludeLayers = 0;
-    }
-
-    public void SetDifficulty(int d)
-    {
-        diffButtons[difficulty].color = normalColor;
-        difficulty = d;
-        diffButtons[d].color = selectedColor;
-        Player.Click();
     }
 }
