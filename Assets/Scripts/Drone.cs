@@ -16,7 +16,7 @@ public class Drone : MonoBehaviour
     enum State {Idle, Launch, Fly, Reset};
     State state = State.Idle;
     Vector3 launchPos, launchTarget;
-    Animator animator;
+    Rotate[] rotators;
     [SerializeField] GameObject screen;
     WaitForSeconds fifthSecond;
     bool cooldown;
@@ -24,7 +24,7 @@ public class Drone : MonoBehaviour
     void Awake()
     {
         myT = transform;
-        animator = GetComponent<Animator>();
+        rotators = GetComponentsInChildren<Rotate>();
         audioSource = GetComponent<AudioSource>();
         aimPos = aim.position;
         pointCount = pathPoints.childCount;
@@ -65,7 +65,7 @@ public class Drone : MonoBehaviour
                 {
                     myT.position = launchPos;
                     audioSource.Stop();
-                    animator.SetTrigger("Reset");
+                    for (int i = 0; i < 4; i++) rotators[i].rotate = false;
                     state = State.Idle;
                     screen.SetActive(false);
                 }
@@ -85,7 +85,7 @@ public class Drone : MonoBehaviour
             Reset();
             return;
         }
-        animator.SetTrigger("Launch");
+        for (int i = 0; i < 4; i++) rotators[i].rotate = true;
         audioSource.PlayOneShot(launch, 0.15f);
         audioSource.Play();
         screen.SetActive(true);

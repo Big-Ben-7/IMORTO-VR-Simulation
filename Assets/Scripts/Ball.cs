@@ -109,7 +109,7 @@ public class Ball : MonoBehaviour
         Vector3 refPos = refT.position;
         rb.linearVelocity = CalcReturnVel(pos.x, pos.y, pos.z, tableHeight, randomZ, v, (randomZ - refPos.z)/Mathf.Tan(refT.rotation.eulerAngles.y * Mathf.Deg2Rad) + refPos.x);*/
         ForceAim();
-        audioSource.PlayOneShot(launch, 0.01f);
+        audioSource.PlayOneShot(launch, 0.02f);
     }
 
     void Update()

@@ -21,7 +21,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
     Animator[] animators = new Animator[6];
     [SerializeField] LayerMask terrainLayer, platformLayer, rockLayer;
     [SerializeField] Transform rover;
-    Animator roverAnim;
+    Animation roverAnim;
     [SerializeField] float roverRotSpeed;
     [SerializeField] Camera roverCam, heliCam;
     Canvas block;
@@ -63,7 +63,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
     Vector3 launchTarget;
     AudioSource heliSource;
     [SerializeField] AudioClip launchClip;
-    Animator heliAnim;
+    [SerializeField] Rotate[] heliRotators;
     bool cooldown;
 
     [Header("Solar System")]
@@ -78,7 +78,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         rect = rectT.rect;
         roverAgent = rover.GetComponent<NavMeshAgent>();
         //rb = rover.GetComponent<Rigidbody>();
-        roverAnim = rover.GetComponent<Animator>();
+        roverAnim = rover.GetComponent<Animation>();
         //roverAgent.updateRotation = false;
         roverSource = rover.GetComponent<AudioSource>();
         lasers = lens.GetComponentsInChildren<LineRenderer>();
@@ -107,7 +107,6 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         heli = heliCam.transform;
         ingenuity = heli.parent;
         heliSource = ingenuity.GetComponent<AudioSource>();
-        heliAnim = ingenuity.GetComponent<Animator>();
         block = ingenuity.GetChild(1).GetComponent<Canvas>();
         for (int i = 0; i < 8; i++)
         {
@@ -201,7 +200,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
                 {
                     ingenuity.position = launchPos;
                     heliSource.Stop();
-                    heliAnim.SetTrigger("Reset");
+                    for (int i = 0; i < 2; i++) heliRotators[i].rotate = false;
                     state = State.Idle;
                     screen.SetActive(false);
                     roverCam.enabled = false;
@@ -316,7 +315,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
             Reset();
             return;
         }
-        heliAnim.SetTrigger("Launch");
+        for (int i = 0; i < 2; i++) heliRotators[i].rotate = true;
         heliSource.PlayOneShot(launchClip, 0.2f);
         heliSource.Play();
         heliCam.enabled = true;
@@ -340,7 +339,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
     IEnumerator Drill()
     {
         inCoroutine = true;
-        roverAnim.SetTrigger("Drill");
+        roverAnim.Play();
         yield return new WaitForSeconds(0.75f);
         roverSource.PlayOneShot(drillClip, 0.15f);
         yield return new WaitForSeconds(2.5f);

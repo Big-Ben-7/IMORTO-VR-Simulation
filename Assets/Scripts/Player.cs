@@ -33,10 +33,10 @@ public class Player : MonoBehaviour
     [SerializeField] float minHeight = 0.5f, maxHeight = 2;
 
     [Header("Movement")]
-    [SerializeField] float outSpeed = 4.5f, inSpeed = 3, turnSpeed, jumpHeight;
+    [SerializeField] LayerMask groundMask;
+    [SerializeField] float outSpeed, inSpeed, stairSpeed, turnSpeed, jumpHeight;
     float speed;
     [SerializeField] InputActionProperty moveInput, turnInput, jumpInput;
-    [SerializeField] LayerMask groundMask;
     Vector2 moveAxis;
     float turnAxis;
     bool isGrounded;
@@ -126,7 +126,7 @@ public class Player : MonoBehaviour
                     walkSource.clip = tileWalk;
                 }
                 //else play = false;
-                if (!isGrounded) audioSource.PlayOneShot(tileLands[Random.Range(0, tileCount)], 0.7f);
+                if (!isGrounded) audioSource.PlayOneShot(tileLands[Random.Range(0, tileCount)], 0.6f);
                 speed = inSpeed;
             }
             else if (go.CompareTag("Grass"))
@@ -162,8 +162,8 @@ public class Player : MonoBehaviour
                 }
                 //else play = false;
                 if (!isGrounded) audioSource.PlayOneShot(concreteLands[Random.Range(0, concreteCount)], 0.7f);
-                //if (go.CompareTag("Stair")) speed = stairSpeed;
-                speed = outSpeed;
+                if (go.CompareTag("Stair")) speed = stairSpeed;
+                else speed = outSpeed;
             }
             if (vel > 0.5f)
             {
