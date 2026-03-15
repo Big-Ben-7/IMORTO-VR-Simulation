@@ -18,7 +18,7 @@ public class Drone : MonoBehaviour
     Vector3 launchPos, launchTarget;
     Animator animator;
     [SerializeField] GameObject screen;
-    WaitForSeconds fifthSecond = new WaitForSeconds(0.2f);
+    WaitForSeconds fifthSecond;
     bool cooldown;
 
     void Awake()
@@ -34,6 +34,7 @@ public class Drone : MonoBehaviour
         screen.SetActive(false);
         launchPos = myT.position;
         launchTarget = new Vector3(path[0].x, 3, launchPos.z);
+        fifthSecond = Player.fifth;
     }
 
     void Update()

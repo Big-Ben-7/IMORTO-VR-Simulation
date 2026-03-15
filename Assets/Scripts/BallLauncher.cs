@@ -36,12 +36,11 @@ public class BallLauncher : XRGrabInteractable
     [SerializeField] float minLaunchSpeed, maxLaunchSpeed;
     Ball[] balls;
     int ballCount, currentBall = 0;
-    Transform arm, launchMarker;
-    Rigidbody rb;
-    WaitForSeconds fifthSecond = new WaitForSeconds(0.2f);
+    Transform arm,launchMarker;
+    //Rigidbody rb;
+    WaitForSeconds halfSecond;
     bool cooldown, grabbed;
-    enum Handedness { Left, Right, None }
-    Handedness handeness = Handedness.None;
+    MyHandedness hand = MyHandedness.None;
     [SerializeField] InputActionProperty leftRotateProp, rightRotateProp;
     InputAction leftRotate, rightRotate;
     [SerializeField] float rotSpeed;
@@ -50,7 +49,7 @@ public class BallLauncher : XRGrabInteractable
     protected override void Awake()
     {
         base.Awake();
-        rb = GetComponent<Rigidbody>();
+        //rb = GetComponent<Rigidbody>();
         arm = transform.GetChild(0);
         launchMarker = arm.GetChild(0);
         balls = ballParent.GetComponentsInChildren<Ball>(true);
@@ -58,14 +57,8 @@ public class BallLauncher : XRGrabInteractable
         ballCount = balls.Length;
         leftRotate = leftRotateProp.action;
         rightRotate = rightRotateProp.action;
-        Ball.rightDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
-        if (Ball.rightDevice.isValid && Ball.rightDevice.TryGetHapticCapabilities(out HapticCapabilities capabilities) && capabilities.supportsImpulse) Ball.rightHaptics = true;
-        else Ball.rightHaptics = false;
-        Ball.leftDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
-        if (Ball.leftDevice.isValid && Ball.leftDevice.TryGetHapticCapabilities(out capabilities) && capabilities.supportsImpulse) Ball.leftHaptics = true;
-        else Ball.leftHaptics = false;
-        Ball.fifthSecond = fifthSecond;
-        Ball.halfSecond = new WaitForSeconds(0.5f);
+        Ball.fifthSecond = Player.fifth;
+        Ball.halfSecond = halfSecond = Player.half;
         Ball.netPos = netMarker.position.z;
         Ball.netHeight = netHeight;
         Ball.tableHeight = tableHeight;
@@ -73,8 +66,8 @@ public class BallLauncher : XRGrabInteractable
         Ball.returnX[1] = returnMarker2.position.x;
         Ball.returnZ[0] = returnMarker1.position.z;
         Ball.returnZ[1] = returnMarker2.position.z;
-        Ball.launchZ[0] = farMarker1.position.z;
-        Ball.launchZ[1] = farMarker2.position.z;
+        //Ball.launchZ[0] = farMarker1.position.z;
+        //Ball.launchZ[1] = farMarker2.position.z;
         Ball.leftCorner = new Vector2(leftCornerMarker.position.x, leftCornerMarker.position.z);
         Ball.rightCorner = new Vector2(rightCornerMarker.position.x, rightCornerMarker.position.z);
         Ball.middle = middle;
@@ -99,6 +92,7 @@ public class BallLauncher : XRGrabInteractable
         Ball.net = net;
         Ball.bot = bot;
         Ball.other = other;
+        Ball.launch = launch;
         Ball.racketLength = racketHits.Length;
         Ball.body = body;
         Ball.defaultLayer = defaultLayer;
@@ -110,18 +104,18 @@ public class BallLauncher : XRGrabInteractable
     void Update()
     {
         if (Ball.instance == null) Ball.ResetBot();
-        Debug.Log (grabbed + ", " + handeness + ", " + leftRotate.ReadValue<Vector2>() + ", " + rightRotate.ReadValue<Vector2>());
+        //Debug.Log (grabbed + ", " + handeness + ", " + leftRotate.ReadValue<Vector2>() + ", " + rightRotate.ReadValue<Vector2>());
         if (grabbed)
         {
-            switch (handeness)
+            switch (hand)
             {
-                case Handedness.Left:
+                case MyHandedness.Left:
                     Vector2 rot = leftRotate.ReadValue<Vector2>();
-                    if (rot.x > 0.1f || rot.x < -0.1f) arm.Rotate(0, rot.x * Time.deltaTime, 0, Space.World);
+                    if (rot.x > 0.1f || rot.x < -0.1f) arm.Rotate(0, 0, rot.x * rotSpeed * Time.deltaTime);
                     break;
-                case Handedness.Right:
+                case MyHandedness.Right:
                     rot = rightRotate.ReadValue<Vector2>();
-                    if (rot.x > 0.1f || rot.x < -0.1f) arm.Rotate(0, rot.x * Time.deltaTime, 0, Space.World);
+                    if (rot.x > 0.1f || rot.x < -0.1f) arm.Rotate(0, 0, rot.x * rotSpeed * Time.deltaTime);
                     break;
             }
         }
@@ -133,7 +127,6 @@ public class BallLauncher : XRGrabInteractable
         if (cooldown) return;
         cooldown = true;
         StartCoroutine(Cooldown());
-        Player.audioSource.PlayOneShot(launch, 0.1f);
 
         currentBall++;
         if (currentBall == ballCount) currentBall = 0;
@@ -165,7 +158,7 @@ public class BallLauncher : XRGrabInteractable
 
     IEnumerator Cooldown()
     {
-        yield return fifthSecond;
+        yield return halfSecond;
         cooldown = false;
     }
 
@@ -176,7 +169,7 @@ public class BallLauncher : XRGrabInteractable
         diffButtons[d].color = selectedColor;
         Player.Click();
     }
-
+    
     protected override void OnSelectEntered(SelectEnterEventArgs args)
     {
         base.OnSelectEntered(args);
@@ -185,13 +178,13 @@ public class BallLauncher : XRGrabInteractable
         switch(args.interactorObject.transform.GetComponent<XRBaseInteractor>().handedness)
         {
             case InteractorHandedness.Left:
-                handeness = Handedness.Left;
+                hand = MyHandedness.Left;
                 break;
             case InteractorHandedness.Right:
-                handeness = Handedness.Right;
+                hand = MyHandedness.Right;
                 break;
             default:
-                handeness = Handedness.None;
+                hand = MyHandedness.None;
                 break;
         }
     }
@@ -200,6 +193,6 @@ public class BallLauncher : XRGrabInteractable
     {
         base.OnSelectExited(args);
         grabbed = false;
-        handeness = Handedness.None;
+        hand = MyHandedness.None;
     }
 }

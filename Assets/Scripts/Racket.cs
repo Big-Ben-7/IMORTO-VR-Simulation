@@ -12,18 +12,19 @@ public class Racket : XRGrabInteractable
     [SerializeField] LayerMask body;
     [SerializeField] AudioClip hit;
     string lastCollision = "";
-    WaitForSeconds fifthSecond = new WaitForSeconds(0.2f);
+    WaitForSeconds fifthSecond;
     Coroutine collisionCoroutine;
     public static bool grabbed;
-    public enum Handedness { Left, Right, None }
-    public static Handedness handeness = Handedness.None;
-    WaitForSeconds second = new WaitForSeconds(1);
+    public static MyHandedness hand = MyHandedness.None;
+    WaitForSeconds second;
 
     protected override void Awake()
     {
         base.Awake();
         col = transform.GetChild(1).GetComponent<Collider>();
         audioSource = GetComponent<AudioSource>();
+        fifthSecond = Player.fifth;
+        second = Player.one;
     }
 
     void OnCollisionEnter(Collision collision)
@@ -57,13 +58,13 @@ public class Racket : XRGrabInteractable
         switch(args.interactorObject.transform.GetComponent<XRBaseInteractor>().handedness)
         {
             case InteractorHandedness.Left:
-                handeness = Handedness.Left;
+                hand = MyHandedness.Left;
                 break;
             case InteractorHandedness.Right:
-                handeness = Handedness.Right;
+                hand = MyHandedness.Right;
                 break;
             default:
-                handeness = Handedness.None;
+                hand = MyHandedness.None;
                 break;
         }
     }
@@ -73,7 +74,7 @@ public class Racket : XRGrabInteractable
         base.OnSelectExited(args);
         grabbed = false;
         StartCoroutine(Release());
-        handeness = Handedness.None;
+        hand = MyHandedness.None;
     }
 
     IEnumerator Release()

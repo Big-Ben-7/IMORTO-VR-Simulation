@@ -5,11 +5,12 @@ public class Boundary : MonoBehaviour
 {
     [SerializeField] AudioClip error;
     MeshRenderer rend;
-    WaitForSeconds fifthSecond = new WaitForSeconds(0.2f);
+    WaitForSeconds fifthSecond;
     Coroutine flashing;
     void Awake()
     {
         rend = GetComponent<MeshRenderer>();
+        fifthSecond = Player.fifth;
     }
     void OnCollisionEnter(Collision collision)
     {

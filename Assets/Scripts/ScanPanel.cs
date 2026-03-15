@@ -8,11 +8,12 @@ public class ScanPanel : UIPanel
     [SerializeField] Image[] bars;
     float[] percents = new float[4];
     float[] refs = new float[4];
-    WaitForSeconds wait = new WaitForSeconds(0.2f);
+    WaitForSeconds fifth;
     protected override void Awake()
     {
         base.Awake();
         for (int i = 0; i < 4; i++) percents[i] = bars[i].fillAmount;
+        fifth = Player.fifth;
     }
     protected override void OnEnable()
     {
@@ -27,7 +28,7 @@ public class ScanPanel : UIPanel
     IEnumerator FillBar()
     {
         for (int i = 0; i < 4; i++) bars[i].fillAmount = 0;
-        yield return wait;
+        yield return fifth;
         while (true)
         {
             bool exit = true;

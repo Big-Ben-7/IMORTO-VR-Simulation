@@ -7,7 +7,7 @@ public class Door : MonoBehaviour
     Animator animator;
     AudioSource[] audioSources = new AudioSource[2];
     //bool canTrigger = true;
-    WaitForSeconds wait = new WaitForSeconds(0.3f);
+    //WaitForSeconds wait = new WaitForSeconds(0.3f);
     public static GameObject[] rooms;
     [SerializeField] int negRoom, posRoom;
     int triggerCount;

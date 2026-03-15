@@ -19,7 +19,7 @@ public class Ball : MonoBehaviour
 
     //Table
     public static float netPos, netHeight, tableHeight;
-    public static float[] returnX = new float[2], returnZ = new float[2], launchZ = new float[2];
+    public static float[] returnX = new float[2], returnZ = new float[2];//, launchZ = new float[2];
     public static Vector2 leftCorner, rightCorner;
 
     //Bot
@@ -36,12 +36,9 @@ public class Ball : MonoBehaviour
 
     //Audio/FX
     public static AudioClip[] racketHits;
-    public static AudioClip table, floor, wall, net, bot, other;
+    public static AudioClip table, floor, wall, net, bot, other, launch;
     public static int racketLength;
     AudioSource audioSource;
-    public static UnityEngine.XR.InputDevice rightDevice;
-    public static UnityEngine.XR.InputDevice leftDevice;
-    public static bool leftHaptics = true, rightHaptics = true;
 
     [Header("Booleans")]
     [SerializeField] bool botTrack;
@@ -112,6 +109,7 @@ public class Ball : MonoBehaviour
         Vector3 refPos = refT.position;
         rb.linearVelocity = CalcReturnVel(pos.x, pos.y, pos.z, tableHeight, randomZ, v, (randomZ - refPos.z)/Mathf.Tan(refT.rotation.eulerAngles.y * Mathf.Deg2Rad) + refPos.x);*/
         ForceAim();
+        audioSource.PlayOneShot(launch, 0.01f);
     }
 
     void Update()
@@ -323,13 +321,13 @@ public class Ball : MonoBehaviour
             {
                 if (farSide && !IsPastNet()) farSide = false;
                 SetNextActive();
-                switch(Racket.handeness)
+                switch(Racket.hand)
                 {
-                    case Racket.Handedness.Left:
-                        if (leftHaptics) leftDevice.SendHapticImpulse(0, 1, 0.1f);
+                    case MyHandedness.Left:
+                        Player.SendHapticsLeft(1, 0.1f);
                         break;
-                    case Racket.Handedness.Right:
-                        if (rightHaptics) rightDevice.SendHapticImpulse(0, 1, 0.1f);
+                    case MyHandedness.Right:
+                        Player.SendHapticsRight(1, 0.1f);
                         break;
                 }
                 ForceAim();

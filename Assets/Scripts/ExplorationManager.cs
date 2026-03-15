@@ -44,9 +44,9 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
     bool traveling, inCoroutine, canClick = true;
     RectTransform rectT;
     Rect rect;
-    WaitForSeconds second = new WaitForSeconds(1);
-    WaitForSeconds halfSecond = new WaitForSeconds(0.5f);
-    WaitForSeconds fifthSecond = new WaitForSeconds(0.2f);
+    WaitForSeconds second;
+    WaitForSeconds halfSecond;
+    WaitForSeconds fifthSecond;
     [SerializeField] Transform[] joysticks;
     Transform origin;
     Transform[] marks = new Transform[2];
@@ -116,6 +116,9 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
             planets[i] = anchor.GetChild(0);
         }
         sun = solarSystem.GetChild(0);
+        second = Player.one;
+        halfSecond = Player.half;
+        fifthSecond = Player.fifth;
     }
     
     void Start()

@@ -7,7 +7,6 @@ using UnityEngine.Rendering.Universal;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
-using UnityEngine.ProBuilder.MeshOperations;
 
 public class BacteriaSpray : XRGrabInteractable
 {
@@ -29,10 +28,10 @@ public class BacteriaSpray : XRGrabInteractable
     bool grabbed;
     string lastCollision = "";
     Coroutine collisionCoroutine;
-    WaitForSeconds fifthSecond = new WaitForSeconds(0.2f);
-    WaitForSeconds second = new WaitForSeconds(1);
-    WaitForSeconds twoSeconds = new WaitForSeconds(2);
-    WaitForSeconds halfSecond = new WaitForSeconds(0.5f);
+    WaitForSeconds fifthSecond;
+    WaitForSeconds second;
+    WaitForSeconds twoSeconds;
+    WaitForSeconds halfSecond;
     Vector3 initialPos;
     Quaternion initialRot;
     Vector3 currentHitPoint;
@@ -62,6 +61,10 @@ public class BacteriaSpray : XRGrabInteractable
         squirt = transform.GetChild(6);
         healthcare = transform.parent;
         animator = GetComponent<Animator>();
+        fifthSecond = Player.fifth;
+        halfSecond = Player.half;
+        second = Player.one;
+        twoSeconds = Player.two;
     }
 
     void Start()
