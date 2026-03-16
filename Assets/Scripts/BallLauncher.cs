@@ -45,6 +45,7 @@ public class BallLauncher : XRGrabInteractable
     [SerializeField] float rotSpeed, soundVel, turnVol, rollVol;
     [SerializeField] AudioClip launch, roll, turn;
     AudioSource audioSource;
+    //bool rotating, moving;
 
     protected override void Awake()
     {
@@ -108,28 +109,30 @@ public class BallLauncher : XRGrabInteractable
         //Debug.Log (grabbed + ", " + handeness + ", " + leftRotate.ReadValue<Vector2>() + ", " + rightRotate.ReadValue<Vector2>());
         if (grabbed)
         {
-            bool rotating = true;
+            bool r = true;
             switch (hand)
             {
                 case MyHandedness.Left:
                     Vector2 rot = leftRotate.ReadValue<Vector2>();
                     if (rot.x > 0.1f || rot.x < -0.1f) arm.Rotate(0, 0, rot.x * rotSpeed * Time.deltaTime);
-                    else rotating = false;
+                    else r = false;
                     break;
                 case MyHandedness.Right:
                     rot = rightRotate.ReadValue<Vector2>();
                     if (rot.x > 0.1f || rot.x < -0.1f) arm.Rotate(0, 0, rot.x * rotSpeed * Time.deltaTime);
-                    else rotating = false;
+                    else r = false;
                     break;
             }
-            if (rotating)
+            /*if (r && !rotating)
             {
-                if (audioSource.clip != turn)
-                {
-                    audioSource.volume = turnVol;
-                    audioSource.clip = turn;
-                }
-                if (!audioSource.isPlaying) audioSource.Play();
+                rotating = true;
+                StartCoroutine(ControlRotAudio(true));
+                if (!moving) StartCoroutine(ControlMoveAudio(false));
+            }
+            else if (!r && rotating)
+            {
+                rotating = false;
+                StartCoroutine(ControlRotAudio(false));
             }
             else if (rb.linearVelocity.sqrMagnitude > soundVel) 
             {
@@ -140,10 +143,52 @@ public class BallLauncher : XRGrabInteractable
                 }
                 if (!audioSource.isPlaying) audioSource.Play();
             }
-            else if (audioSource.isPlaying) audioSource.Stop();
+            else if (audioSource.isPlaying) audioSource.Stop();*/
+        }
+        //else if (audioSource.isPlaying) audioSource.Stop();
+    }
+
+    /*IEnumerator ControlRotAudio(bool rot)
+    {
+        float t = 0;
+        while (t < 0.1f)
+        {
+            if (rot != rotating) yield break;
+            yield return null;
+            t += Time.deltaTime;
+        }
+        if (rot)
+        {
+            if (audioSource.clip != turn)
+            {
+                audioSource.volume = turnVol;
+                audioSource.clip = turn;
+            }
+            if (!audioSource.isPlaying) audioSource.Play();
         }
         else if (audioSource.isPlaying) audioSource.Stop();
     }
+
+    IEnumerator ControlMoveAudio(bool mov)
+    {
+        float t = 0;
+        while (t < 0.1f)
+        {
+            if (mov != moving) yield break;
+            yield return null;
+            t += Time.deltaTime;
+        }
+        if (mov)
+        {
+            if (audioSource.clip != turn)
+            {
+                audioSource.volume = turnVol;
+                audioSource.clip = turn;
+            }
+            if (!audioSource.isPlaying) audioSource.Play();
+        }
+        else if (audioSource.isPlaying) audioSource.Stop();
+    }*/
 
     protected override void OnActivated(ActivateEventArgs args)
     {

@@ -195446,7 +195446,7 @@ MonoBehaviour:
     m_Reference: {fileID: -5913262927076077117, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   rotSpeed: 90
   soundVel: 0.1
-  turnVol: 0.5
+  turnVol: 0.9
   rollVol: 0.15
   launch: {fileID: 8300000, guid: 1244d80c7bc4a47899f6ee6e2df95c9f, type: 3}
   roll: {fileID: 8300000, guid: 74e75abbe2f574306b7c411c416aeda3, type: 3}
@@ -292520,7 +292520,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 0fff7cb7672ef4301be4930a49db9ab6, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.5
+  m_Volume: 0.8
   m_Pitch: 1
   Loop: 1
   Mute: 0

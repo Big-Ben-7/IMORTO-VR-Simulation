@@ -205,7 +205,7 @@ public class BacteriaSpray : XRGrabInteractable
         StartCoroutine(RotateBotToward(Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z))));
         yield return second;
         //if (botSource.isPlaying) botSource.Stop();
-        botSource.PlayOneShot(buzz, 0.35f);
+        botSource.PlayOneShot(buzz, 0.2f);
         cameraData.renderPostProcessing = true;
         volumeObject.SetActive(true);
         mat.EnableKeyword("_EMISSION");
