@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using System.Collections.Generic;
@@ -37,19 +36,21 @@ public class BallLauncher : XRGrabInteractable
     Ball[] balls;
     int ballCount, currentBall = 0;
     Transform arm,launchMarker;
-    //Rigidbody rb;
+    Rigidbody rb;
     WaitForSeconds halfSecond;
     bool cooldown, grabbed;
     MyHandedness hand = MyHandedness.None;
     [SerializeField] InputActionProperty leftRotateProp, rightRotateProp;
     InputAction leftRotate, rightRotate;
-    [SerializeField] float rotSpeed;
-    [SerializeField] AudioClip launch;
+    [SerializeField] float rotSpeed, soundVel, turnVol, rollVol;
+    [SerializeField] AudioClip launch, roll, turn;
+    AudioSource audioSource;
 
     protected override void Awake()
     {
         base.Awake();
-        //rb = GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody>();
+        audioSource = GetComponent<AudioSource>();
         arm = transform.GetChild(0);
         launchMarker = arm.GetChild(0);
         balls = ballParent.GetComponentsInChildren<Ball>(true);
@@ -107,18 +108,41 @@ public class BallLauncher : XRGrabInteractable
         //Debug.Log (grabbed + ", " + handeness + ", " + leftRotate.ReadValue<Vector2>() + ", " + rightRotate.ReadValue<Vector2>());
         if (grabbed)
         {
+            bool rotating = true;
             switch (hand)
             {
                 case MyHandedness.Left:
                     Vector2 rot = leftRotate.ReadValue<Vector2>();
                     if (rot.x > 0.1f || rot.x < -0.1f) arm.Rotate(0, 0, rot.x * rotSpeed * Time.deltaTime);
+                    else rotating = false;
                     break;
                 case MyHandedness.Right:
                     rot = rightRotate.ReadValue<Vector2>();
                     if (rot.x > 0.1f || rot.x < -0.1f) arm.Rotate(0, 0, rot.x * rotSpeed * Time.deltaTime);
+                    else rotating = false;
                     break;
             }
+            if (rotating)
+            {
+                if (audioSource.clip != turn)
+                {
+                    audioSource.volume = turnVol;
+                    audioSource.clip = turn;
+                }
+                if (!audioSource.isPlaying) audioSource.Play();
+            }
+            else if (rb.linearVelocity.sqrMagnitude > soundVel) 
+            {
+                if (audioSource.clip != roll)
+                {
+                    audioSource.volume = rollVol;
+                    audioSource.clip = roll;
+                }
+                if (!audioSource.isPlaying) audioSource.Play();
+            }
+            else if (audioSource.isPlaying) audioSource.Stop();
         }
+        else if (audioSource.isPlaying) audioSource.Stop();
     }
 
     protected override void OnActivated(ActivateEventArgs args)
