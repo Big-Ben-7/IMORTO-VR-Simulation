@@ -67,7 +67,6 @@ public class Drone : MonoBehaviour
                     audioSource.Stop();
                     for (int i = 0; i < 4; i++) rotators[i].rotate = false;
                     state = State.Idle;
-                    screen.SetActive(false);
                 }
                 break;
         }
@@ -98,6 +97,7 @@ public class Drone : MonoBehaviour
         nextPoint = 0;
         path[nextPoint].y = Random.Range(2, 4);
         state = State.Reset;
+        screen.SetActive(false);
     }
 
     IEnumerator ResetCooldown()
