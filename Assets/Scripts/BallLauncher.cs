@@ -45,7 +45,9 @@ public class BallLauncher : XRGrabInteractable
     [SerializeField] float rotSpeed, soundVel, turnVol, rollVol;
     [SerializeField] AudioClip launch, roll, turn;
     AudioSource audioSource;
-    //bool rotating, moving;
+    bool moving, rotating;
+    Coroutine stopping;
+    float t;
 
     protected override void Awake()
     {
@@ -109,33 +111,34 @@ public class BallLauncher : XRGrabInteractable
         //Debug.Log (grabbed + ", " + handeness + ", " + leftRotate.ReadValue<Vector2>() + ", " + rightRotate.ReadValue<Vector2>());
         if (grabbed)
         {
-            bool r = true;
+            rotating = true;
             switch (hand)
             {
                 case MyHandedness.Left:
                     Vector2 rot = leftRotate.ReadValue<Vector2>();
                     if (rot.x > 0.1f || rot.x < -0.1f) arm.Rotate(0, 0, rot.x * rotSpeed * Time.deltaTime);
-                    else r = false;
+                    else rotating = false;
                     break;
                 case MyHandedness.Right:
                     rot = rightRotate.ReadValue<Vector2>();
                     if (rot.x > 0.1f || rot.x < -0.1f) arm.Rotate(0, 0, rot.x * rotSpeed * Time.deltaTime);
-                    else r = false;
+                    else rotating = false;
                     break;
             }
-            /*if (r && !rotating)
+            if (rotating)
             {
-                rotating = true;
-                StartCoroutine(ControlRotAudio(true));
-                if (!moving) StartCoroutine(ControlMoveAudio(false));
-            }
-            else if (!r && rotating)
-            {
-                rotating = false;
-                StartCoroutine(ControlRotAudio(false));
+                moving = false;
+                if (audioSource.clip != turn)
+                {
+                    audioSource.volume = turnVol;
+                    audioSource.clip = turn;
+                }
+                if (!audioSource.isPlaying) audioSource.Play();
             }
             else if (rb.linearVelocity.sqrMagnitude > soundVel) 
             {
+                moving = true;
+                rotating = false;
                 if (audioSource.clip != roll)
                 {
                     audioSource.volume = rollVol;
@@ -143,52 +146,26 @@ public class BallLauncher : XRGrabInteractable
                 }
                 if (!audioSource.isPlaying) audioSource.Play();
             }
-            else if (audioSource.isPlaying) audioSource.Stop();*/
-        }
-        //else if (audioSource.isPlaying) audioSource.Stop();
+            else
+            {
+                moving = rotating = false;
+                if (stopping == null) stopping = StartCoroutine(StopAudio());
+                else t = 0;
+            }
+        } else if (audioSource.isPlaying) audioSource.Stop();
     }
 
-    /*IEnumerator ControlRotAudio(bool rot)
+    IEnumerator StopAudio()
     {
-        float t = 0;
+        t = 0;
         while (t < 0.1f)
         {
-            if (rot != rotating) yield break;
+            if (rotating || moving) yield break;
             yield return null;
             t += Time.deltaTime;
         }
-        if (rot)
-        {
-            if (audioSource.clip != turn)
-            {
-                audioSource.volume = turnVol;
-                audioSource.clip = turn;
-            }
-            if (!audioSource.isPlaying) audioSource.Play();
-        }
-        else if (audioSource.isPlaying) audioSource.Stop();
+        if (audioSource.isPlaying) audioSource.Stop();
     }
-
-    IEnumerator ControlMoveAudio(bool mov)
-    {
-        float t = 0;
-        while (t < 0.1f)
-        {
-            if (mov != moving) yield break;
-            yield return null;
-            t += Time.deltaTime;
-        }
-        if (mov)
-        {
-            if (audioSource.clip != turn)
-            {
-                audioSource.volume = turnVol;
-                audioSource.clip = turn;
-            }
-            if (!audioSource.isPlaying) audioSource.Play();
-        }
-        else if (audioSource.isPlaying) audioSource.Stop();
-    }*/
 
     protected override void OnActivated(ActivateEventArgs args)
     {
