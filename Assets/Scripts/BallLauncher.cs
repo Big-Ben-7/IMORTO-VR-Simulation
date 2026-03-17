@@ -37,7 +37,7 @@ public class BallLauncher : XRGrabInteractable
     int ballCount, currentBall = 0;
     Transform arm,launchMarker;
     Rigidbody rb;
-    WaitForSeconds halfSecond;
+    WaitForSeconds halfSecond, fifthSecond;
     bool cooldown, grabbed;
     MyHandedness hand = MyHandedness.None;
     [SerializeField] InputActionProperty leftRotateProp, rightRotateProp;
@@ -45,10 +45,7 @@ public class BallLauncher : XRGrabInteractable
     [SerializeField] float rotSpeed, soundVel, turnVol, rollVol;
     [SerializeField] AudioClip launch, roll, turn;
     AudioSource audioSource;
-    bool moving, rotating;
-    Coroutine stopping;
-    float t;
-
+    bool stopping;
     protected override void Awake()
     {
         base.Awake();
@@ -103,6 +100,7 @@ public class BallLauncher : XRGrabInteractable
         Ball.nextActive = new List<Ball>();
         selectedColor = diffButtons[0].color;
         normalColor = diffButtons[1].color;
+        fifthSecond = Player.fifth;
     }
 
     void Update()
@@ -111,7 +109,7 @@ public class BallLauncher : XRGrabInteractable
         //Debug.Log (grabbed + ", " + handeness + ", " + leftRotate.ReadValue<Vector2>() + ", " + rightRotate.ReadValue<Vector2>());
         if (grabbed)
         {
-            rotating = true;
+            bool rotating = true;
             switch (hand)
             {
                 case MyHandedness.Left:
@@ -127,44 +125,48 @@ public class BallLauncher : XRGrabInteractable
             }
             if (rotating)
             {
-                moving = false;
+                //moving = false;
                 if (audioSource.clip != turn)
                 {
                     audioSource.volume = turnVol;
                     audioSource.clip = turn;
                 }
                 if (!audioSource.isPlaying) audioSource.Play();
+                if (stopping)
+                {
+                    StopCoroutine(StopAudio());
+                    stopping = false;
+                }
             }
             else if (rb.linearVelocity.sqrMagnitude > soundVel) 
             {
-                moving = true;
-                rotating = false;
+                //moving = true;
+                //rotating = false;
                 if (audioSource.clip != roll)
                 {
                     audioSource.volume = rollVol;
                     audioSource.clip = roll;
                 }
                 if (!audioSource.isPlaying) audioSource.Play();
+                if (stopping)
+                {
+                    StopCoroutine(StopAudio());
+                    stopping = false;
+                }
             }
             else
             {
-                moving = rotating = false;
-                if (stopping == null) stopping = StartCoroutine(StopAudio());
-                else t = 0;
+                if (!stopping) StartCoroutine(StopAudio());
             }
         } else if (audioSource.isPlaying) audioSource.Stop();
     }
 
     IEnumerator StopAudio()
     {
-        t = 0;
-        while (t < 0.1f)
-        {
-            if (rotating || moving) yield break;
-            yield return null;
-            t += Time.deltaTime;
-        }
+        stopping = true;
+        yield return fifthSecond;
         if (audioSource.isPlaying) audioSource.Stop();
+        stopping = false;
     }
 
     protected override void OnActivated(ActivateEventArgs args)
