@@ -3,23 +3,59 @@ using UnityEngine;
 
 public class ManuManager : MonoBehaviour
 {
-    [SerializeField] float moveSpeed;
-    [SerializeField] Transform[] parts;
-    [SerializeField] Transform stamper, endMarker;
+    [SerializeField] float moveSpeed, timeInterval;
+    [SerializeField] Transform[] parts, partMarkers;
+    [SerializeField] GameObject sheetPrefab;
+    MeshRenderer[] partRends;
+    GameObject[] sheets;
+    [SerializeField] Transform stamper, startMarker, endMarker;
     Animation stampAnim;
     float stampZ, endZ;
-    enum State {Idle, Moving, ToStamp, Stamping, Stamped};
+    Vector3 startPos;
+    enum State {Idle, Moving, Stamping, Stamped};
     State[] partStates;
     int partCount;
+    bool paused;
+    WaitForSeconds wait = new WaitForSeconds(0.5833f);
 
     void Awake()
     {
         partCount = parts.Length;
         partStates = new State[partCount];
-        partStates[0] = State.Moving;
+        partMarkers = new Transform[partCount];
+        partRends = new MeshRenderer[partCount];
+        sheets = new GameObject[partCount];
+        for (int i = 0; i < partCount; i++) 
+        {
+            Transform partT = parts[i];
+            Transform marker = partMarkers[i] = partT.GetChild(0);
+            MeshRenderer rend = partRends[i] = partT.GetComponent<MeshRenderer>();
+            rend.enabled = false;
+            sheets[i] = Instantiate(sheetPrefab, marker.position, Quaternion.identity, partT);
+        }
         stampAnim = stamper.GetComponent<Animation>();
-        stampZ = stamper.position.z;
+        startPos = startMarker.position;
         endZ = endMarker.position.z;
+        stampZ = stamper.position.z;
+        StartCoroutine(SendParts());
+    }
+
+    IEnumerator SendParts()
+    {
+        for (int i = 0; i < partCount; i++)
+        {
+            while (paused) yield return null;
+            Transform partT = parts[i];
+            partT.position = startPos - partMarkers[i].localPosition;
+            partT.gameObject.SetActive(true);
+            partStates[i] = State.Moving;
+            float t = 0;
+            while (t < timeInterval)
+            {
+                yield return null;
+                t += Time.deltaTime;
+            }
+        }
     }
 
     // Update is called once per frame
@@ -31,23 +67,33 @@ public class ManuManager : MonoBehaviour
             {
                 case State.Idle: break;
                 case State.Moving:
-                    Vector3 pos = parts[i].position;
-                    if (Mathf.Abs(pos.z - stampZ) > 0.01f) parts[i].position = pos + new Vector3(0, 0, moveSpeed * Time.deltaTime);
-                    else partStates[i] = State.ToStamp;
-                    break;
-                case State.ToStamp:
-                    if (!stampAnim.isPlaying) stampAnim.Play();
-                    partStates[i] = State.Stamping;
+                    if (paused) break;
+                    if (Mathf.Abs(partMarkers[i].position.z - stampZ) > 0.01f) parts[i].position += new Vector3(0, 0, moveSpeed * Time.deltaTime);
+                    else partStates[i] = State.Stamping;
                     break;
                 case State.Stamping:
-                    if (!stampAnim.isPlaying) partStates[i] = State.Stamped;
+                    if (paused) break;
+                    paused = true;
+                    partStates[i] = State.Stamping;
+                    StartCoroutine(Stamp(i));
                     break;
                 case State.Stamped:
-                    pos = parts[i].position;
-                    if (Mathf.Abs(pos.z - endZ) > 0.01f) parts[i].position = pos + new Vector3(0, 0, moveSpeed * Time.deltaTime);
+                    if (paused) break;
+                    if (Mathf.Abs(partMarkers[i].position.z - endZ) > 0.01f) parts[i].position += new Vector3(0, 0, moveSpeed * Time.deltaTime);
                     else partStates[i] = State.Idle;
                     break;
             }
         }
+    }
+
+    IEnumerator Stamp(int i)
+    {
+        if (!stampAnim.IsPlaying("Stamp")) stampAnim.Play();
+        yield return wait;
+        Destroy(sheets[i]);
+        partRends[i].enabled = true;
+        yield return wait;
+        paused = false;
+        partStates[i] = State.Stamped;
     }
 }
