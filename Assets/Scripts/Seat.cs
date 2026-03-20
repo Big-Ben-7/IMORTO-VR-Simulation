@@ -4,23 +4,26 @@ using System.Collections;
 
 public class Seat : MonoBehaviour
 {
-    Collider col;
+    Collider[] cols;
+    int colCount;
     Rigidbody rb;
     [SerializeField] int resetFrames, resetFrames2;
     [SerializeField] LayerMask body;//, defaultLayer;]
     //LayerMask initialExclude;
     [SerializeField] float sitHeight, exitDistance;
     [SerializeField] Transform camOffset, origin, cam, attach;
-    Vector3 attachPos, initialPos;
+    Vector3 attachPos, initialPos, attachForward, attachRight;
     Vector2 attachDir;
     [SerializeField] Canvas canvas;
     [SerializeField] TMP_Text seatText;
     void Awake()
     {
-        col = GetComponent<Collider>();
+        cols = GetComponentsInChildren<Collider>();
+        colCount = cols.Length;
         attachPos = attach.position;
-        Vector3 forward = attach.forward;
-        attachDir = new Vector2(forward.x, forward.z);
+        attachForward = attach.forward;
+        attachRight = attach.right;
+        attachDir = new Vector2(attachForward.x, attachForward.z);
         seatText.SetText("[CLICK ICON TO SIT]");
     }
 
@@ -31,7 +34,7 @@ public class Seat : MonoBehaviour
 
     public void Sit()
     {
-        col.excludeLayers = body;
+        for (int i = 0; i < colCount; i++) cols[i].excludeLayers = body;
         //initialExclude = rb.excludeLayers;
         //rb.excludeLayers = defaultLayer;
         //rb.linearVelocity = Vector3.zero;
@@ -73,11 +76,14 @@ public class Seat : MonoBehaviour
             float angle = Vector2.SignedAngle(attachDir, new Vector2(forward.x, forward.z));
             switch (angle)
             {
-                case > 0 and < 90:
-                    d = -attach.right * exitDistance;
+                case > 45 and < 90:
+                    d = -attachRight * exitDistance;
                     break;
-                case <= 0 and > -90:
-                    d = attach.right * exitDistance;
+                case < -45 and > -90:
+                    d = attachRight * exitDistance;
+                    break;
+                case <= 45 and >= -45:
+                    d = -attachForward * exitDistance;
                     break;
                 default:
                     d = forward * exitDistance;
@@ -86,7 +92,7 @@ public class Seat : MonoBehaviour
             //rb.linearVelocity = Vector3.zero;
         }
         canvas.enabled = true;
-        col.excludeLayers = 0;
+        for (int i = 0; i < colCount; i++) cols[i].excludeLayers = 0;
         seatText.SetText("[CLICK ICON TO SIT]");
         Player.seat = null;
         StartCoroutine(ResetRB2(resetFrames2, d));

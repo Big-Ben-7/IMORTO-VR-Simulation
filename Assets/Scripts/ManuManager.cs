@@ -26,8 +26,8 @@ public class ManuManager : MonoBehaviour
     int partCount;
     bool paused, start = true, buttonPaused, firstStarted;
     WaitForSeconds particleWait = new WaitForSeconds(0.005f);
-    WaitForSeconds wait = new WaitForSeconds(0.5833f);
-    Color paintColor;
+    WaitForSeconds wait = new WaitForSeconds(0.1667f);
+    Color paintColor = Color.white;
     Rotate[] bars;
     int barCount;
     AudioSource painterSource, stamperSource, beltSource;
@@ -57,7 +57,7 @@ public class ManuManager : MonoBehaviour
         endZ = endMarker.position.z - 0.01f;
         stampZ = stamper.position.z - 0.01f;
         stamperSource = stamper.GetChild(0).GetComponent<AudioSource>();
-        paintZ = painter.position.z - 0.01f;
+        paintZ = painter.position.z - 0.2f;
         painterSource = painter.GetComponent<AudioSource>();
         particles = painter.GetComponentsInChildren<ParticleSystem>();
         particleCount = particles.Length;
@@ -83,8 +83,12 @@ public class ManuManager : MonoBehaviour
             buttonColors[i] = t.GetComponent<Image>().color;
             pos += inc;
         }
-        paintColor = buttonColors[0];
-        colorText.SetText("Selected Paint Color: " + buttonNames[0]);
+        for (int j = 0; j < particleCount; j++)
+        {
+            ParticleSystem.MainModule main = particles[j].main;
+            main.startColor = Color.white;
+        }
+        colorText.SetText("Selected Paint Color: None");
         bars = transform.parent.GetChild(0).GetComponentsInChildren<Rotate>();
         barCount = bars.Length;
     }
@@ -124,7 +128,7 @@ public class ManuManager : MonoBehaviour
                     if (paused || buttonPaused) break;
                     paused = true;
                     partStates[i] = State.Stamping;
-                    for (int j = 0; j < barCount; j++) bars[j].rotate = false;
+                    for (int j = 0; j < 6; j++) bars[j].rotate = false;
                     StartCoroutine(Stamp(i));
                     break;
                 case State.Stamped:
@@ -153,33 +157,50 @@ public class ManuManager : MonoBehaviour
     IEnumerator SetColor(MeshRenderer rend, Color color)
     {
         yield return particleWait;
-        Material[] mats = rend.materials;
-        int n = mats.Length;
-        for (int i = 0; i < n; i++) mats[i].color = color;
+        if (color != Color.white)
+        {
+            Material[] mats = rend.materials;
+            int n = mats.Length;
+            for (int i = 0; i < n; i++) mats[i].color = color;
+        }
         painterSource.PlayOneShot(paint);
     }
     IEnumerator Stamp(int i)
     {
         if (!stampAnim.IsPlaying("Stamp")) stampAnim.Play();
+        yield return wait;
+        yield return wait;
         stamperSource.PlayOneShot(stamp);
         yield return wait;
         Destroy(sheets[i]);
-        parts[i].position += new Vector3(0, 0.1f, 0);
         partRends[i].enabled = partCols[i].enabled = true;
-        yield return wait;
+        for (int j = 0; j < 3; j++) yield return wait;
         paused = false;
-        for (int j = 0; j < barCount; j++) bars[j].rotate = true;
+        for (int j = 0; j < 6; j++) bars[j].rotate = true;
         partStates[i] = State.Stamped;
     }
 
     public void SetPaint(int i)
     {
-        paintColor = buttonColors[i];
-        colorText.SetText("Selected Paint Color: " + buttonNames[i]);
-        for (int j = 0; j < particleCount; j++)
+        if (paintColor == buttonColors[i])
         {
-            ParticleSystem.MainModule main = particles[j].main;
-            main.startColor = paintColor;
+            paintColor = Color.white;
+            for (int j = 0; j < particleCount; j++)
+            {
+                ParticleSystem.MainModule main = particles[j].main;
+                main.startColor = Color.white;
+            }
+            colorText.SetText("Selected Paint Color: None");
+        }
+        else
+        {
+            paintColor = buttonColors[i];
+            colorText.SetText("Selected Paint Color: " + buttonNames[i]);
+            for (int j = 0; j < particleCount; j++)
+            {
+                ParticleSystem.MainModule main = particles[j].main;
+                main.startColor = paintColor;
+            }
         }
         Player.Click();
     }
