@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,7 +16,7 @@ public class ManuManager : MonoBehaviour
     ParticleSystem[] particles;
     int particleCount;
     [SerializeField] Transform stamper, painter, startMarker, endMarker, buttonParent;
-    [SerializeField] TMP_Text colorText, startText;
+    [SerializeField] TMP_Text colorText, startText, paintQueueText;
     string[] buttonNames;
     Color[] buttonColors;
     Animation stampAnim;
@@ -31,7 +32,8 @@ public class ManuManager : MonoBehaviour
     Rotate[] bars;
     int barCount;
     AudioSource painterSource, stamperSource, beltSource;
-    [SerializeField] AudioClip paint, stamp;
+    [SerializeField] AudioClip paint, stamp, startUp, shutDown;
+    List<string> paintQueue = new List<string>();
 
     void Awake()
     {
@@ -44,6 +46,7 @@ public class ManuManager : MonoBehaviour
         for (int i = 0; i < partCount; i++) 
         {
             Transform partT = parts[i];
+            partT.gameObject.SetActive(false);
             Transform marker = partMarkers[i] = partT.GetChild(0);
             MeshRenderer rend = partRends[i] = partT.GetComponent<MeshRenderer>();
             rend.enabled = false;
@@ -69,7 +72,7 @@ public class ManuManager : MonoBehaviour
         for (int i = 0; i < row1; i++)
         {
             Transform t = buttonParent.GetChild(i);
-            t.GetComponent<RectTransform>().anchoredPosition = new Vector2(pos, -0.08f);
+            t.GetComponent<RectTransform>().anchoredPosition = new Vector2(pos, -0.155f);
             buttonNames[i] = t.gameObject.name;
             buttonColors[i] = t.GetComponent<Image>().color;
             pos += inc;
@@ -78,7 +81,7 @@ public class ManuManager : MonoBehaviour
         for (int i = row1; i < childCount; i++)
         {
             Transform t = buttonParent.GetChild(i);
-            t.GetComponent<RectTransform>().anchoredPosition = new Vector2(pos, -0.2f);
+            t.GetComponent<RectTransform>().anchoredPosition = new Vector2(pos, -0.275f);
             buttonNames[i] = t.gameObject.name;
             buttonColors[i] = t.GetComponent<Image>().color;
             pos += inc;
@@ -128,7 +131,7 @@ public class ManuManager : MonoBehaviour
                     if (paused || buttonPaused) break;
                     paused = true;
                     partStates[i] = State.Stamping;
-                    for (int j = 0; j < 6; j++) bars[j].rotate = false;
+                    //for (int j = 0; j < 6; j++) bars[j].rotate = false;
                     StartCoroutine(Stamp(i));
                     break;
                 case State.Stamped:
@@ -164,6 +167,8 @@ public class ManuManager : MonoBehaviour
             for (int i = 0; i < n; i++) mats[i].color = color;
         }
         painterSource.PlayOneShot(paint);
+        paintQueue.RemoveAt(0);
+        UpdatePaintQueue();
     }
     IEnumerator Stamp(int i)
     {
@@ -174,10 +179,32 @@ public class ManuManager : MonoBehaviour
         yield return wait;
         Destroy(sheets[i]);
         partRends[i].enabled = partCols[i].enabled = true;
-        for (int j = 0; j < 3; j++) yield return wait;
+        yield return wait;
+        paintQueue.Add(parts[i].gameObject.name);
+        UpdatePaintQueue();
+        for (int j = 0; j < 2; j++) yield return wait;
         paused = false;
-        for (int j = 0; j < 6; j++) bars[j].rotate = true;
+        //if (!buttonPaused) for (int j = 0; j < 6; j++) bars[j].rotate = true;
         partStates[i] = State.Stamped;
+    }
+
+    void UpdatePaintQueue()
+    {
+        string str = "None";
+        switch(paintQueue.Count)
+        {
+            case 0: break;
+            case 1:
+                str = paintQueue[0];
+                break;
+            case 2:
+                str = paintQueue[0] + ", " + paintQueue[1];
+                break;
+            default:
+                str = paintQueue[0] + ", " + paintQueue[1] + " . . .";
+                break;
+        }
+        paintQueueText.SetText("PAINT QUEUE: " + str);
     }
 
     public void SetPaint(int i)
@@ -216,15 +243,17 @@ public class ManuManager : MonoBehaviour
             }
             start = buttonPaused = false;
             for (int j = 0; j < barCount; j++) bars[j].rotate = true;
-            startText.SetText("Pause Conveyer Belt");
+            startText.SetText("Halt Production");
             beltSource.Play();
+            beltSource.PlayOneShot(startUp);
         }
         else
         {
             buttonPaused = start = true;
             for (int j = 0; j < barCount; j++) bars[j].rotate = false;
-            startText.SetText("Activate Conveyer Belt");
+            startText.SetText("Initiate Production");
             beltSource.Stop();
+            beltSource.PlayOneShot(shutDown);
         }
         Player.Click();
     }
