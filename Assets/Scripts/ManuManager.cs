@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class ManuManager : MonoBehaviour
 {
-    [SerializeField] float moveSpeed, rotSpeed, timeInterval;
+    [SerializeField] float moveSpeed, rotSpeed, timeInterval, laserSpeed, nozzleSpeed;
     [SerializeField] Transform[] parts;
     [SerializeField] GameObject sheetPrefab;
     Rigidbody[] partRBs;
@@ -17,6 +17,7 @@ public class ManuManager : MonoBehaviour
     MeshRenderer[] partRends;
     List<MeshRenderer> lasercutRends = new List<MeshRenderer>();
     int[] lasercutIndices;
+    int cutCount;
     Collider[] partCols;
     GameObject[] sheets;
     ParticleSystem[] particles;
@@ -26,7 +27,13 @@ public class ManuManager : MonoBehaviour
     string[] buttonNames;
     Color[] buttonColors;
     Animation stampAnim;
-    float stampZ, laserZ, endX;
+    float stampZ, endX;
+    Vector3 laserMarker;
+    Queue<int> availableIndices = new Queue<int>();
+    LineRenderer[] lasers = new LineRenderer[4];
+    Transform[] nozzles = new Transform[4];
+    Vector3[] initialNozzlePos = new Vector3[4];
+    bool[] lasersAvailable = new bool[4] {true, true, true, true};
     Vector3 startPos;
     enum State {Idle, Moving, Stamping, ToLasercut, Stamped, Painted};
     State[] partStates;
@@ -37,7 +44,7 @@ public class ManuManager : MonoBehaviour
     Color paintColor = Color.white;
     Rotate[] bars;
     int barCount;
-    AudioSource painterSource, stamperSource, beltSource;
+    AudioSource beltSource, painterSource, stamperSource, laserSource;
     [SerializeField] AudioClip paint, stamp, startUp, shutDown;
     List<string> paintQueue = new List<string>();
 
@@ -87,7 +94,15 @@ public class ManuManager : MonoBehaviour
         endX = endMarker.position.x;
         stampZ = stamper.position.z;
         stamperSource = stamper.GetChild(0).GetComponent<AudioSource>();
-        laserZ = lasercutter.GetChild(0).position.z;
+        laserMarker = lasercutter.GetChild(0).position;
+        for (int i = 0; i < 4; i++)
+        {
+            availableIndices.Enqueue(i);
+            lasers[i] = lasercutter.GetChild(i + 1).GetComponent<LineRenderer>();
+            Transform nozzle = nozzles[i] = lasercutter.GetChild(i + 6);
+            initialNozzlePos[i] = nozzle.position;
+        }
+        laserSource = lasercutter.GetChild(5).GetComponent<AudioSource>();
         painterSource = painter.GetComponent<AudioSource>();
         particles = painter.GetComponentsInChildren<ParticleSystem>();
         particleCount = particles.Length;
@@ -191,11 +206,10 @@ public class ManuManager : MonoBehaviour
                     break;
                 case State.ToLasercut:
                     movePart(i);
-                    if (partMarkers[i].position.z >= laserZ)
+                    if (partMarkers[i].position.z >= laserMarker.z)
                     {
                         partStates[i] = State.Stamped;
-                        lasercutRends[lasercutIndices[i]].enabled = false;
-                        partRends[i].enabled = true;
+                        StartCoroutine(Lasercut(i));
                     }
                     break;
                 case State.Painted:
@@ -207,6 +221,69 @@ public class ManuManager : MonoBehaviour
                     }
                     break;
             }
+        }
+    }
+
+    IEnumerator Lasercut(int i)
+    {
+        cutCount ++;
+        int c = cutCount;
+        MeshRenderer rend = lasercutRends[lasercutIndices[i]];
+        Transform t = rend.transform.parent;
+        Animation anim = t.GetComponent<Animation>();
+        anim[t.gameObject.name].speed *= laserSpeed;
+        anim.Play();
+        Transform sphere1, sphere2 = null;
+        int index1 = availableIndices.Dequeue(), index2 = -1;
+        lasersAvailable[index1] = false;
+        LineRenderer laser1 = lasers[index1], laser2 = null;
+        Transform nozzle1 = nozzles[index1], nozzle2 = null;
+        laser1.enabled = true;
+        if (t.childCount == 5)
+        {
+            sphere1 = t.GetChild(3);
+            sphere2 = t.GetChild(4);
+            index2 = availableIndices.Dequeue();
+            lasersAvailable[index2] = false;
+            laser2 = lasers[index2];
+            laser2.enabled = true;
+            nozzle2 = nozzles[index2];
+        }
+        else sphere1 = t.GetChild(2);
+        if (!laserSource.isPlaying) laserSource.Play();
+        while (anim.isPlaying)
+        {
+            Vector3 spherePos = sphere1.position;
+            Vector3 nozzlePos = nozzle1.position = Vector3.Lerp(nozzle1.position, new Vector3(spherePos.x, laserMarker.y, spherePos.z), nozzleSpeed * Time.deltaTime);
+            laser1.SetPositions(new Vector3[] {nozzlePos, spherePos});
+            if (index2 != -1)
+            {
+                spherePos = sphere2.position;
+                nozzlePos = nozzle2.position = Vector3.Lerp(nozzle2.position, new Vector3(spherePos.x, laserMarker.y, spherePos.z), nozzleSpeed * Time.deltaTime);
+                laser2.SetPositions(new Vector3[] {nozzlePos, spherePos});
+            }
+            yield return null;
+        }
+        if (cutCount == c) laserSource.Stop();
+        cutCount --;
+        availableIndices.Enqueue(index1);
+        lasersAvailable[index1] = true;
+        laser1.enabled = false;
+        if (index2 != -1)
+        {
+            availableIndices.Enqueue(index2);
+            lasersAvailable[index2] = true;
+            laser2.enabled = false;
+        }
+        rend.enabled = false;
+        partRends[i].enabled = true;
+        while (true)
+        {
+            bool b1 = lasersAvailable[index1], b2 = index2 != -1 && lasersAvailable[index2];
+            if (b1) nozzle1.position = Vector3.Lerp(nozzle1.position, initialNozzlePos[index1], nozzleSpeed * Time.deltaTime);
+            if (b2) nozzle2.position = Vector3.Lerp(nozzle2.position, initialNozzlePos[index2], nozzleSpeed * Time.deltaTime);
+            else if (!b1 && !b2) break;
+            yield return null;
         }
     }
 
@@ -233,14 +310,14 @@ public class ManuManager : MonoBehaviour
         Destroy(sheets[i]);
         parts[i].position += new Vector3(0, 0.1f, 0);
         partCols[i].enabled = true;
-        (lasercutIndices[i] >= 0 ? lasercutRends[lasercutIndices[i]] : partRends[i]).enabled = true;
+        (lasercutIndices[i] != -1 ? lasercutRends[lasercutIndices[i]] : partRends[i]).enabled = true;
         yield return wait;
         paintQueue.Add(parts[i].gameObject.name);
         UpdatePaintQueue();
         for (int j = 0; j < 2; j++) yield return wait;
         paused = false;
         if (!buttonPaused) for (int j = 0; j < 6; j++) bars[j].rotate = true;
-        partStates[i] = lasercutIndices[i] >= 0 ? State.ToLasercut : State.Stamped;
+        partStates[i] = lasercutIndices[i] != -1 ? State.ToLasercut : State.Stamped;
     }
 
     void UpdatePaintQueue()

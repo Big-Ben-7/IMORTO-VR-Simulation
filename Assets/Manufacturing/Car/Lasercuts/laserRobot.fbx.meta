@@ -3,37 +3,7 @@ guid: c12239ad2e8aa41b9b19e27dd8a14351
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Glass
-    second: {fileID: 2100000, guid: b4dbfe30b60f343729e3cb695a422a11, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Main material
-    second: {fileID: 2100000, guid: e834a247651cf4caf81d0bfbed57e6a5, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Main material.001
-    second: {fileID: 2100000, guid: 93d641d83621f4536999c7839f263263, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Material
-    second: {fileID: 2100000, guid: 4dc3c342ed6d34668a2b7eb7b5820444, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Material.001
-    second: {fileID: 2100000, guid: c3d848ca15c624c44a03f5d20fb6744e, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: nozzle tip
-    second: {fileID: 2100000, guid: 0a007606f63164135a04f529f13f3d00, type: 2}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0
