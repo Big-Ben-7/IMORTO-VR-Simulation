@@ -176407,7 +176407,8 @@ MonoBehaviour:
   rotSpeed: 30
   timeInterval: 3
   laserSpeed: 1.5
-  nozzleSpeed: 20
+  nozzleSpeed: 10
+  nozzleSpeedSlow: 5
   parts:
   - {fileID: 8464783070861865429}
   - {fileID: 424551907442093537}

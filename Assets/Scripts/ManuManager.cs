@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class ManuManager : MonoBehaviour
 {
-    [SerializeField] float moveSpeed, rotSpeed, timeInterval, laserSpeed, nozzleSpeed;
+    [SerializeField] float moveSpeed, rotSpeed, timeInterval, laserSpeed, nozzleSpeed, nozzleSpeedSlow;
     [SerializeField] Transform[] parts;
     [SerializeField] GameObject sheetPrefab;
     Rigidbody[] partRBs;
@@ -280,8 +280,8 @@ public class ManuManager : MonoBehaviour
         while (true)
         {
             bool b1 = lasersAvailable[index1], b2 = index2 != -1 && lasersAvailable[index2];
-            if (b1) nozzle1.position = Vector3.Lerp(nozzle1.position, initialNozzlePos[index1], nozzleSpeed * Time.deltaTime);
-            if (b2) nozzle2.position = Vector3.Lerp(nozzle2.position, initialNozzlePos[index2], nozzleSpeed * Time.deltaTime);
+            if (b1) nozzle1.position = Vector3.Lerp(nozzle1.position, initialNozzlePos[index1], nozzleSpeedSlow * Time.deltaTime);
+            if (b2) nozzle2.position = Vector3.Lerp(nozzle2.position, initialNozzlePos[index2], nozzleSpeedSlow * Time.deltaTime);
             else if (!b1 && !b2) break;
             yield return null;
         }
