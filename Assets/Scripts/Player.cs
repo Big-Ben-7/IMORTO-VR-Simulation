@@ -45,7 +45,7 @@ public class Player : MonoBehaviour
     [SerializeField] Transform piano;
     //[SerializeField] GameObject lobby, ent, health, expl, manu;
     public static Player instance;
-    bool canBump = true;
+    bool canBump = true, climbing;
     public static bool leftHaptics, rightHaptics;
     public static UnityEngine.XR.InputDevice rightDevice;
     public static UnityEngine.XR.InputDevice leftDevice;
@@ -106,7 +106,7 @@ public class Player : MonoBehaviour
         turnAxis = turnInput.action.ReadValue<Vector2>().x;
 
         Vector3 start = colT.position;
-        bool cast = Physics.Raycast(start + new Vector3(0, 0.5f, 0), Vector3.down, out RaycastHit hit, 0.6f, groundMask);
+        bool cast = Physics.Raycast(start + new Vector3(0, 0.5f, 0), Vector3.down, out RaycastHit hit, 0.51f, groundMask);
         if (!cast)
         {
             if (walkSource.isPlaying) walkSource.Stop();
@@ -181,6 +181,7 @@ public class Player : MonoBehaviour
                 if (!sitting) rb.linearVelocity = Vector3.up * Mathf.Sqrt(2 * -Physics.gravity.y * jumpHeight);
                 else seat.Exit(true);
             }
+            if (climbing) climbing = false;
         }
         isGrounded = cast;
         bgSource.volume = Mathf.Clamp(0.002f * (Vector3.SqrMagnitude(piano.position - head.position) - 3), 0, 0.03f);
@@ -188,9 +189,12 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
-        //col.height = Mathf.Clamp(head.position.y, minHeight, maxHeight);
         colT.localPosition = new Vector3(head.localPosition.x, 0, head.localPosition.z);
-        //col.center = new Vector3(0, col.height / 2, 0);
+        if (!climbing)
+        {
+            col.height = Mathf.Clamp(head.position.y, minHeight, maxHeight);
+            col.center = new Vector3(0, col.height / 2, 0);
+        }
 
         Vector3 localPos = leftController.localPosition;
         leftJoint.targetPosition = new Vector3(localPos.x, leftController.position.y, localPos.z);
@@ -230,6 +234,11 @@ public class Player : MonoBehaviour
     {
         audioSource.PlayOneShot(teleport);
         StartCoroutine(Fade());
+    }
+
+    public void SetClimb()
+    {
+        climbing = true;
     }
 
     IEnumerator Fade(float duration = 0.2f)
