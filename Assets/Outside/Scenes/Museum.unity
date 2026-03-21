@@ -278417,7 +278417,7 @@ MonoBehaviour:
   inSpeed: 3.5
   stairSpeed: 10
   turnSpeed: 90
-  jumpHeight: 0.5
+  jumpHeight: 1
   moveInput:
     m_UseReference: 1
     m_Action:
