@@ -238,12 +238,6 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
             {
                 Transform wheel = wheels[i];
                 wheel.Rotate(Vector3.forward, roverAgent.velocity.magnitude * 572.957795131f * Time.deltaTime);
-                //r = 0.2
-                if (Physics.Raycast(wheel.position, Vector3.down, out RaycastHit hit, 2, terrainLayer))
-                {
-                    Vector3 pos = wheel.position;
-                    wheel.position = new Vector3(pos.x, fpos.z);
-                }
             }
             if (!inCoroutine && roverAgent.remainingDistance <= roverAgent.stoppingDistance && (!roverAgent.hasPath || roverAgent.velocity.sqrMagnitude < 1e-5f))
             {
@@ -261,6 +255,15 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
                     roverCam.enabled = false;
                     canClick = true;
                 }
+            }
+        }
+        for (int i = 0; i < 6; i++)
+        {
+            Transform wheel = wheels[i];
+            if (Physics.Raycast(wheel.position + new Vector3(0, 0.5f, 0), Vector3.down, out RaycastHit hit, 2, terrainLayer))
+            {
+                Vector3 pos = wheel.position;
+                wheel.position = new Vector3(pos.x, Mathf.Clamp(hit.point.y + 0.09f, pos.y - 0.1f, pos.y + 0.1f), pos.z);
             }
         }
         /*if (!roverAgent.hasPath) return;

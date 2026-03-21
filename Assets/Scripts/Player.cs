@@ -188,9 +188,9 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
-        col.height = Mathf.Clamp(head.position.y, minHeight, maxHeight);
+        //col.height = Mathf.Clamp(head.position.y, minHeight, maxHeight);
         colT.localPosition = new Vector3(head.localPosition.x, 0, head.localPosition.z);
-        col.center = new Vector3(0, col.height / 2, 0);
+        //col.center = new Vector3(0, col.height / 2, 0);
 
         Vector3 localPos = leftController.localPosition;
         leftJoint.targetPosition = new Vector3(localPos.x, leftController.position.y, localPos.z);

@@ -549,12 +549,12 @@ public class Ball : MonoBehaviour
         if (grabbed)
         {
             col.excludeLayers = body;
-            rb.interpolation = RigidbodyInterpolation.None;
+            //rb.interpolation = RigidbodyInterpolation.None;
             Player.Grab();
         }
         else
         {
-            rb.interpolation = RigidbodyInterpolation.Interpolate;
+            //rb.interpolation = RigidbodyInterpolation.Interpolate;
             StartCoroutine(Release(halfSecond));
         }
     }
