@@ -36,7 +36,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
     [SerializeField] AudioClip scanClip, drillClip, foundClip, successClip, errorClip, uiClip, colorClip, ringClip, startClip, gravel;
     NavMeshAgent roverAgent;
     //Rigidbody rb;
-    Transform[] wheels = new Transform[3];
+    Transform[] wheels = new Transform[6];
     //Transform[] indWheels = new Transform[6];
     AudioSource roverSource;
     int rockIndex = -1;
@@ -84,7 +84,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         lasers = lens.GetComponentsInChildren<LineRenderer>();
         laserCount = lasers.Length;
         for (int i = 0; i < laserCount; i++) lasers[i].enabled = false;
-        Transform p = rover.GetChild(0);
+        //Transform p = rover.GetChild(0);
         cols[0] = joysticks[0].GetComponent<Collider>();
         cols[1] = joysticks[1].GetComponent<Collider>();
         origin = joysticks[0].parent.GetChild(1);
@@ -92,7 +92,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         initialPos[0] = origin.InverseTransformPoint(t.position);
         t = marks[1] = joysticks[1].GetChild(0);
         initialPos[1] = origin.InverseTransformPoint(t.position);
-        for (int i = 0; i < 3; i++) wheels[i] = p.GetChild(i+4);
+        for (int i = 0; i < 6; i++) wheels[i] = rover.GetChild(0).GetChild(i+4);
         //for (int i = 0; i < 6; i++) indWheels[i] = p.GetChild(i+7);
         for (int i = 0; i < 5; i++)
         {
@@ -234,9 +234,16 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         }
         if (traveling)
         {
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 6; i++)
             {
-                wheels[i].Rotate(Vector3.forward, roverAgent.velocity.magnitude * 572.957795131f * Time.deltaTime);
+                Transform wheel = wheels[i];
+                wheel.Rotate(Vector3.forward, roverAgent.velocity.magnitude * 572.957795131f * Time.deltaTime);
+                //r = 0.2
+                if (Physics.Raycast(wheel.position, Vector3.down, out RaycastHit hit, 2, terrainLayer))
+                {
+                    Vector3 pos = wheel.position;
+                    wheel.position = new Vector3(pos.x, fpos.z);
+                }
             }
             if (!inCoroutine && roverAgent.remainingDistance <= roverAgent.stoppingDistance && (!roverAgent.hasPath || roverAgent.velocity.sqrMagnitude < 1e-5f))
             {
