@@ -2,10 +2,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR;
-using UnityEngine.XR.Interaction.Toolkit;
-using UnityEngine.XR.Interaction.Toolkit.Interactables;
-using System.Collections.Generic;
-using Unity.Tutorials.Core.Editor;
 public enum MyHandedness {Left, Right, None};
 public class Player : MonoBehaviour
 {
