@@ -6,23 +6,29 @@ using UnityEngine.UI;
 
 public class ManuManager : MonoBehaviour
 {
-    [SerializeField] float moveSpeed, timeInterval;
+    [SerializeField] float moveSpeed, rotSpeed, timeInterval;
     [SerializeField] Transform[] parts;
     [SerializeField] GameObject sheetPrefab;
-    Transform[] partMarkers;
+    Rigidbody[] partRBs;
+    int destinationCount;
+    Vector3[] destinationPos;
+    int[] partDestinations;
+    Transform[] partMarkers, destinations;
     MeshRenderer[] partRends;
+    List<MeshRenderer> lasercutRends = new List<MeshRenderer>();
+    int[] lasercutIndices;
     Collider[] partCols;
     GameObject[] sheets;
     ParticleSystem[] particles;
     int particleCount;
-    [SerializeField] Transform stamper, painter, startMarker, endMarker, buttonParent;
+    [SerializeField] Transform stamper, painter, lasercutter, startMarker, endMarker, buttonParent, destinationParent;
     [SerializeField] TMP_Text colorText, startText, paintQueueText;
     string[] buttonNames;
     Color[] buttonColors;
     Animation stampAnim;
-    float stampZ, paintZ, endZ;
+    float stampZ, laserZ, endX;
     Vector3 startPos;
-    enum State {Idle, Moving, Stamping, Stamped, Painted};
+    enum State {Idle, Moving, Stamping, ToLasercut, Stamped, Painted};
     State[] partStates;
     int partCount;
     bool paused, start = true, buttonPaused, firstStarted;
@@ -43,24 +49,45 @@ public class ManuManager : MonoBehaviour
         partRends = new MeshRenderer[partCount];
         partCols = new Collider[partCount];
         sheets = new GameObject[partCount];
+        partRBs = new Rigidbody[partCount];
+        lasercutIndices = new int[partCount];
+        int lasercutIndex = 0;
         for (int i = 0; i < partCount; i++) 
         {
             Transform partT = parts[i];
             partT.gameObject.SetActive(false);
-            Transform marker = partMarkers[i] = partT.GetChild(0);
             MeshRenderer rend = partRends[i] = partT.GetComponent<MeshRenderer>();
             rend.enabled = false;
             Collider col = partCols[i] = partT.GetComponent<Collider>();
             col.enabled = false;
+            if (partT.childCount > 1)
+            {
+                lasercutIndices[i] = lasercutIndex ++;
+                rend = partT.GetChild(1).GetChild(0).GetComponent<MeshRenderer>();
+                rend.enabled = false;
+                lasercutRends.Add(rend);
+            }
+            else lasercutIndices[i] = -1;
+            Transform marker = partMarkers[i] = partT.GetChild(0);
+            partRBs[i] = partT.GetComponent<Rigidbody>();
             sheets[i] = Instantiate(sheetPrefab, marker.position, Quaternion.identity, partT);
         }
+        destinationCount = destinationParent.childCount;
+        destinations = new Transform[destinationCount];
+        destinationPos = new Vector3[destinationCount];
+        for (int i = 0; i < destinationCount; i++)
+        {
+            Transform d = destinations[i] = destinationParent.GetChild(destinationCount - i - 1);
+            destinationPos[i] = d.position;
+        }
+        partDestinations = new int[partCount];
         beltSource = transform.GetChild(0).GetComponent<AudioSource>();
         stampAnim = stamper.GetComponent<Animation>();
         startPos = startMarker.position;
-        endZ = endMarker.position.z - 0.01f;
-        stampZ = stamper.position.z - 0.01f;
+        endX = endMarker.position.x;
+        stampZ = stamper.position.z;
         stamperSource = stamper.GetChild(0).GetComponent<AudioSource>();
-        paintZ = painter.position.z - 0.2f;
+        laserZ = lasercutter.GetChild(0).position.z;
         painterSource = painter.GetComponent<AudioSource>();
         particles = painter.GetComponentsInChildren<ParticleSystem>();
         particleCount = particles.Length;
@@ -114,40 +141,66 @@ public class ManuManager : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void movePart(int i)
     {
+        int d = partDestinations[i];
+        Transform marker = partMarkers[i];
+        Vector3 diff = destinationPos[d] - marker.position;
+        if (Mathf.Abs(diff.x) < 0.02f && Mathf.Abs(diff.z) < 0.02f)
+        {
+            partDestinations[i] ++;
+            return;
+        }
+        Vector3 diffN = new Vector3(diff.x, 0, diff.z).normalized;
+        Rigidbody rb = partRBs[i];
+        rb.MovePosition(rb.position + diffN * moveSpeed * Time.fixedDeltaTime);
+        Quaternion rot = rb.rotation;
+        Vector3 markerF = marker.forward;
+        markerF = new Vector3(markerF.x, 0, markerF.z).normalized;
+        rb.MoveRotation(Quaternion.RotateTowards(rot, Quaternion.FromToRotation(markerF, diffN) * rot, rotSpeed * Time.deltaTime));
+        //.Log(destinations[d] + ", " + destinations[d].InverseTransformPoint(partMarkers[i].position).y);
+    }
+
+    void FixedUpdate()
+    {
+        if (buttonPaused) return;
         for (int i = 0; i < partCount; i++)
         {
             switch(partStates[i])
             {
                 case State.Idle: break;
                 case State.Moving:
-                    if (paused || buttonPaused) break;
-                    if (partMarkers[i].position.z < stampZ) parts[i].position += new Vector3(0, 0, moveSpeed * Time.deltaTime);
-                    else partStates[i] = State.Stamping;
+                    if (paused) break;
+                    movePart(i);
+                    if (partMarkers[i].position.z >= stampZ) partStates[i] = State.Stamping;
                     break;
                 case State.Stamping:
-                    if (paused || buttonPaused) break;
+                    if (paused) break;
                     paused = true;
-                    partStates[i] = State.Stamping;
-                    //for (int j = 0; j < 6; j++) bars[j].rotate = false;
+                    for (int j = 0; j < 6; j++) bars[j].rotate = false;
                     StartCoroutine(Stamp(i));
                     break;
                 case State.Stamped:
-                    if (buttonPaused) break;
-                    if (partMarkers[i].position.z < paintZ) parts[i].position += new Vector3(0, 0, moveSpeed * Time.deltaTime);
-                    else
+                    movePart(i);
+                    if (partDestinations[i] >= 7)
                     {
                         partStates[i] = State.Painted;
                         StartCoroutine(SetColor(partRends[i], paintColor));
                         for (int j = 0; j < particleCount; j++) particles[j].Play();
                     }
                     break;
+                case State.ToLasercut:
+                    movePart(i);
+                    if (partMarkers[i].position.z >= laserZ)
+                    {
+                        partStates[i] = State.Stamped;
+                        lasercutRends[lasercutIndices[i]].enabled = false;
+                        partRends[i].enabled = true;
+                    }
+                    break;
                 case State.Painted:
-                    if (buttonPaused) break;
-                    if (partMarkers[i].position.z < endZ) parts[i].position += new Vector3(0, 0, moveSpeed * Time.deltaTime);
-                    else
+                    movePart(i);
+                    if (partMarkers[i].position.x < endX)
                     {
                         partStates[i] = State.Idle;
                         parts[i].gameObject.SetActive(false);
@@ -178,19 +231,21 @@ public class ManuManager : MonoBehaviour
         stamperSource.PlayOneShot(stamp);
         yield return wait;
         Destroy(sheets[i]);
-        partRends[i].enabled = partCols[i].enabled = true;
+        parts[i].position += new Vector3(0, 0.1f, 0);
+        partCols[i].enabled = true;
+        (lasercutIndices[i] >= 0 ? lasercutRends[lasercutIndices[i]] : partRends[i]).enabled = true;
         yield return wait;
         paintQueue.Add(parts[i].gameObject.name);
         UpdatePaintQueue();
         for (int j = 0; j < 2; j++) yield return wait;
         paused = false;
-        //if (!buttonPaused) for (int j = 0; j < 6; j++) bars[j].rotate = true;
-        partStates[i] = State.Stamped;
+        if (!buttonPaused) for (int j = 0; j < 6; j++) bars[j].rotate = true;
+        partStates[i] = lasercutIndices[i] >= 0 ? State.ToLasercut : State.Stamped;
     }
 
     void UpdatePaintQueue()
     {
-        string str = "None";
+        string str = "Clear";
         switch(paintQueue.Count)
         {
             case 0: break;
@@ -204,7 +259,7 @@ public class ManuManager : MonoBehaviour
                 str = paintQueue[0] + ", " + paintQueue[1] + " . . .";
                 break;
         }
-        paintQueueText.SetText("PAINT QUEUE: " + str);
+        paintQueueText.SetText("PAINT NEXT QUEUE: " + str);
     }
 
     public void SetPaint(int i)
