@@ -201,12 +201,11 @@ public class Player : MonoBehaviour
         localPos = head.localPosition;
         headJoint.targetPosition = new Vector3(localPos.x, head.position.y, localPos.z);
         
-        Quaternion q = Quaternion.AngleAxis(turnSpeed * Time.fixedDeltaTime * turnAxis, Vector3.up);
-        rb.MoveRotation(rb.rotation * q);
-        if (sitting) return;
         Quaternion yaw = Quaternion.Euler(0, head.eulerAngles.y, 0);
         Vector3 direction = yaw * new Vector3(moveAxis.x, 0, moveAxis.y);
         Vector3 targetPos = rb.position + direction * speed * Time.fixedDeltaTime;
+        Quaternion q = Quaternion.AngleAxis(turnSpeed * Time.fixedDeltaTime * turnAxis, Vector3.up);
+        rb.MoveRotation(rb.rotation * q);
         Vector3 newPosition = q * (targetPos - head.position) + head.position;
         rb.MovePosition(newPosition);
     }

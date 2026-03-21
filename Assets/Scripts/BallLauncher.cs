@@ -154,9 +154,10 @@ public class BallLauncher : XRGrabInteractable
                     stopping = false;
                 }
             }
-            else
+            else if (audioSource.isPlaying && !stopping)
             {
-                if (!stopping) StartCoroutine(StopAudio());
+                if (audioSource.clip == turn) audioSource.Stop();
+                else StartCoroutine(StopAudio());
             }
         } else if (audioSource.isPlaying) audioSource.Stop();
     }
@@ -164,7 +165,7 @@ public class BallLauncher : XRGrabInteractable
     IEnumerator StopAudio()
     {
         stopping = true;
-        yield return fifthSecond;
+        yield return halfSecond;
         if (audioSource.isPlaying) audioSource.Stop();
         stopping = false;
     }

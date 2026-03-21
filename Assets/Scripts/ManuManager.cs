@@ -316,7 +316,7 @@ public class ManuManager : MonoBehaviour
         stamperSource.PlayOneShot(stamp);
         yield return wait;
         Destroy(sheets[i]);
-        parts[i].position += new Vector3(0, 0.1f, 0);
+        parts[i].position += new Vector3(0, 0.02f, 0);
         int laserIndex = lasercutIndices[i];
         if (laserIndex != -1)
         {
