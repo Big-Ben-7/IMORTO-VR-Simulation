@@ -192,15 +192,15 @@ public class Ball : MonoBehaviour
                     v = Random.Range(minSpeed, maxSpeed);
                     randomX = Random.Range(returnX[0], returnX[1]);
                     break;
-                //Serious: aimed return
+                //Serious: rough aimed return
                 case 1:
                     v = Random.Range(minSpeed, maxSpeed);
-                    randomX = Mathf.Clamp(racket.position.x, returnX[0], returnX[1]);
+                    randomX = Mathf.Clamp(racket.position.x - Random.Range(-0.1f, 0.25f), returnX[0], returnX[1]);
                     break;
                 //Friendly: slow, aimed return
                 default:
                     v = Random.Range(easyMinSpeed, easyMaxSpeed);
-                    randomX = Mathf.Clamp(racket.position.x, returnX[0], returnX[1]);
+                    randomX = Mathf.Clamp(racket.position.x - Random.Range(0.1f, 0.15f), returnX[0], returnX[1]);
                     break;
             }
             Vector3 vel = CalcReturnVel(contact.x, contact.y, contact.z, tableHeight, Random.Range(returnZ[0], returnZ[1]), v, randomX);

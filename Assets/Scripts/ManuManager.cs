@@ -36,12 +36,14 @@ public class ManuManager : MonoBehaviour
     Vector3[] initialNozzlePos = new Vector3[4];
     bool[] lasersAvailable = new bool[4] {true, true, true, true};
     Vector3 startPos;
+    Quaternion startRot;
     enum State {Idle, Moving, Stamping, ToLasercut, Stamped, Painted};
     State[] partStates;
     int partCount;
     bool paused, start = true, buttonPaused, firstStarted;
     WaitForSeconds particleWait = new WaitForSeconds(0.005f);
     WaitForSeconds wait = new WaitForSeconds(0.1667f);
+    WaitForSeconds partWait;
     Color paintColor = Color.white;
     Rotate[] bars;
     int barCount;
@@ -51,6 +53,7 @@ public class ManuManager : MonoBehaviour
 
     void Awake()
     {
+        partWait = new WaitForSeconds(timeInterval);
         partCount = parts.Length;
         partStates = new State[partCount];
         partMarkers = new Transform[partCount];
@@ -60,6 +63,7 @@ public class ManuManager : MonoBehaviour
         partRBs = new Rigidbody[partCount];
         lasercutIndices = new int[partCount];
         int lasercutIndex = 0;
+        startMarker.GetPositionAndRotation(out startPos, out startRot);
         for (int i = 0; i < partCount; i++) 
         {
             Transform partT = parts[i];
@@ -82,7 +86,7 @@ public class ManuManager : MonoBehaviour
             else lasercutIndices[i] = -1;
             Transform marker = partMarkers[i] = partT.GetChild(0);
             partRBs[i] = partT.GetComponent<Rigidbody>();
-            sheets[i] = Instantiate(sheetPrefab, marker.position, Quaternion.identity, partT);
+            sheets[i] = Instantiate(sheetPrefab, marker.position, startRot, partT);
         }
         destinationCount = destinationParent.childCount;
         destinations = new Transform[destinationCount];
@@ -95,7 +99,6 @@ public class ManuManager : MonoBehaviour
         partDestinations = new int[partCount];
         beltSource = transform.GetChild(0).GetComponent<AudioSource>();
         stampAnim = stamper.GetComponent<Animation>();
-        startPos = startMarker.position;
         endX = endMarker.position.x;
         stampZ = stamper.position.z;
         stamperSource = stamper.GetChild(0).GetComponent<AudioSource>();
@@ -149,15 +152,10 @@ public class ManuManager : MonoBehaviour
         {
             while (paused || buttonPaused) yield return null;
             Transform partT = parts[i];
-            partT.position = startPos - partMarkers[i].localPosition;
+            partT.position += startPos - partMarkers[i].position;
             partT.gameObject.SetActive(true);
             partStates[i] = State.Moving;
-            float t = 0;
-            while (t < timeInterval)
-            {
-                yield return null;
-                t += Time.deltaTime;
-            }
+            yield return partWait;
         }
     }
 
@@ -275,8 +273,10 @@ public class ManuManager : MonoBehaviour
             lasersAvailable[index] = true;
             lasers[index].enabled = false;
         }
-        partCols[i].enabled = partRends[i].enabled = true;
-        lasercutCols[laserIndex].enabled = rend.enabled = false;
+        /*partCols[i].enabled = */
+        /*lasercutCols[laserIndex].enabled =*/
+        rend.enabled = false;
+        partRends[i].enabled = true;
         while (true)
         {
             bool canBreak = true;

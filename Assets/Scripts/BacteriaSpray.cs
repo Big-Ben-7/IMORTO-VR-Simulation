@@ -69,9 +69,8 @@ public class BacteriaSpray : XRGrabInteractable
 
     void Start()
     {
-        initialPos = bot.position;
+        bot.GetPositionAndRotation(out initialPos, out initialRot);
         initialPos = new Vector3(initialPos.x, 0, initialPos.z);
-        initialRot = bot.rotation;
         leftBound = leftWall.position.x;
         rightBound = rightWall.position.x;
         backBound = backWall.position.z;
