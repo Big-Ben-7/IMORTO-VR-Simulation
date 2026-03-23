@@ -3,13 +3,20 @@ using UnityEngine;
 public class PlayerCollider : MonoBehaviour
 {
     [SerializeField] MyHandedness hand;
+    [SerializeField] LayerMask cols;
+    int val;
+
+    void Awake()
+    {
+        val = cols.value;
+    }
 
     void OnCollisionEnter(Collision collision)
     {
         GameObject go = collision.gameObject;
-        if (go.layer == 0)
+        if ((val & 1 << go.layer) != 0)
         {
-            //if (!go.CompareTag("Racket")) Player.instance.Bump();
+            if (!go.CompareTag("Racket")) Player.instance.Bump();
             switch (hand)
             {
                 case MyHandedness.Left:

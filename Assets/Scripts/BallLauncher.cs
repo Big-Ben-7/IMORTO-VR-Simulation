@@ -45,7 +45,7 @@ public class BallLauncher : XRGrabInteractable
     [SerializeField] float rotSpeed, soundVel, turnVol, rollVol;
     [SerializeField] AudioClip launch, roll, turn;
     AudioSource audioSource;
-    bool stopping;
+    bool stopping, rotating, moving;
     protected override void Awake()
     {
         base.Awake();
@@ -109,7 +109,7 @@ public class BallLauncher : XRGrabInteractable
         //Debug.Log (grabbed + ", " + handeness + ", " + leftRotate.ReadValue<Vector2>() + ", " + rightRotate.ReadValue<Vector2>());
         if (grabbed)
         {
-            bool rotating = true;
+            rotating = true;
             switch (hand)
             {
                 case MyHandedness.Left:
@@ -125,7 +125,7 @@ public class BallLauncher : XRGrabInteractable
             }
             if (rotating)
             {
-                //moving = false;
+                moving = false;
                 if (audioSource.clip != turn)
                 {
                     audioSource.volume = turnVol;
@@ -140,8 +140,8 @@ public class BallLauncher : XRGrabInteractable
             }
             else if (rb.linearVelocity.sqrMagnitude > soundVel) 
             {
-                //moving = true;
-                //rotating = false;
+                moving = true;
+                rotating = false;
                 if (audioSource.clip != roll)
                 {
                     audioSource.volume = rollVol;
@@ -154,19 +154,28 @@ public class BallLauncher : XRGrabInteractable
                     stopping = false;
                 }
             }
-            else if (audioSource.isPlaying && !stopping)
+            else
             {
-                if (audioSource.clip == turn) audioSource.Stop();
-                else StartCoroutine(StopAudio());
+                moving = rotating = false;
+                if (audioSource.isPlaying && !stopping)
+                {
+                    if (audioSource.clip == turn) audioSource.Stop();
+                    else StartCoroutine(StopAudio());
+                }
             }
-        } else if (audioSource.isPlaying) audioSource.Stop();
+        } 
+        else
+        {
+            moving = rotating = false;
+            if (audioSource.isPlaying) audioSource.Stop();
+        }
     }
 
     IEnumerator StopAudio()
     {
         stopping = true;
         yield return halfSecond;
-        if (audioSource.isPlaying) audioSource.Stop();
+        if (audioSource.isPlaying && !rotating && !moving) audioSource.Stop();
         stopping = false;
     }
 

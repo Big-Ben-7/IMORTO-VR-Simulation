@@ -311,7 +311,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
 
     Vector2 PosToPoint(Rect rect, Vector2 point)
     {
-        return new Vector2( rect.xMin + rect.width * point.x, rect.yMin + rect.height * point.y );
+        return new Vector2(rect.xMin + rect.width * point.x, rect.yMin + rect.height * point.y);
     }
 
     public void Launch()
@@ -467,7 +467,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         roverAgent.SetDestination(rockTs[idx].GetChild(0).position);// + (agentPos - rockPos).normalized);
         roverSource.PlayOneShot(startClip, 0.4f);
         roverSource.Play();
-        roverSource.PlayOneShot(gravel, 0.15f);
+        roverSource.PlayOneShot(gravel, 0.2f);
         StartCoroutine(ToggleCamera());
     }
 
@@ -510,7 +510,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
             }
             roverSource.PlayOneShot(startClip, 0.4f);
             roverSource.Play();
-            roverSource.PlayOneShot(gravel, 0.15f);
+            roverSource.PlayOneShot(gravel, 0.2f);
             StartCoroutine(ToggleCamera());
         }
     }

@@ -5,12 +5,12 @@ using UnityEngine.XR;
 public enum MyHandedness {Left, Right, None};
 public class Player : MonoBehaviour
 {
-    [SerializeField] InputActionProperty leftGripInput, rightGripInput;
-    InputAction leftGrip, rightGrip;
+    [SerializeField] InputActionProperty leftGripInput, rightGripInput, mapInput;
+    InputAction leftGrip, rightGrip, mapAction;
     [SerializeField] Animator leftHand, rightHand;
-    [SerializeField] AudioClip teleport, grab, button, tileWalk, concreteWalk, grassWalk, gravelWalk;
-    [SerializeField] AudioClip[] tileLands, concreteLands, grassLands, gravelLands, objectBumps;
-    int tileCount, concreteCount, grassCount, gravelCount;
+    [SerializeField] AudioClip teleport, grab, button, tileWalk, /*woodWalk,*/ metalWalk, concreteWalk, grassWalk, gravelWalk, mapActivate;
+    [SerializeField] AudioClip[] tileLands, metalLands, concreteLands, grassLands, gravelLands, objectBumps;
+    int tileCount, metalCount, concreteCount, grassCount, gravelCount;
     [SerializeField] CanvasGroup fadeCanvas;
     public static bool initialized;
     public static AudioSource audioSource;
@@ -22,6 +22,7 @@ public class Player : MonoBehaviour
     //WaitForSeconds halfSecond = new WaitForSeconds(0.5f);
 
     [Header("Physics")]
+    //CapsuleCollider col;
     CapsuleCollider col;
     public static Rigidbody rb;
     Transform colT;
@@ -32,8 +33,13 @@ public class Player : MonoBehaviour
     [Header("Movement")]
     [SerializeField] LayerMask groundMask;
     [SerializeField] float outSpeed, inSpeed, stairSpeed, turnSpeed, jumpHeight;
+    [SerializeField] RectTransform rectT, icon;
+    Canvas mapCanvas;
+    Collider mapCol;
+    Rect rect;
     float speed;
     [SerializeField] InputActionProperty moveInput, turnInput, jumpInput;
+    InputAction moveAction, turnAction, jumpAction;
     Vector2 moveAxis;
     float turnAxis;
     bool isGrounded;
@@ -49,6 +55,10 @@ public class Player : MonoBehaviour
     public static bool leftHaptics, rightHaptics;
     public static UnityEngine.XR.InputDevice rightDevice;
     public static UnityEngine.XR.InputDevice leftDevice;
+    [SerializeField] Transform ladder;
+    Collider[] ladderCols;
+    int ladderColCount;
+    [SerializeField] LayerMask body;
 
     void Awake()
     {
@@ -72,6 +82,10 @@ public class Player : MonoBehaviour
         //rightRb = rightJoint.GetComponent<Rigidbody>();
         leftGrip = leftGripInput.action;
         rightGrip = rightGripInput.action;
+        mapAction = mapInput.action;
+        moveAction = moveInput.action;
+        turnAction = turnInput.action;
+        jumpAction = jumpInput.action;
         fadeCanvas.alpha = 0;
         grabClip = grab;
         buttonClip = button;
@@ -79,6 +93,7 @@ public class Player : MonoBehaviour
         //Door.rooms = new GameObject[] {lobby, ent, health, expl, manu};
         UIPanel.audioSource = audioSource;
         tileCount = tileLands.Length;
+        metalCount = metalLands.Length;
         concreteCount = concreteLands.Length;
         grassCount = grassLands.Length;
         gravelCount = gravelLands.Length;
@@ -88,6 +103,11 @@ public class Player : MonoBehaviour
         //health.SetActive(false);
         //expl.SetActive(false);
         //manu.SetActive(false);
+        rect = rectT.rect;
+        mapCanvas = rectT.parent.GetComponent<Canvas>();
+        mapCol = mapCanvas.GetComponent<Collider>();
+        ladderCols = ladder.GetComponentsInChildren<Collider>();
+        ladderColCount = ladderCols.Length;
     }
 
     void Start()
@@ -102,11 +122,11 @@ public class Player : MonoBehaviour
     {
         leftHand.SetFloat("Grip", leftGrip.ReadValue<float>());
         rightHand.SetFloat("Grip", rightGrip.ReadValue<float>());
-        moveAxis = sitting? Vector2.zero : moveInput.action.ReadValue<Vector2>();
-        turnAxis = turnInput.action.ReadValue<Vector2>().x;
+        moveAxis = sitting? Vector2.zero : moveAction.ReadValue<Vector2>();
+        turnAxis = turnAction.ReadValue<Vector2>().x;
 
         Vector3 start = colT.position;
-        bool cast = Physics.Raycast(start + new Vector3(0, 0.5f, 0), Vector3.down, out RaycastHit hit, 0.51f, groundMask);
+        bool cast = Physics.Raycast(start + new Vector3(0, 0.5f, 0), Vector3.down, out RaycastHit hit, 0.55f, groundMask);
         if (!cast)
         {
             if (walkSource.isPlaying) walkSource.Stop();
@@ -115,7 +135,7 @@ public class Player : MonoBehaviour
         {
             //bool play = true;
             GameObject go = hit.transform.gameObject;
-            if (go.CompareTag("Floor"))
+            if (go.CompareTag("Floor") || Vector2.SqrMagnitude(new Vector2(start.x, start.z)) <= 20.930625)
             {
                 if (walkSource.clip != tileWalk)
                 {
@@ -124,6 +144,17 @@ public class Player : MonoBehaviour
                 }
                 //else play = false;
                 if (!isGrounded) audioSource.PlayOneShot(tileLands[Random.Range(0, tileCount)], 0.6f);
+                speed = inSpeed;
+            }
+            else if (go.CompareTag("Metal"))
+            {
+                if (walkSource.clip != metalWalk)
+                {
+                    walkSource.volume = 0.2f;
+                    walkSource.clip = metalWalk;
+                }
+                //else play = false;
+                if (!isGrounded) audioSource.PlayOneShot(metalLands[Random.Range(0, metalCount)]);
                 speed = inSpeed;
             }
             else if (go.CompareTag("Grass"))
@@ -174,17 +205,33 @@ public class Player : MonoBehaviour
             else if (walkSource.isPlaying) walkSource.Stop();
 
 
-            if (jumpInput.action.WasPressedThisFrame())
+            if (jumpAction.WasPressedThisFrame())
             {
                 //float handSpeed = ((leftRb.linearVelocity - rb.linearVelocity).sqrMagnitude + (rightRb.linearVelocity - rb.linearVelocity).sqrMagnitude) / 2;
                 /*if (handSpeed > minHandSpeed)*/
                 if (!sitting) rb.linearVelocity = Vector3.up * Mathf.Sqrt(2 * -Physics.gravity.y * jumpHeight);
                 else seat.Exit(true);
             }
-            if (climbing) climbing = false;
+            if (climbing)
+            {
+                climbing = false;
+                for (int i = 0; i < ladderColCount; i++) ladderCols[i].excludeLayers = 0;
+            }
         }
         isGrounded = cast;
         bgSource.volume = Mathf.Clamp(0.002f * (Vector3.SqrMagnitude(piano.position - head.position) - 3), 0, 0.03f);
+        
+        if (mapAction.WasPressedThisFrame())
+        {
+            mapCanvas.enabled = mapCol.enabled = !mapCanvas.enabled;
+            audioSource.PlayOneShot(mapActivate);
+        }
+        if (mapCanvas.enabled)
+        {
+            Vector3 pos = head.position;
+            icon.anchoredPosition = new Vector2(rect.xMin + rect.width * Mathf.Clamp01((15.5f - pos.x) / 31), rect.yMin + rect.height * Mathf.Clamp01((15.035f - pos.z) / 31));
+            icon.localRotation = Quaternion.Euler(0, 0, -head.eulerAngles.y + 180);
+        }
     }
 
     void FixedUpdate()
@@ -239,6 +286,7 @@ public class Player : MonoBehaviour
     public void SetClimb()
     {
         climbing = true;
+        for (int i = 0; i < ladderColCount; i++) ladderCols[i].excludeLayers = body;
     }
 
     IEnumerator Fade(float duration = 0.2f)
@@ -255,10 +303,7 @@ public class Player : MonoBehaviour
         alpha = fadeCanvas.alpha = 1;
         elapsedTime = 0;
         yield return twentiethSecond;
-        if (sitting)
-        {
-            seat.Exit(false);
-        }
+        if (sitting) seat.Exit(false);
         while (alpha >= 0.01f)
         {
             alpha = fadeCanvas.alpha = 1 - elapsedTime / duration;
@@ -284,7 +329,7 @@ public class Player : MonoBehaviour
 
     public static void Click()
     {
-        audioSource.PlayOneShot(buttonClip, 0.7f);
+        audioSource.PlayOneShot(buttonClip, 0.9f);
     }
 
     public void Bump()
@@ -292,7 +337,7 @@ public class Player : MonoBehaviour
         if (!canBump) return;
         canBump = false;
         StartCoroutine(BumpCooldown());
-        audioSource.PlayOneShot(bumpClips[Random.Range(0, bumpCount)], 0.5f);
+        audioSource.PlayOneShot(bumpClips[Random.Range(0, bumpCount)], 0.4f);
     }
 
     public static void SendHapticsLeft(float amplitude, float duration)

@@ -14,6 +14,7 @@ TagManager:
   - Stair
   - Pane
   - Racket
+  - Metal
   layers:
   - Default
   - TransparentFX

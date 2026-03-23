@@ -324,10 +324,10 @@ public class Ball : MonoBehaviour
                 switch(Racket.hand)
                 {
                     case MyHandedness.Left:
-                        Player.SendHapticsLeft(1, 0.1f);
+                        Player.SendHapticsLeft(1.5f, 0.15f);
                         break;
                     case MyHandedness.Right:
-                        Player.SendHapticsRight(1, 0.1f);
+                        Player.SendHapticsRight(1.5f, 0.15f);
                         break;
                 }
                 ForceAim();
@@ -549,12 +549,12 @@ public class Ball : MonoBehaviour
         if (grabbed)
         {
             col.excludeLayers = body;
-            //rb.interpolation = RigidbodyInterpolation.None;
+            rb.interpolation = RigidbodyInterpolation.None;
             Player.Grab();
         }
         else
         {
-            //rb.interpolation = RigidbodyInterpolation.Interpolate;
+            rb.interpolation = RigidbodyInterpolation.Interpolate;
             StartCoroutine(Release(halfSecond));
         }
     }

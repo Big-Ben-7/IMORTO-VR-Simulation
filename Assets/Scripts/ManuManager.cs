@@ -391,7 +391,7 @@ public class ManuManager : MonoBehaviour
                 firstStarted = true;
             }
             start = buttonPaused = false;
-            for (int j = 0; j < barCount; j++) bars[j].rotate = true;
+            for (int j = 0; j < barCount; j++) bars[j].SetRotate(true, 360);
             startText.SetText("Halt Production");
             beltSource.Play();
             beltSource.PlayOneShot(startUp);
@@ -399,7 +399,7 @@ public class ManuManager : MonoBehaviour
         else
         {
             buttonPaused = start = true;
-            for (int j = 0; j < barCount; j++) bars[j].rotate = false;
+            for (int j = 0; j < barCount; j++) bars[j].SetRotate(false, 360);
             startText.SetText("Initiate Production");
             beltSource.Stop();
             beltSource.PlayOneShot(shutDown);

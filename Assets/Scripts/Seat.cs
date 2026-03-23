@@ -16,6 +16,7 @@ public class Seat : MonoBehaviour
     Vector2 attachDir;
     [SerializeField] Canvas canvas;
     [SerializeField] TMP_Text seatText;
+    [SerializeField] AudioClip sitClip, exitClip;
     void Awake()
     {
         cols = GetComponentsInChildren<Collider>();
@@ -48,6 +49,7 @@ public class Seat : MonoBehaviour
         rb.position = new Vector3(attachPos.x - camPos.x + pos.x, pos.y, attachPos.z - camPos.z + pos.z);
         camOffset.localPosition = new Vector3(0, sitHeight, 0);
         StartCoroutine(ResetRB(resetFrames));
+        Player.audioSource.PlayOneShot(sitClip, 0.2f);
     }
     IEnumerator ResetRB(int n)
     {
@@ -60,7 +62,7 @@ public class Seat : MonoBehaviour
     {
         for (int i = 0; i < n; i++) yield return null;
         //rb.excludeLayers = initialExclude;
-        rb.position += d;
+        if (d != Vector3.zero) rb.position += d;
         rb.isKinematic = false;
     }
 
@@ -90,6 +92,7 @@ public class Seat : MonoBehaviour
                     break;
             }
             //rb.linearVelocity = Vector3.zero;
+            Player.audioSource.PlayOneShot(exitClip, 0.2f);
         }
         canvas.enabled = true;
         for (int i = 0; i < colCount; i++) cols[i].excludeLayers = 0;
