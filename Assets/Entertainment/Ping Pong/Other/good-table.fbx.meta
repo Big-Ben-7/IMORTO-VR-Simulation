@@ -3,27 +3,7 @@ guid: 7abc871f552ab4bb9bc7f094c94042c0
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Net materiel
-    second: {fileID: 2100000, guid: cb490a15139f6484e9f356d3da6654ae, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: White table_legs material
-    second: {fileID: 2100000, guid: 9e633d59015ef4894a248b3ef17127c3, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: black rubber
-    second: {fileID: 2100000, guid: cd9acfd90a99640198cece3bbfa672d1, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: black tabletop Material
-    second: {fileID: 2100000, guid: db7aa57ae755c4013a6b57117060080d, type: 2}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0
