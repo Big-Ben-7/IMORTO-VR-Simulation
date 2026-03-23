@@ -292,6 +292,7 @@ public class Player : MonoBehaviour
     IEnumerator Fade(float duration = 0.2f)
     {
         tp = rb.isKinematic = true;
+        rb.interpolation = RigidbodyInterpolation.None;
         float elapsedTime = 0;
         float alpha = 0;
         while (alpha <= 0.99f)
@@ -311,6 +312,7 @@ public class Player : MonoBehaviour
             yield return null;
         }
         fadeCanvas.alpha = 0;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.isKinematic = false;
         //yield return halfSecond;
         tp = false;

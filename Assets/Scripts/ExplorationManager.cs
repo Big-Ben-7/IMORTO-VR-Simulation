@@ -96,7 +96,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         //for (int i = 0; i < 6; i++) indWheels[i] = p.GetChild(i+7);
         for (int i = 0; i < 5; i++)
         {
-            rockObstacles[i] = rockTs[i].GetComponent<NavMeshObstacle>();
+            //rockObstacles[i] = rockTs[i].GetComponent<NavMeshObstacle>();
             /*RectTransform rectT = */colorRects[i] = mapColors[i].GetComponent<RectTransform>();
             //if (Physics.Raycast(heliCam.ViewportPointToRay(Rect.PointToNormalized(rect, rectT.anchoredPosition)), out RaycastHit hit, 20, terrainLayer)) colorPos[i] = hit.point;
             animators[i] = mapColors[i].GetComponent<Animator>();
@@ -437,7 +437,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         roverCam.enabled = false;
         mapColors[rockIndex].SetActive(true);
         animators[rockIndex].SetTrigger("Fill");
-        rockObstacles[rockIndex].enabled = true;
+        //rockObstacles[rockIndex].enabled = true;
         rockIndex = -1;
         roverSource.PlayOneShot(colorClip, 0.06f);
         if (rocksScanned == 5)
@@ -462,7 +462,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         //Vector3 rockPos = rockTs[idx].position;
         //Vector3 agentPos = rover.position;
         disable[idx] = true;
-        rockObstacles[idx].enabled = false;
+        //rockObstacles[idx].enabled = false;
         roverAgent.stoppingDistance = 1.4f;
         roverAgent.SetDestination(rockTs[idx].GetChild(0).position);// + (agentPos - rockPos).normalized);
         roverSource.PlayOneShot(startClip, 0.4f);

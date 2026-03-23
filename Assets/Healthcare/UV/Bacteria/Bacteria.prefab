@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1746947226668321141}
   - component: {fileID: 5848250162333996545}
   - component: {fileID: 7614378718211614701}
+  - component: {fileID: 4455243179796080920}
   m_Layer: 0
   m_Name: Bacteria
   m_TagString: Untagged
@@ -83,3 +84,16 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!210 &4455243179796080920
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8174836944384792099}
+  m_Enabled: 1
+  m_SortingLayerID: -373825525
+  m_SortingLayer: 1
+  m_SortingOrder: 2
+  m_SortAtRoot: 0
+  m_Sort3DAs2D: 0
