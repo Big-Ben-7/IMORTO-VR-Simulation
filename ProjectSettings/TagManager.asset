@@ -15,6 +15,7 @@ TagManager:
   - Pane
   - Racket
   - Metal
+  - PokeInteractable
   layers:
   - Default
   - TransparentFX

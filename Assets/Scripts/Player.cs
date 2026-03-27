@@ -344,12 +344,12 @@ public class Player : MonoBehaviour
 
     public static void SendHapticsLeft(float amplitude, float duration)
     {
-        if (leftHaptics) leftDevice.SendHapticImpulse(0, amplitude, duration);
+        /*if (leftHaptics)*/ leftDevice.SendHapticImpulse(0, amplitude, duration);
     }
 
     public static void SendHapticsRight(float amplitude, float duration)
     {
-        if (rightHaptics) rightDevice.SendHapticImpulse(0, amplitude, duration);
+        /*if (rightHaptics)*/ rightDevice.SendHapticImpulse(0, amplitude, duration);
     }
 
     IEnumerator BumpCooldown()

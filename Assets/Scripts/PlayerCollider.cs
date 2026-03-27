@@ -16,7 +16,7 @@ public class PlayerCollider : MonoBehaviour
         GameObject go = collision.gameObject;
         if ((val & 1 << go.layer) != 0)
         {
-            if (!go.CompareTag("Racket")) Player.instance.Bump();
+            if (!go.CompareTag("Racket") && !go.CompareTag("PokeInteractable")) Player.instance.Bump();
             switch (hand)
             {
                 case MyHandedness.Left:

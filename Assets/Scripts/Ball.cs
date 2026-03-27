@@ -321,14 +321,17 @@ public class Ball : MonoBehaviour
             {
                 if (farSide && !IsPastNet()) farSide = false;
                 SetNextActive();
-                switch(Racket.hand)
+                if (!grabbed)
                 {
-                    case MyHandedness.Left:
-                        Player.SendHapticsLeft(1, 0.15f);
-                        break;
-                    case MyHandedness.Right:
-                        Player.SendHapticsRight(1, 0.15f);
-                        break;
+                    switch(Racket.hand)
+                    {
+                        case MyHandedness.Left:
+                            Player.SendHapticsLeft(1, 0.15f);
+                            break;
+                        case MyHandedness.Right:
+                            Player.SendHapticsRight(1, 0.15f);
+                            break;
+                    }
                 }
                 ForceAim();
             }

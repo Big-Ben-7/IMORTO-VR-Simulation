@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b5d80f45fb5f4418a5e84a476e517628, type: 3}
-  m_Name: InteractionColor 1
+  m_Name: InteractionColorLadder
   m_EditorClassIdentifier: 
   m_Comments: 'For each state in the list, there are 2 values (Start and End).
 
@@ -59,16 +59,16 @@ MonoBehaviour:
       animationStateStartValue: {r: 1, g: 0.78431374, b: 0.5686275, a: 1}
       animationStateEndValue: {r: 1, g: 0.7843138, b: 0.5686275, a: 1}
     - stateName: hoveredPriority
-      animationStateStartValue: {r: 1, g: 1, b: 1, a: 0}
-      animationStateEndValue: {r: 1, g: 1, b: 1, a: 0}
+      animationStateStartValue: {r: 1, g: 0.78431374, b: 0.5686275, a: 1}
+      animationStateEndValue: {r: 1, g: 0.78431374, b: 0.5686275, a: 1}
     - stateName: selected
-      animationStateStartValue: {r: 1, g: 1, b: 1, a: 0}
-      animationStateEndValue: {r: 1, g: 1, b: 1, a: 0}
+      animationStateStartValue: {r: 0.7019608, g: 0.78039217, b: 0.8509804, a: 1}
+      animationStateEndValue: {r: 0.7019608, g: 0.78039217, b: 0.8509804, a: 1}
     - stateName: activated
-      animationStateStartValue: {r: 1, g: 1, b: 1, a: 0}
-      animationStateEndValue: {r: 1, g: 1, b: 1, a: 0}
+      animationStateStartValue: {r: 0.7019608, g: 0.78039217, b: 0.8509804, a: 1}
+      animationStateEndValue: {r: 1, g: 0.78431374, b: 0.5686275, a: 1}
     - stateName: focused
-      animationStateStartValue: {r: 1, g: 1, b: 1, a: 0}
-      animationStateEndValue: {r: 1, g: 1, b: 1, a: 0}
+      animationStateStartValue: {r: 0.7019608, g: 0.78039217, b: 0.8509804, a: 1}
+      animationStateEndValue: {r: 0.7019608, g: 0.78039217, b: 0.8509804, a: 1}
     m_ColorBlendMode: 0
     m_BlendAmount: 1
