@@ -13,7 +13,7 @@ public class Ball : MonoBehaviour
     Vector3 initialPos;
     Coroutine test;
 
-    Rigidbody rb;
+    public Rigidbody rb;
     Collider col;
     float g = Physics.gravity.magnitude;
 
@@ -268,10 +268,11 @@ public class Ball : MonoBehaviour
         }
         else if (!grabbed && lastCollision != name && go.layer != 7)
         {
-            audioSource.PlayOneShot(other, Mathf.Clamp01(Mathf.Log10(collision.relativeVelocity.magnitude / 3 + 1)));
             lastCollision = name;
             if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
             collisionCoroutine = StartCoroutine(ResetLastCollision());
+            if (go.CompareTag("Bot")) return;
+            audioSource.PlayOneShot(other, Mathf.Clamp01(Mathf.Log10(collision.relativeVelocity.magnitude / 3 + 1)));
         }
 
         if (farSide) farSide = false;

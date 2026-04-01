@@ -17,6 +17,7 @@ TagManager:
   - Metal
   - PokeInteractable
   - Bumpable
+  - Bot
   layers:
   - Default
   - TransparentFX

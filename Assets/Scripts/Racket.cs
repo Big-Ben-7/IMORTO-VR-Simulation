@@ -7,7 +7,7 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class Racket : XRGrabInteractable
 {
-    Collider col;
+    Rigidbody rb;
     AudioSource audioSource;
     [SerializeField] LayerMask body;
     [SerializeField] AudioClip hit;
@@ -21,7 +21,7 @@ public class Racket : XRGrabInteractable
     protected override void Awake()
     {
         base.Awake();
-        col = transform.GetChild(1).GetComponent<Collider>();
+        rb = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
         fifthSecond = Player.fifth;
         second = Player.one;
@@ -53,7 +53,7 @@ public class Racket : XRGrabInteractable
     {
         base.OnSelectEntered(args);
         grabbed = true;
-        col.excludeLayers = body;
+        rb.excludeLayers = body;
         Player.Grab();
         switch(args.interactorObject.transform.GetComponent<XRBaseInteractor>().handedness)
         {
@@ -67,6 +67,7 @@ public class Racket : XRGrabInteractable
                 hand = MyHandedness.None;
                 break;
         }
+        for (int i = 0; i < BallLauncher.ballCount; i++) BallLauncher.balls[i].rb.excludeLayers = body;
     }
 
     protected override void OnSelectExited(SelectExitEventArgs args)
@@ -75,11 +76,12 @@ public class Racket : XRGrabInteractable
         grabbed = false;
         StartCoroutine(Release());
         hand = MyHandedness.None;
+        for (int i = 0; i < BallLauncher.ballCount; i++) BallLauncher.balls[i].rb.excludeLayers = 0;
     }
 
     IEnumerator Release()
     {
         yield return second;
-        if (!grabbed) col.excludeLayers = 0;
+        if (!grabbed) rb.excludeLayers = 0;
     }
 }

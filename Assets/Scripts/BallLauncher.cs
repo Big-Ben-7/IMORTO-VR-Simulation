@@ -33,8 +33,9 @@ public class BallLauncher : XRGrabInteractable
     [Header("Launching")]
     [SerializeField] Transform ballParent;
     [SerializeField] float minLaunchSpeed, maxLaunchSpeed;
-    Ball[] balls;
-    int ballCount, currentBall = 0;
+    public static Ball[] balls;
+    public static int ballCount;
+    int currentBall = 0;
     Transform arm,launchMarker;
     Rigidbody rb;
     WaitForSeconds halfSecond, fifthSecond;
