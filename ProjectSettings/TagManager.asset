@@ -16,6 +16,7 @@ TagManager:
   - Racket
   - Metal
   - PokeInteractable
+  - Bumpable
   layers:
   - Default
   - TransparentFX

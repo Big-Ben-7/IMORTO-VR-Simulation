@@ -10,6 +10,7 @@ public class Rotate : MonoBehaviour
     public bool rotate = true;
     [SerializeField] bool localSpace = true, flatten;
     [SerializeField] float flattenSpeed;
+    //[SerializeField] float limit1, limit2;
     Coroutine ease;
     void Awake()
     {
@@ -23,6 +24,10 @@ public class Rotate : MonoBehaviour
         if (rotate)
         {
             myT.Rotate(rot * Time.deltaTime, localSpace? Space.Self : Space.World);
+            /*if (limit1 != limit2)
+            {
+                if (myT.eulerAngles.y <= limit1 || myT.eulerAngles.y >= limit2) rot *= -1;
+            }*/
             if (flatten)
             {
                 Quaternion cur = myT.rotation;

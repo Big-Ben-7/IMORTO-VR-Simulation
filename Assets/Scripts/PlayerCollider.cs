@@ -1,14 +1,18 @@
+using System;
 using UnityEngine;
 
 public class PlayerCollider : MonoBehaviour
 {
     [SerializeField] MyHandedness hand;
     [SerializeField] LayerMask cols;
+    [SerializeField] String[] tags;
+    int tagCount;
     int val;
 
     void Awake()
     {
         val = cols.value;
+        tagCount = tags.Length;
     }
 
     void OnCollisionEnter(Collision collision)
@@ -16,7 +20,14 @@ public class PlayerCollider : MonoBehaviour
         GameObject go = collision.gameObject;
         if ((val & 1 << go.layer) != 0)
         {
-            if (!go.CompareTag("Racket") && !go.CompareTag("PokeInteractable")) Player.instance.Bump();
+            for (int i = 0; i < tagCount; i++)
+            {
+                if (go.CompareTag(tags[i]))
+                {
+                    Player.instance.Bump();
+                    break;
+                }
+            }
             switch (hand)
             {
                 case MyHandedness.Left:

@@ -320,7 +320,7 @@ public class Player : MonoBehaviour
 
     IEnumerator Initialize()
     {
-        yield return tenth;
+        yield return fifth;
         initialized = true;
     }
 
