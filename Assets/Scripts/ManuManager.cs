@@ -13,7 +13,7 @@ public class ManuManager : MonoBehaviour
     int destinationCount;
     Vector3[] destinationPos;
     int[] partDestinations;
-    Transform[] partMarkers, destinations;
+    Transform[] partMarkers, destinations, assemblyParts;
     MeshRenderer[] partRends;
     List<MeshRenderer> lasercutRends = new List<MeshRenderer>();
     List<Collider> lasercutCols = new List<Collider>();
@@ -23,10 +23,12 @@ public class ManuManager : MonoBehaviour
     GameObject[] sheets;
     ParticleSystem[] particles;
     int particleCount;
-    [SerializeField] Transform stamper, painter, lasercutter, startMarker, endMarker, buttonParent, destinationParent;
+    [SerializeField] Transform stamper, painter, lasercutter, startMarker/*, endMarker, */, buttonParent, destinationParent, assemblyParent, suction;
     [SerializeField] TMP_Text colorText, startText, paintQueueText;
     string[] buttonNames;
     Color[] buttonColors;
+    Transform carParent, partsParent;
+    Animator assemblyAnim;
     Animation stampAnim;
     float stampZ, endX;
     Vector3 laserMarker;
@@ -50,9 +52,11 @@ public class ManuManager : MonoBehaviour
     AudioSource beltSource, painterSource, stamperSource, laserSource;
     [SerializeField] AudioClip paint, stamp, startUp, shutDown;
     List<string> paintQueue = new List<string>();
+    public static ManuManager instance;
 
     void Awake()
     {
+        instance = this;
         partWait = new WaitForSeconds(timeInterval);
         partCount = parts.Length;
         partStates = new State[partCount];
@@ -64,6 +68,10 @@ public class ManuManager : MonoBehaviour
         lasercutIndices = new int[partCount];
         int lasercutIndex = 0;
         startMarker.GetPositionAndRotation(out startPos, out startRot);
+        assemblyParts = new Transform[partCount];
+        partsParent = assemblyParent.GetChild(0);
+        carParent = partsParent.GetChild(1);
+        assemblyAnim = assemblyParent.GetComponent<Animator>();
         for (int i = 0; i < partCount; i++) 
         {
             Transform partT = parts[i];
@@ -87,6 +95,7 @@ public class ManuManager : MonoBehaviour
             Transform marker = partMarkers[i] = partT.GetChild(0);
             partRBs[i] = partT.GetComponent<Rigidbody>();
             sheets[i] = Instantiate(sheetPrefab, marker.position, startRot, partT);
+            assemblyParts[i] = partsParent.GetChild(i+2);
         }
         destinationCount = destinationParent.childCount;
         destinations = new Transform[destinationCount];
@@ -99,7 +108,7 @@ public class ManuManager : MonoBehaviour
         partDestinations = new int[partCount];
         beltSource = transform.GetChild(0).GetComponent<AudioSource>();
         stampAnim = stamper.GetComponent<Animation>();
-        endX = endMarker.position.x;
+        //endX = endMarker.position.x;
         stampZ = stamper.position.z;
         stamperSource = stamper.GetChild(0).GetComponent<AudioSource>();
         laserMarker = lasercutter.GetChild(0).position;
@@ -166,7 +175,20 @@ public class ManuManager : MonoBehaviour
         Vector3 diff = destinationPos[d] - marker.position;
         if (Mathf.Abs(diff.x) < 0.02f && Mathf.Abs(diff.z) < 0.02f)
         {
-            partDestinations[i] ++;
+            if (d == destinationCount - 1)
+            {
+                partStates[i] = State.Idle;
+                Color color = partRends[i].materials[0].color;
+                parts[i].gameObject.SetActive(false);
+                Transform t = parts[i] = assemblyParts[i];
+                MeshRenderer rend = t.GetComponent<MeshRenderer>();
+                Material[] mats = rend.materials;
+                int n = mats.Length;
+                for (int j = 0; j < n; j++) mats[j].color = color;
+                t.gameObject.SetActive(true);
+                assemblyAnim.SetInteger("Part", i);
+            }
+            else partDestinations[i] ++;
             return;
         }
         Vector3 diffN = new Vector3(diff.x, 0, diff.z).normalized;
@@ -217,11 +239,6 @@ public class ManuManager : MonoBehaviour
                     break;
                 case State.Painted:
                     movePart(i);
-                    if (partMarkers[i].position.x < endX)
-                    {
-                        partStates[i] = State.Idle;
-                        parts[i].gameObject.SetActive(false);
-                    }
                     break;
             }
         }
@@ -405,5 +422,18 @@ public class ManuManager : MonoBehaviour
             beltSource.PlayOneShot(shutDown);
         }
         Player.Click();
+    }
+
+    public void Suction(int i)
+    {
+        parts[i].SetParent(suction);
+    }
+
+    public void UnSuction(int i)
+    {
+        Transform partT = parts[i];
+        partT.SetParent(carParent);
+        carParent.GetChild(i).GetPositionAndRotation(out Vector3 p, out Quaternion r);
+        partT.SetPositionAndRotation(p, r);
     }
 }
