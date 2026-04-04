@@ -6,8 +6,10 @@ using UnityEngine.UI;
 
 public class ManuManager : MonoBehaviour
 {
-    [SerializeField] float moveSpeed, rotSpeed, timeInterval, laserSpeed, nozzleSpeed, nozzleSpeedSlow;
+    [SerializeField] float moveSpeed, slowSpeed, rotSpeed, timeInterval, laserSpeed, nozzleSpeed, nozzleSpeedSlow;
     [SerializeField] Transform[] parts;
+    [SerializeField] float[] moveSpeeds;
+    [SerializeField] bool[] slowPart;
     [SerializeField] GameObject sheetPrefab;
     Rigidbody[] partRBs;
     int destinationCount;
@@ -28,9 +30,9 @@ public class ManuManager : MonoBehaviour
     string[] buttonNames;
     Color[] buttonColors;
     Transform carParent, partsParent;
-    Animator assemblyAnim;
+    Animator assemblyAnim1, assemblyAnim2;
     Animation stampAnim;
-    float stampZ, endX;
+    float stampZ, laserEnd;
     Vector3 laserMarker;
     Queue<int> availableIndices = new Queue<int>();
     LineRenderer[] lasers = new LineRenderer[4];
@@ -39,7 +41,7 @@ public class ManuManager : MonoBehaviour
     bool[] lasersAvailable = new bool[4] {true, true, true, true};
     Vector3 startPos;
     Quaternion startRot;
-    enum State {Idle, Moving, Stamping, ToLasercut, Stamped, Painted};
+    enum State {Idle, Moving, Stamping, ToLasercut, Stamped, ToPaint, Painted};
     State[] partStates;
     int partCount;
     bool paused, start = true, buttonPaused, firstStarted;
@@ -59,6 +61,8 @@ public class ManuManager : MonoBehaviour
         instance = this;
         partWait = new WaitForSeconds(timeInterval);
         partCount = parts.Length;
+        moveSpeeds = new float[partCount];
+        slowPart = new bool[partCount];
         partStates = new State[partCount];
         partMarkers = new Transform[partCount];
         partRends = new MeshRenderer[partCount];
@@ -71,10 +75,13 @@ public class ManuManager : MonoBehaviour
         assemblyParts = new Transform[partCount];
         partsParent = assemblyParent.GetChild(0);
         carParent = partsParent.GetChild(1);
-        assemblyAnim = assemblyParent.GetComponent<Animator>();
+        foreach (Transform t in carParent) t.gameObject.SetActive(false);
+        assemblyAnim1 = assemblyParent.GetChild(1).GetComponent<Animator>();
+        assemblyAnim2 = assemblyParent.GetChild(2).GetComponent<Animator>();
         for (int i = 0; i < partCount; i++) 
         {
             Transform partT = parts[i];
+            moveSpeeds[i] = moveSpeed;
             partT.gameObject.SetActive(false);
             MeshRenderer rend = partRends[i] = partT.GetComponent<MeshRenderer>();
             rend.enabled = false;
@@ -95,7 +102,8 @@ public class ManuManager : MonoBehaviour
             Transform marker = partMarkers[i] = partT.GetChild(0);
             partRBs[i] = partT.GetComponent<Rigidbody>();
             sheets[i] = Instantiate(sheetPrefab, marker.position, startRot, partT);
-            assemblyParts[i] = partsParent.GetChild(i+2);
+            Transform assemblyT = assemblyParts[i] = partsParent.GetChild(i+2);
+            assemblyT.gameObject.SetActive(false);
         }
         destinationCount = destinationParent.childCount;
         destinations = new Transform[destinationCount];
@@ -112,6 +120,7 @@ public class ManuManager : MonoBehaviour
         stampZ = stamper.position.z;
         stamperSource = stamper.GetChild(0).GetComponent<AudioSource>();
         laserMarker = lasercutter.GetChild(0).position;
+        laserEnd = lasercutter.GetChild(10).position.z;
         for (int i = 0; i < 4; i++)
         {
             availableIndices.Enqueue(i);
@@ -150,7 +159,7 @@ public class ManuManager : MonoBehaviour
             ParticleSystem.MainModule main = particles[j].main;
             main.startColor = Color.white;
         }
-        colorText.SetText("Selected Paint Color: None");
+        colorText.SetText("Selected Paint Color: Clear");
         bars = transform.parent.GetChild(0).GetComponentsInChildren<Rotate>();
         barCount = bars.Length;
     }
@@ -178,6 +187,8 @@ public class ManuManager : MonoBehaviour
             if (d == destinationCount - 1)
             {
                 partStates[i] = State.Idle;
+                partRBs[i].isKinematic = true;
+                if (i % 2 != 0) return;
                 Color color = partRends[i].materials[0].color;
                 parts[i].gameObject.SetActive(false);
                 Transform t = parts[i] = assemblyParts[i];
@@ -186,14 +197,25 @@ public class ManuManager : MonoBehaviour
                 int n = mats.Length;
                 for (int j = 0; j < n; j++) mats[j].color = color;
                 t.gameObject.SetActive(true);
-                assemblyAnim.SetInteger("Part", i);
+                (i % 2 == 0 ? assemblyAnim1 : assemblyAnim2).SetInteger("Part", i);
+                //if (i % 2 != 0) parts[i].gameObject.SetActive(false);
             }
-            else partDestinations[i] ++;
+            else
+            {
+                if (d == destinationCount - 5) slowPart[i] = true;
+                partDestinations[i] ++;
+            }
             return;
         }
         Vector3 diffN = new Vector3(diff.x, 0, diff.z).normalized;
         Rigidbody rb = partRBs[i];
-        rb.MovePosition(rb.position + diffN * moveSpeed * Time.fixedDeltaTime);
+        float speed = moveSpeeds[i];
+        if (slowPart[i])
+        {
+            speed = moveSpeeds[i] = speed - slowSpeed * Time.deltaTime;
+            if (speed < 0.1f) speed = moveSpeeds[i] = 0.1f;
+        }
+        rb.MovePosition(rb.position + diffN * speed * Time.fixedDeltaTime);
         Quaternion rot = rb.rotation;
         Vector3 markerF = marker.forward;
         markerF = new Vector3(markerF.x, 0, markerF.z).normalized;
@@ -217,17 +239,8 @@ public class ManuManager : MonoBehaviour
                 case State.Stamping:
                     if (paused) break;
                     paused = true;
-                    for (int j = 0; j < 6; j++) bars[j].rotate = false;
+                    //for (int j = 0; j < 6; j++) bars[j].rotate = false;
                     StartCoroutine(Stamp(i));
-                    break;
-                case State.Stamped:
-                    movePart(i);
-                    if (partDestinations[i] >= 7)
-                    {
-                        partStates[i] = State.Painted;
-                        StartCoroutine(SetColor(partRends[i], paintColor));
-                        for (int j = 0; j < particleCount; j++) particles[j].Play();
-                    }
                     break;
                 case State.ToLasercut:
                     movePart(i);
@@ -235,6 +248,24 @@ public class ManuManager : MonoBehaviour
                     {
                         partStates[i] = State.Stamped;
                         StartCoroutine(Lasercut(i));
+                    }
+                    break;
+                case State.Stamped:
+                    movePart(i);
+                    if (partMarkers[i].position.z >= laserEnd)
+                    {
+                        partStates[i] = State.ToPaint;
+                        paintQueue.Add(parts[i].gameObject.name);
+                        UpdatePaintQueue();
+                    }
+                    break;
+                case State.ToPaint:
+                    movePart(i);
+                    if (partDestinations[i] >= 7)
+                    {
+                        partStates[i] = State.Painted;
+                        StartCoroutine(SetColor(partRends[i], paintColor));
+                        for (int j = 0; j < particleCount; j++) particles[j].Play();
                     }
                     break;
                 case State.Painted:
@@ -346,17 +377,15 @@ public class ManuManager : MonoBehaviour
             partRends[i].enabled = true;
         }
         yield return wait;
-        paintQueue.Add(parts[i].gameObject.name);
-        UpdatePaintQueue();
         for (int j = 0; j < 2; j++) yield return wait;
         paused = false;
-        if (!buttonPaused) for (int j = 0; j < 6; j++) bars[j].rotate = true;
+        //if (!buttonPaused) for (int j = 0; j < 6; j++) bars[j].rotate = true;
         partStates[i] = laserIndex != -1 ? State.ToLasercut : State.Stamped;
     }
 
     void UpdatePaintQueue()
     {
-        string str = "Clear";
+        string str = "Vacant";
         switch(paintQueue.Count)
         {
             case 0: break;
@@ -383,7 +412,7 @@ public class ManuManager : MonoBehaviour
                 ParticleSystem.MainModule main = particles[j].main;
                 main.startColor = Color.white;
             }
-            colorText.SetText("Selected Paint Color: None");
+            colorText.SetText("Selected Paint Color: Clear");
         }
         else
         {
@@ -427,6 +456,7 @@ public class ManuManager : MonoBehaviour
     public void Suction(int i)
     {
         parts[i].SetParent(suction);
+        //assemblyAnim.SetInteger("Part", -1);
     }
 
     public void UnSuction(int i)
