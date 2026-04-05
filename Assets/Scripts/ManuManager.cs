@@ -28,26 +28,27 @@ public class ManuManager : MonoBehaviour
     int particleCount;
     [SerializeField] Transform stamper, painter, lasercutter, startMarker/*, endMarker, */, buttonParent, destinationParent, assemblyParent, suction1, suction2;
     [SerializeField] TMP_Text colorText, startText, paintQueueText;
-    [SerializeField] Transform tireParent, wholeCar;
+    Transform tireParent, wholeCar;
+    Material[][] wholeCarMats;
     List<int>[] partMats = new List<int>[] 
     {
-        new List<int>() {}, 
-        new List<int>() {}, 
-        new List<int>() {}, 
-        new List<int>() {},
-        new List<int>() {},
-        new List<int>() {},
-        new List<int>() {},
-        new List<int>() {},
-        new List<int>() {},
-        new List<int>() {},
-        new List<int>() {},
-        new List<int>() {},
-        new List<int>() {},
-        new List<int>() {},
-        new List<int>() {},
-        new List<int>() {},
-        new List<int>() {},
+        new List<int>() {4, 1}, 
+        new List<int>() {4, 0}, 
+        new List<int>() {4, 2}, 
+        new List<int>() {4, 14},
+        new List<int>() {5, 1, 10, 0, 14, 0},
+        new List<int>() {7, 1, 10, 1, 14, 2},
+        new List<int>() {5, 0},
+        new List<int>() {7, 0},
+        new List<int>() {4, 4},
+        new List<int>() {4, 15},
+        new List<int>() {0, 0, 9, 0},
+        new List<int>() {2, 0, 9, 1},
+        new List<int>() {0, 1},
+        new List<int>() {2, 1},
+        new List<int>() {4, 3},
+        new List<int>() {4, 7},
+        new List<int>() {4, 6},
     };
     string[] buttonNames;
     Color[] buttonColors;
@@ -101,7 +102,10 @@ public class ManuManager : MonoBehaviour
         startMarker.GetPositionAndRotation(out startPos, out startRot);
         assemblyParts = new Transform[partCount];
         partsParent = assemblyParent.GetChild(0);
+        wholeCar = partsParent.GetChild(0);
         carParent = partsParent.GetChild(1);
+        Transform postConveyerParent = partsParent.GetChild(2);
+        tireParent = partsParent.GetChild(3);
         assemblyAnim1 = assemblyParent.GetChild(1).GetComponent<Animator>();
         assemblyAnim2 = assemblyParent.GetChild(2).GetComponent<Animator>();
         for (int i = 0; i < partCount; i++) 
@@ -128,7 +132,7 @@ public class ManuManager : MonoBehaviour
             Transform marker = partMarkers[i] = partT.GetChild(0);
             partRBs[i] = partT.GetComponent<Rigidbody>();
             sheets[i] = Instantiate(sheetPrefab, marker.position, startRot, partT);
-            assemblyParts[i] = partsParent.GetChild(i+2);
+            assemblyParts[i] = postConveyerParent.GetChild(i);
         }
         destinationCount = destinationParent.childCount;
         destinations = new Transform[destinationCount];
@@ -191,6 +195,10 @@ public class ManuManager : MonoBehaviour
         //tireAssembly = tireAnim["TireAssembly"];
         tireSource = tireParent.GetChild(4).GetComponent<AudioSource>();
         stampState = stampAnim["Stamp"];
+        MeshRenderer[] assembledRends = wholeCar.GetComponentsInChildren<MeshRenderer>();
+        int n = assembledRends.Length;
+        wholeCarMats = new Material[n][];
+        for (int i = 0; i < n; i++) wholeCarMats[i] = assembledRends[i].materials;
     }
 
     IEnumerator SendParts()
@@ -309,11 +317,11 @@ public class ManuManager : MonoBehaviour
                         Color c = paintColor;
                         switch (i)
                         {
-                            case 6 or 7 or 13 or 14:
+                            case 6 or 7 or 12 or 13:
                                 if (c == Color.white) c = blackColor;
                                 break;
                         }
-                        StartCoroutine(SetColor(partRends[i], c));
+                        StartCoroutine(SetColor(i, c));
                         for (int j = 0; j < particleCount; j++) particles[j].Play();
                     }
                     break;
@@ -392,7 +400,7 @@ public class ManuManager : MonoBehaviour
         }
     }
 
-    IEnumerator SetColor(MeshRenderer rend, Color color)
+    IEnumerator SetColor(int i, Color color)
     {
         yield return particleWait;
         for (int j = 0; j < particleCount; j++)
@@ -400,11 +408,15 @@ public class ManuManager : MonoBehaviour
             ParticleSystem.MainModule main = particles[j].main;
             main.startColor = color;
         }
+        MeshRenderer rend = partRends[i];
         if (color != Color.white)
         {
             Material[] mats = rend.materials;
             int n = mats.Length;
-            for (int i = 0; i < n; i++) mats[i].color = color;
+            for (int j = 0; j < n; j++) mats[j].color = color;
+            List<int> matIndices = partMats[i];
+            n = matIndices.Count;
+            for (int j = 0; j < n; j += 2) wholeCarMats[matIndices[j]][matIndices[j + 1]].color = color;
         }
         painterSource.PlayOneShot(paint);
         paintQueue.RemoveAt(0);
@@ -517,14 +529,16 @@ public class ManuManager : MonoBehaviour
         partT.SetParent(carParent);
         carParent.GetChild(i).GetPositionAndRotation(out Vector3 p, out Quaternion r);
         partT.SetPositionAndRotation(p, r);
+        if (i == partCount - 1)
+        {
+            carParent.gameObject.SetActive(false);
+            wholeCar.gameObject.SetActive(true);
+        }
     }
 
     public void SwapTires()
     {
-        for (int i = 0; i < 4; i++)
-        {
-            preTires[i].SetActive(false);
-            postTires[i].SetActive(true);
-        }
+        for (int i = 0; i < 4; i++) preTires[i].SetActive(false);
+        postTires[0].SetActive(true); postTires[1].SetActive(true);
     }
 }
