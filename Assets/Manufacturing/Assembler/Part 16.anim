@@ -2952,7 +2952,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: SuctionCupRobot/Base/Mid
+    path: SuctionCupRobot/Base/Mid/MidArm/Back
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -2964,7 +2964,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: SuctionCupRobot/Base/Mid
+    path: SuctionCupRobot/Base/Mid/MidArm/Back
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -2976,7 +2976,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.x
-    path: SuctionCupRobot/Base/Mid
+    path: SuctionCupRobot/Base/Mid/MidArm/Back
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -3132,7 +3132,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.x
-    path: SuctionCupRobot/Base/Mid/MidArm/Back
+    path: SuctionCupRobot/Base/Mid
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -3144,7 +3144,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: SuctionCupRobot/Base/Mid/MidArm/Back
+    path: SuctionCupRobot/Base/Mid
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -3156,7 +3156,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: SuctionCupRobot/Base/Mid/MidArm/Back
+    path: SuctionCupRobot/Base/Mid
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -3172,6 +3172,13 @@ AnimationClip:
     messageOptions: 0
   - time: 1.5
     functionName: UnSuction
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 16
+    messageOptions: 0
+  - time: 2.5
+    functionName: Complete
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

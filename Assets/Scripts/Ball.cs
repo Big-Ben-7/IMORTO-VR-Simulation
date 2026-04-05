@@ -155,7 +155,7 @@ public class Ball : MonoBehaviour
         {
             if (!grabbed && lastCollision != name)
             {
-                audioSource.PlayOneShot(net, Mathf.Clamp01(Mathf.Log10(rb.linearVelocity.magnitude + 1)));
+                audioSource.PlayOneShot(net, Mathf.Clamp01(Mathf.Log10(rb.linearVelocity.magnitude * 1.5f + 1)));
                 lastCollision = name;
                 if (collisionCoroutine != null) StopCoroutine(collisionCoroutine);
                 collisionCoroutine = StartCoroutine(ResetLastCollision());

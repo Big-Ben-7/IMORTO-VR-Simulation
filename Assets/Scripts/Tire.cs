@@ -1,10 +1,12 @@
 using UnityEngine;
 using System.Collections;
-using System;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
-public class Tire : MonoBehaviour
+public class Tire : XRGrabInteractable
 {
-    [SerializeField] AudioClip hit;
+    [SerializeField] AudioClip hit, socket;
     string lastCollision;
     WaitForSeconds fifthSecond;
     bool grabbed;
@@ -12,8 +14,9 @@ public class Tire : MonoBehaviour
     Coroutine collisionCoroutine;
     Collider col;
     [SerializeField] LayerMask body;
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         audioSource = GetComponent<AudioSource>();
         col = GetComponent<Collider>();
         fifthSecond = Player.fifth;
@@ -39,14 +42,34 @@ public class Tire : MonoBehaviour
         if (lastCollision == t) lastCollision = "";
     }
 
-    public void Grab()
+
+    protected override void OnSelectEntered(SelectEnterEventArgs args)
     {
-        grabbed = !grabbed;
-        if (grabbed)
+        base.OnSelectEntered(args);
+        if (args.interactorObject is XRSocketInteractor)
         {
-            Player.Grab();
-            col.excludeLayers = body;
+            audioSource.PlayOneShot(socket);
+            return;
         }
-        else col.excludeLayers = 0;
+        grabbed = true;
+        Player.Grab();
+        col.excludeLayers = body;
+    }
+
+    protected override void OnSelectExited(SelectExitEventArgs args)
+    {
+        base.OnSelectExited(args);
+        if (args.interactorObject is XRSocketInteractor)
+        {
+            return;
+        }
+        grabbed = false;
+        col.excludeLayers = 0;
+    }
+
+    public void Freeze()
+    {
+        GetComponent<Rigidbody>().isKinematic = true;
+        col.enabled = false;
     }
 }

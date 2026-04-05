@@ -1,4 +1,5 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
@@ -65,6 +66,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
     [SerializeField] AudioClip launchClip;
     [SerializeField] Rotate[] heliRotators;
     bool cooldown;
+    [SerializeField] TMP_Text instructions;
 
     [Header("Solar System")]
     [SerializeField] Transform solarSystem;
@@ -205,6 +207,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
                     screen.SetActive(false);
                     roverCam.enabled = false;
                     block.enabled = true;
+                    instructions.enabled = false;
                 }
                 break;
         }
@@ -331,6 +334,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         heliCam.enabled = true;
         screen.SetActive(true);
         block.enabled = false;
+        instructions.enabled = true;
         state = State.Launch;
     }
 
@@ -512,6 +516,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
             roverSource.Play();
             roverSource.PlayOneShot(gravel, 0.2f);
             StartCoroutine(ToggleCamera());
+            instructions.enabled = false;
         }
     }
 
