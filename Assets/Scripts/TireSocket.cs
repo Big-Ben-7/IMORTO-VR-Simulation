@@ -34,7 +34,8 @@ public class TireSocket : XRSocketInteractor
             tires = manuManager.tiresReady = tires + 1;
             if (tires == 4)
             {
-                tireText.text = "Assembly Ready";
+                //tireText.text = "Assembly Ready";
+                tireText.text = "Tires Secured: 4/4";
                 tireText.color = greenColor;
                 manuManager.tireSource.PlayOneShot(tiresReady, 0.1f);
             }

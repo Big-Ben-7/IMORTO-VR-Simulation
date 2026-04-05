@@ -54,6 +54,8 @@ public class Tire : XRGrabInteractable
         grabbed = true;
         Player.Grab();
         col.excludeLayers = body;
+        ManuManager manuManager = ManuManager.instance;
+        if (!manuManager.carSwapped && manuManager.lastAssembled) manuManager.SwapCar();
     }
 
     protected override void OnSelectExited(SelectExitEventArgs args)

@@ -17,6 +17,7 @@ public class ManuManager : MonoBehaviour
     Vector3[] destinationPos;
     int[] partDestinations;
     Transform[] partMarkers, destinations, assemblyParts;
+    MeshRenderer door1, door2;
     MeshRenderer[] partRends;
     List<MeshRenderer> lasercutRends = new List<MeshRenderer>();
     List<Collider> lasercutCols = new List<Collider>();
@@ -28,7 +29,8 @@ public class ManuManager : MonoBehaviour
     int particleCount;
     [SerializeField] Transform stamper, painter, lasercutter, startMarker/*, endMarker, */, buttonParent, destinationParent, assemblyParent, suction1, suction2;
     [SerializeField] TMP_Text colorText, startText, paintQueueText;
-    Transform tireParent, wholeCar;
+    [SerializeField] Color[] masterButtonColors;
+    Transform tireParent, wholeCar, suctionParts1, suctionParts2;
     Material[][] wholeCarMats;
     List<int>[] partMats = new List<int>[] 
     {
@@ -54,7 +56,7 @@ public class ManuManager : MonoBehaviour
     Color[] buttonColors;
     Transform carParent, partsParent;
     Animator assemblyAnim1, assemblyAnim2;
-    Animation stampAnim, tireAnim;
+    Animation stampAnim, tireAnim, carAnim;
     AnimationState /*tireAssembly,*/ stampState;
     float stampZ, laserEnd;
     Vector3 laserMarker;
@@ -75,15 +77,17 @@ public class ManuManager : MonoBehaviour
     [SerializeField] Color blackColor;
     Rotate[] bars;
     int barCount;
-    AudioSource beltSource, painterSource, stamperSource, laserSource;
+    AudioSource beltSource, painterSource, stamperSource, laserSource, carSource;
     public AudioSource tireSource;
-    [SerializeField] AudioClip paint, stamp, startUp, shutDown;
+    [SerializeField] AudioClip paint, stamp, startUp, shutDown, tireSwap, carStart, carMove;
     List<string> paintQueue = new List<string>();
     public static ManuManager instance;
     public int tiresReady;
-    public bool assemblyComplete;
+    public bool lastAssembled;
+    bool assemblyComplete;
     bool tireAssembled;
     public bool stampTrigger;
+    public bool carSwapped;
 
     void Awake()
     {
@@ -102,7 +106,9 @@ public class ManuManager : MonoBehaviour
         startMarker.GetPositionAndRotation(out startPos, out startRot);
         assemblyParts = new Transform[partCount];
         partsParent = assemblyParent.GetChild(0);
-        wholeCar = partsParent.GetChild(0);
+        Transform finalCar = partsParent.GetChild(0);
+        carAnim = finalCar.GetComponent<Animation>();
+        wholeCar = finalCar.GetChild(0);
         carParent = partsParent.GetChild(1);
         Transform postConveyerParent = partsParent.GetChild(2);
         tireParent = partsParent.GetChild(3);
@@ -157,6 +163,7 @@ public class ManuManager : MonoBehaviour
             Transform nozzle = nozzles[i] = lasercutter.GetChild(i + 6);
             initialNozzlePos[i] = nozzle.position;
         }
+        carSource = wholeCar.GetChild(0).GetComponent<AudioSource>();
         laserSource = lasercutter.GetChild(5).GetComponent<AudioSource>();
         painterSource = painter.GetComponent<AudioSource>();
         particles = painter.GetComponentsInChildren<ParticleSystem>();
@@ -193,12 +200,16 @@ public class ManuManager : MonoBehaviour
         barCount = bars.Length;
         tireAnim = tireParent.GetChild(0).GetComponent<Animation>();
         //tireAssembly = tireAnim["TireAssembly"];
-        tireSource = tireParent.GetChild(4).GetComponent<AudioSource>();
+        tireSource = tireParent.GetChild(3).GetComponent<AudioSource>();
         stampState = stampAnim["Stamp"];
         MeshRenderer[] assembledRends = wholeCar.GetComponentsInChildren<MeshRenderer>();
         int n = assembledRends.Length;
         wholeCarMats = new Material[n][];
         for (int i = 0; i < n; i++) wholeCarMats[i] = assembledRends[i].materials;
+        suctionParts1 = suction1.GetChild(1);
+        suctionParts2 = suction2.GetChild(1);
+        door1 = assemblyParts[4].GetComponent<MeshRenderer>();
+        door2 = assemblyParts[10].GetComponent<MeshRenderer>();
     }
 
     IEnumerator SendParts()
@@ -271,6 +282,7 @@ public class ManuManager : MonoBehaviour
             tireSource.Play();
             tireAnim.Play();
         }
+        if (lastAssembled && !carSwapped && !door1.isVisible && !door2.isVisible) SwapCar();
     }
 
     void FixedUpdate()
@@ -501,6 +513,7 @@ public class ManuManager : MonoBehaviour
             start = buttonPaused = false;
             for (int j = 0; j < barCount; j++) bars[j].SetRotate(true, 360);
             startText.SetText("Halt Production");
+            startText.color = masterButtonColors[1];
             beltSource.Play();
             beltSource.PlayOneShot(startUp);
         }
@@ -509,6 +522,7 @@ public class ManuManager : MonoBehaviour
             buttonPaused = start = true;
             for (int j = 0; j < barCount; j++) bars[j].SetRotate(false, 360);
             startText.SetText("Initiate Production");
+            startText.color = masterButtonColors[0];
             beltSource.Stop();
             beltSource.PlayOneShot(shutDown);
             assemblyAnim1.speed = assemblyAnim2.speed = stampState.speed = 0;
@@ -517,9 +531,34 @@ public class ManuManager : MonoBehaviour
         Player.Click();
     }
 
+    public void CompleteAssembly()
+    {
+        assemblyComplete = true;
+        startText.transform.parent.GetComponent<Button>().interactable = false;
+        startText.SetText("Assembly Complete");
+        startText.color = masterButtonColors[2];
+        if (buttonPaused) return;
+        buttonPaused = true;
+        for (int j = 0; j < barCount; j++) bars[j].SetRotate(false, 360);
+        beltSource.Stop();
+        beltSource.PlayOneShot(shutDown);
+    }
+
     public void Suction(int i)
     {
-        assemblyParts[i].SetParent(i % 2 == 0 ? suction1 : suction2);
+        Transform t = assemblyParts[i];
+        if (i % 2 == 0)
+        {
+            t.SetParent(suction1);
+            suctionParts1.GetChild(i / 2).GetLocalPositionAndRotation(out Vector3 p, out Quaternion r);
+            t.SetLocalPositionAndRotation(p, r);
+        }
+        else
+        {
+            t.SetParent(suction2);
+            suctionParts2.GetChild(i / 2).GetLocalPositionAndRotation(out Vector3 p, out Quaternion r);
+            t.SetLocalPositionAndRotation(p, r);
+        }
         //assemblyAnim.SetInteger("Part", -1);
     }
 
@@ -531,14 +570,27 @@ public class ManuManager : MonoBehaviour
         partT.SetPositionAndRotation(p, r);
         if (i == partCount - 1)
         {
-            carParent.gameObject.SetActive(false);
-            wholeCar.gameObject.SetActive(true);
+            lastAssembled = true;
+            if (!carSwapped && tiresReady == 4) SwapCar();
         }
     }
 
     public void SwapTires()
     {
-        for (int i = 0; i < 4; i++) preTires[i].SetActive(false);
-        postTires[0].SetActive(true); postTires[1].SetActive(true);
+        for (int i = 0; i < 4; i++)
+        {
+            preTires[i].SetActive(false);
+            postTires[i].SetActive(true);
+        }
+        carSource.PlayOneShot(tireSwap);
+        carAnim.Play();
+    }
+
+    public void SwapCar()
+    {
+        if (carSwapped || !lastAssembled) return;
+        carSwapped = true;
+        carParent.gameObject.SetActive(false);
+        wholeCar.gameObject.SetActive(true);
     }
 }

@@ -1,13 +1,15 @@
+using Palmmedia.ReportGenerator.Core.Reporting.Builders;
 using UnityEngine;
 
 public class AssemblyManager : MonoBehaviour
 {
     AudioSource audioSource;
-    [SerializeField] AudioClip suction, unsuction;
+    [SerializeField] AudioClip suction, unsuction, carMoving, carStart, honk;
+    [SerializeField] Material headlights, redHeadlights;
     ManuManager manuManager;
     void Awake()
     {
-        audioSource = GetComponentInChildren<AudioSource>();
+        audioSource = GetComponentInChildren<AudioSource>(true);
     }
     void Start()
     {
@@ -26,7 +28,7 @@ public class AssemblyManager : MonoBehaviour
 
     public void Complete()
     {
-        manuManager.assemblyComplete = true;
+        manuManager.CompleteAssembly();
     }
 
     public void Stamp()
@@ -41,6 +43,21 @@ public class AssemblyManager : MonoBehaviour
 
     public void StopAudio()
     {
-        transform.parent.GetChild(4).GetComponent<AudioSource>().Stop();
+        transform.parent.GetChild(3).GetComponent<AudioSource>().Stop();
+    }
+
+    public void PlayCar()
+    {
+        Debug.Log(audioSource);
+        audioSource.PlayOneShot(carStart, 0.2f);
+        audioSource.PlayOneShot(carMoving, 0.6f);
+        MeshRenderer mr = transform.GetChild(0).GetChild(5).GetComponent<MeshRenderer>();
+        mr.materials[11] = headlights;
+        mr.materials[12] = redHeadlights;
+    }
+
+    public void Honk()
+    {
+        audioSource.PlayOneShot(honk, 0.5f);
     }
 }

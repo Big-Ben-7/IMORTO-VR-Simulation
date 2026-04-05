@@ -59,6 +59,7 @@ public class Player : MonoBehaviour
     Collider[] ladderCols;
     int ladderColCount;
     [SerializeField] LayerMask body;
+    ManuManager manuManager;
 
     void Awake()
     {
@@ -116,6 +117,7 @@ public class Player : MonoBehaviour
         lastPos = new Vector2(pos.x, pos.z);
         StartCoroutine(Initialize());
         StartCoroutine(CalculateVelocity());
+        manuManager = ManuManager.instance;
     }
 
     void Update()
@@ -287,6 +289,7 @@ public class Player : MonoBehaviour
     {
         climbing = true;
         for (int i = 0; i < ladderColCount; i++) ladderCols[i].excludeLayers = body;
+        if (!manuManager.carSwapped && manuManager.lastAssembled) manuManager.SwapCar();
     }
 
     IEnumerator Fade(float duration = 0.2f)
