@@ -71,6 +71,7 @@ public class ManuManager : MonoBehaviour
     WaitForSeconds particleWait = new WaitForSeconds(0.005f);
     WaitForSeconds wait = new WaitForSeconds(0.1667f);
     Color paintColor = Color.white;
+    [SerializeField] Color blackColor;
     Rotate[] bars;
     int barCount;
     AudioSource beltSource, painterSource, stamperSource, laserSource;
@@ -183,7 +184,7 @@ public class ManuManager : MonoBehaviour
             ParticleSystem.MainModule main = particles[j].main;
             main.startColor = Color.white;
         }
-        colorText.SetText("Selected Paint Color: Clear");
+        colorText.SetText("Selected Paint Color: Auto");
         bars = transform.parent.GetChild(0).GetComponentsInChildren<Rotate>();
         barCount = bars.Length;
         tireAnim = tireParent.GetChild(0).GetComponent<Animation>();
@@ -305,7 +306,14 @@ public class ManuManager : MonoBehaviour
                     if (partDestinations[i] >= 7)
                     {
                         partStates[i] = State.Painted;
-                        StartCoroutine(SetColor(partRends[i], paintColor));
+                        Color c = paintColor;
+                        switch (i)
+                        {
+                            case 6 or 7 or 13 or 14:
+                                if (c == Color.white) c = blackColor;
+                                break;
+                        }
+                        StartCoroutine(SetColor(partRends[i], c));
                         for (int j = 0; j < particleCount; j++) particles[j].Play();
                     }
                     break;
@@ -387,6 +395,11 @@ public class ManuManager : MonoBehaviour
     IEnumerator SetColor(MeshRenderer rend, Color color)
     {
         yield return particleWait;
+        for (int j = 0; j < particleCount; j++)
+        {
+            ParticleSystem.MainModule main = particles[j].main;
+            main.startColor = color;
+        }
         if (color != Color.white)
         {
             Material[] mats = rend.materials;
@@ -449,22 +462,12 @@ public class ManuManager : MonoBehaviour
         if (paintColor == buttonColors[i])
         {
             paintColor = Color.white;
-            for (int j = 0; j < particleCount; j++)
-            {
-                ParticleSystem.MainModule main = particles[j].main;
-                main.startColor = Color.white;
-            }
-            colorText.SetText("Selected Paint Color: Clear");
+            colorText.SetText("Selected Paint Color: Auto");
         }
         else
         {
             paintColor = buttonColors[i];
             colorText.SetText("Selected Paint Color: " + buttonNames[i]);
-            for (int j = 0; j < particleCount; j++)
-            {
-                ParticleSystem.MainModule main = particles[j].main;
-                main.startColor = paintColor;
-            }
         }
         Player.Click();
     }
