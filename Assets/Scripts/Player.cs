@@ -344,12 +344,14 @@ public class Player : MonoBehaviour
 
     public static void SendHapticsLeft(float amplitude, float duration)
     {
+        if (leftDevice == null) return;
         var command = UnityEngine.InputSystem.XR.Haptics.SendHapticImpulseCommand.Create(0, amplitude, duration);
         leftDevice.ExecuteCommand(ref command);
     }
 
     public static void SendHapticsRight(float amplitude, float duration)
     {
+        if (rightDevice == null) return;
         var command = UnityEngine.InputSystem.XR.Haptics.SendHapticImpulseCommand.Create(0, amplitude, duration);
         rightDevice.ExecuteCommand(ref command);
     }
