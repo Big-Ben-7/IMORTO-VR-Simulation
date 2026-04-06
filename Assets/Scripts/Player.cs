@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.XR;
 public enum MyHandedness {Left, Right, None};
 public class Player : MonoBehaviour
 {
@@ -52,9 +51,7 @@ public class Player : MonoBehaviour
     //[SerializeField] GameObject lobby, ent, health, expl, manu;
     public static Player instance;
     bool canBump = true, climbing;
-    public static bool leftHaptics, rightHaptics;
-    public static UnityEngine.XR.InputDevice rightDevice;
-    public static UnityEngine.XR.InputDevice leftDevice;
+    public static UnityEngine.InputSystem.XR.XRController leftDevice, rightDevice;
     [SerializeField] Transform ladder;
     Collider[] ladderCols;
     int ladderColCount;
@@ -64,12 +61,6 @@ public class Player : MonoBehaviour
     void Awake()
     {
         instance = this;
-        rightDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
-        if (rightDevice.isValid && rightDevice.TryGetHapticCapabilities(out HapticCapabilities capabilities) && capabilities.supportsImpulse) rightHaptics = true;
-        else rightHaptics = false;
-        leftDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
-        if (leftDevice.isValid && leftDevice.TryGetHapticCapabilities(out capabilities) && capabilities.supportsImpulse) leftHaptics = true;
-        else leftHaptics = false;
         Transform xr = transform.GetChild(0);
         rb = xr.GetComponent<Rigidbody>();
         col = xr.GetChild(2).GetComponent<CapsuleCollider>();
@@ -109,6 +100,8 @@ public class Player : MonoBehaviour
         mapCol = mapCanvas.GetComponent<Collider>();
         ladderCols = ladder.GetComponentsInChildren<Collider>();
         ladderColCount = ladderCols.Length;
+        leftDevice = InputSystem.GetDevice<UnityEngine.InputSystem.XR.XRController>(CommonUsages.LeftHand);
+        rightDevice = InputSystem.GetDevice<UnityEngine.InputSystem.XR.XRController>(CommonUsages.RightHand);
     }
 
     void Start()
@@ -351,12 +344,14 @@ public class Player : MonoBehaviour
 
     public static void SendHapticsLeft(float amplitude, float duration)
     {
-        /*if (leftHaptics)*/ leftDevice.SendHapticImpulse(0, amplitude, duration);
+        var command = UnityEngine.InputSystem.XR.Haptics.SendHapticImpulseCommand.Create(0, amplitude, duration);
+        leftDevice.ExecuteCommand(ref command);
     }
 
     public static void SendHapticsRight(float amplitude, float duration)
     {
-        /*if (rightHaptics)*/ rightDevice.SendHapticImpulse(0, amplitude, duration);
+        var command = UnityEngine.InputSystem.XR.Haptics.SendHapticImpulseCommand.Create(0, amplitude, duration);
+        rightDevice.ExecuteCommand(ref command);
     }
 
     IEnumerator BumpCooldown()

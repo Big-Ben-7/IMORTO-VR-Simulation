@@ -1,45 +1,47 @@
 using System.Collections;
-using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.UIElements;
+using UnityEngine.XR.Interaction.Toolkit.Samples.Hands;
 
 public class GreeterBot : MonoBehaviour
 {
     WaitForSeconds fourSeconds = new WaitForSeconds(4);
     WaitForSeconds twoSeconds;
     [SerializeField] AudioClip greeting;
-    [SerializeField] Animation anim;
+    [SerializeField] Transform head;
     AudioSource audioSource, botSource;
     //bool started;
-    Coroutine play;
+    bool paused = true;
     void Awake()
     {
-        AudioSource[] sources = GetComponents<AudioSource>();
+        AudioSource[] sources = head.GetComponents<AudioSource>();
         audioSource = sources[0];
         botSource = sources[1];
         twoSeconds = Player.two;
+        StartCoroutine(Play());
     }
 
     void OnTriggerEnter(Collider other)
     {
-        if (botSource.isPlaying) return;
-        play = StartCoroutine(Play());
+        if (!paused || !other.gameObject.CompareTag("Player")) return;
+        paused = false;
+        botSource.Play();
     }
 
-    void OnTriggerExit()
+    void OnTriggerExit(Collider other)
     {
-        if (!botSource.isPlaying) return;
-        StopCoroutine(play);
+        if (paused || !other.gameObject.CompareTag("Player")) return;
+        paused = true;
         botSource.Stop();
-        anim.Stop();
     }
 
     IEnumerator Play()
     {
-        botSource.Play();
-        anim.Play();
         yield return Player.one;
         while (true)
         {
+            while (paused) yield return null;
             botSource.Pause();
             audioSource.PlayOneShot(greeting);
             StartCoroutine(PlayBot());

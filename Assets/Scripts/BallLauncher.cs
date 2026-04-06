@@ -104,6 +104,11 @@ public class BallLauncher : XRGrabInteractable
         fifthSecond = Player.fifth;
     }
 
+    void Start()
+    {
+        balls[0].gameObject.SetActive(true);
+    }
+
     void Update()
     {
         if (Ball.instance == null) Ball.ResetBot();

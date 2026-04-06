@@ -1,4 +1,3 @@
-using Palmmedia.ReportGenerator.Core.Reporting.Builders;
 using UnityEngine;
 
 public class AssemblyManager : MonoBehaviour
@@ -18,7 +17,7 @@ public class AssemblyManager : MonoBehaviour
     public void Suction(int i)
     {
         manuManager.Suction(i);
-        audioSource.PlayOneShot(suction, 0.7f);
+        audioSource.PlayOneShot(suction, 0.5f);
     }
     public void UnSuction(int i)
     {
@@ -48,8 +47,8 @@ public class AssemblyManager : MonoBehaviour
 
     public void PlayCar()
     {
-        audioSource.PlayOneShot(carStart, 0.25f);
-        audioSource.PlayOneShot(carMoving, 0.6f);
+        audioSource.PlayOneShot(carStart, 0.3f);
+        audioSource.PlayOneShot(carMoving, 0.7f);
         MeshRenderer mr = transform.GetChild(0).GetChild(5).GetComponent<MeshRenderer>();
         Material[] mats = mr.materials;
         mats[11] = headlights;
@@ -59,6 +58,6 @@ public class AssemblyManager : MonoBehaviour
 
     public void Honk()
     {
-        audioSource.PlayOneShot(honk, 0.4f);
+        audioSource.PlayOneShot(honk, 0.5f);
     }
 }

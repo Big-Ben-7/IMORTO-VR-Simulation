@@ -5294,7 +5294,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5912880646877707423, guid: 641a0c1e66d7942118e29359a27ecddc, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5967925749307711558, guid: 641a0c1e66d7942118e29359a27ecddc, type: 3}
       propertyPath: m_ExcludeLayers.m_Bits
@@ -38864,6 +38864,74 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 180598720}
   m_CullTransparentMesh: 1
+--- !u!1 &180790867
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 180790868}
+  - component: {fileID: 180790870}
+  - component: {fileID: 180790869}
+  m_Layer: 0
+  m_Name: Collider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 2147483647
+  m_IsActive: 1
+--- !u!4 &180790868
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 180790867}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.6830127, y: 0.18301275, z: 0.18301275, w: 0.6830127}
+  m_LocalPosition: {x: -2.36, y: 1.9648219, z: 14.54}
+  m_LocalScale: {x: 70, y: 70, z: 70}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1621164208}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+--- !u!114 &180790869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 180790867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00b13423e013143aa9d2375fd66f8c33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  greeting: {fileID: 8300000, guid: 36975a1bb686644edba6fa67237f9090, type: 3}
+  head: {fileID: 5328482479227895092}
+--- !u!135 &180790870
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 180790867}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 32639
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.1
+  m_Center: {x: 0, y: -0.04, z: 0}
 --- !u!1 &181196437
 GameObject:
   m_ObjectHideFlags: 0
@@ -45895,7 +45963,7 @@ Animation:
   m_Animations:
   - {fileID: 7400000, guid: 0a6fa2816edbf4374a8f39a417e384e2, type: 2}
   m_WrapMode: 0
-  m_PlayAutomatically: 0
+  m_PlayAutomatically: 1
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
@@ -79801,7 +79869,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5912880646877707423, guid: 641a0c1e66d7942118e29359a27ecddc, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5967925749307711558, guid: 641a0c1e66d7942118e29359a27ecddc, type: 3}
       propertyPath: m_ExcludeLayers.m_Bits
@@ -189772,7 +189840,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5912880646877707423, guid: 641a0c1e66d7942118e29359a27ecddc, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5967925749307711558, guid: 641a0c1e66d7942118e29359a27ecddc, type: 3}
       propertyPath: m_ExcludeLayers.m_Bits
@@ -194633,7 +194701,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5912880646877707423, guid: 641a0c1e66d7942118e29359a27ecddc, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5967925749307711558, guid: 641a0c1e66d7942118e29359a27ecddc, type: 3}
       propertyPath: m_ExcludeLayers.m_Bits
@@ -217736,6 +217804,7 @@ Transform:
   - {fileID: 1188454840}
   - {fileID: 378143230}
   - {fileID: 1998675610}
+  - {fileID: 180790868}
   - {fileID: 543450651939927314}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -328940,8 +329009,6 @@ GameObject:
   - component: {fileID: 6164996481239493242}
   - component: {fileID: 8498956830487163277}
   - component: {fileID: 8498956830487163274}
-  - component: {fileID: 8498956830487163275}
-  - component: {fileID: 8498956830487163276}
   m_Layer: 0
   m_Name: head
   m_TagString: Untagged
@@ -342741,7 +342808,7 @@ AudioSource:
   Priority: 256
   DopplerLevel: 1
   MinDistance: 1.5
-  MaxDistance: 15
+  MaxDistance: 10
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -342816,41 +342883,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!135 &8498956830487163275
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6712131612081366783}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 32639
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.1
-  m_Center: {x: 0, y: -0.04, z: 0}
---- !u!114 &8498956830487163276
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6712131612081366783}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00b13423e013143aa9d2375fd66f8c33, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  greeting: {fileID: 8300000, guid: 36975a1bb686644edba6fa67237f9090, type: 3}
-  anim: {fileID: 255499211}
 --- !u!82 &8498956830487163277
 AudioSource:
   m_ObjectHideFlags: 0
@@ -342873,7 +342905,7 @@ AudioSource:
   Priority: 256
   DopplerLevel: 1
   MinDistance: 1.5
-  MaxDistance: 15
+  MaxDistance: 10
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0

@@ -86,6 +86,7 @@ public class Ball : MonoBehaviour
         //reset = resetBall.action;
         audioSource = GetComponent<AudioSource>();
         col = GetComponent<Collider>();
+        gameObject.SetActive(false);
     }
 
     void Start()
@@ -327,10 +328,10 @@ public class Ball : MonoBehaviour
                     switch(Racket.hand)
                     {
                         case MyHandedness.Left:
-                            Player.SendHapticsLeft(1, 0.15f);
+                            Player.SendHapticsLeft(1, 0.2f);
                             break;
                         case MyHandedness.Right:
-                            Player.SendHapticsRight(1, 0.15f);
+                            Player.SendHapticsRight(1, 0.2f);
                             break;
                     }
                 }
