@@ -32,7 +32,7 @@ public class Player : MonoBehaviour
 
     [Header("Movement")]
     [SerializeField] LayerMask groundMask;
-    [SerializeField] float outSpeed, inSpeed, stairSpeed, turnSpeed, jumpHeight;
+    [SerializeField] float outSpeed, inSpeed, stairSpeed, downStairSpeed, turnSpeed, jumpHeight;
     [SerializeField] RectTransform rectT, icon;
     Canvas mapCanvas;
     Collider mapCol;
@@ -192,7 +192,11 @@ public class Player : MonoBehaviour
                 }
                 //else play = false;
                 if (!isGrounded) audioSource.PlayOneShot(concreteLands[Random.Range(0, concreteCount)], 0.7f);
-                if (go.CompareTag("Stair")) speed = stairSpeed;
+                if (go.CompareTag("Stair"))
+                {
+                    if (Vector3.Dot(head.forward, head.position) > 0) speed = stairSpeed;
+                    else speed = downStairSpeed;
+                }
                 else speed = outSpeed;
             }
             if (vel > 0.5f)

@@ -48,16 +48,17 @@ public class AssemblyManager : MonoBehaviour
 
     public void PlayCar()
     {
-        Debug.Log(audioSource);
-        audioSource.PlayOneShot(carStart, 0.2f);
+        audioSource.PlayOneShot(carStart, 0.25f);
         audioSource.PlayOneShot(carMoving, 0.6f);
         MeshRenderer mr = transform.GetChild(0).GetChild(5).GetComponent<MeshRenderer>();
-        mr.materials[11] = headlights;
-        mr.materials[12] = redHeadlights;
+        Material[] mats = mr.materials;
+        mats[11] = headlights;
+        mats[12] = redHeadlights;
+        mr.materials = mats;
     }
 
     public void Honk()
     {
-        audioSource.PlayOneShot(honk, 0.5f);
+        audioSource.PlayOneShot(honk, 0.4f);
     }
 }

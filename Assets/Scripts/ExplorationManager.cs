@@ -473,6 +473,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         roverSource.Play();
         roverSource.PlayOneShot(gravel, 0.2f);
         StartCoroutine(ToggleCamera());
+        instructions.enabled = false;
     }
 
     public void Grab(int i)
