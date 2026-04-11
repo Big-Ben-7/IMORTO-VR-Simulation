@@ -5,7 +5,7 @@ using UnityEngine.AI;
 
 public class NPC : MonoBehaviour
 {
-    [SerializeField] Transform initialPos;
+    //[SerializeField] Transform initialPos;
     [SerializeField] float initialTime;
     [SerializeField] int destinationIndex, anim;
     [SerializeField] Transform destinationParent;
@@ -19,7 +19,6 @@ public class NPC : MonoBehaviour
     int pointHash = Animator.StringToHash("Point"), talkHash = Animator.StringToHash("Talk"), speedHash = Animator.StringToHash("Speed");
     Transform myT;
     static List<int> availableIndices = new List<int>() {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
-    int lastDestination = -1;
     //WaitForSeconds wait = new WaitForSeconds(0.02f);
     float myVel;
     Vector2 lastPos;
@@ -132,10 +131,9 @@ public class NPC : MonoBehaviour
         while (true)
         {
             while (animator.GetCurrentAnimatorStateInfo(0).shortNameHash != idleHash) yield return null;
-            agent.enabled = true;
-            obstacle.enabled = false;
+            //agent.enabled = true;
+            //obstacle.enabled = false;
             agent.SetDestination(destinationPos[destinationIndex]);
-            if (lastDestination != -1) availableIndices.Add(lastDestination);
             //animator.SetTrigger(walkHash);
             /*float lastVel = agent.velocity.magnitude;
             float diff = agent.remainingDistance - agent.stoppingDistance;
@@ -162,8 +160,8 @@ public class NPC : MonoBehaviour
                 animator.SetFloat(speedHash, myVel);
                 yield return null;
             }
-            agent.enabled = false;
-            obstacle.enabled = true;
+            //agent.enabled = false;
+            //obstacle.enabled = true;
             animator.speed = 1;
             animator.SetFloat(speedHash, 0);
             //yield return tenth;
@@ -202,7 +200,7 @@ public class NPC : MonoBehaviour
                     anim = 0;
                     break;
             }
-            lastDestination = destinationIndex;
+            availableIndices.Add(destinationIndex);
             destinationIndex = availableIndices[Random.Range(0, availableIndices.Count)];
             availableIndices.Remove(destinationIndex);
         }
