@@ -57,6 +57,8 @@ public class Player : MonoBehaviour
     int ladderColCount;
     [SerializeField] LayerMask body;
     ManuManager manuManager;
+    public static GreeterBot greeterBot;
+    bool outside = true;
 
     void Awake()
     {
@@ -146,6 +148,11 @@ public class Player : MonoBehaviour
                 //else play = false;
                 if (!isGrounded) audioSource.PlayOneShot(tileLands[Random.Range(0, tileCount)], 0.6f);
                 speed = inSpeed;
+                if (outside)
+                {
+                    outside = false;
+                    greeterBot.Outside(false);
+                }
             }
             else if (go.CompareTag("Metal"))
             {
@@ -157,6 +164,11 @@ public class Player : MonoBehaviour
                 //else play = false;
                 if (!isGrounded) audioSource.PlayOneShot(metalLands[Random.Range(0, metalCount)]);
                 speed = inSpeed;
+                if (outside)
+                {
+                    outside = false;
+                    greeterBot.Outside(false);
+                }
             }
             else if (go.CompareTag("Grass"))
             {
@@ -181,6 +193,11 @@ public class Player : MonoBehaviour
                     if (!isGrounded) audioSource.PlayOneShot(grassLands[Random.Range(0, grassCount)], 0.4f);
                 }
                 speed = outSpeed;
+                if (!outside)
+                {
+                    outside = true;
+                    greeterBot.Outside(true);
+                }
             }
             else
             {
@@ -197,6 +214,11 @@ public class Player : MonoBehaviour
                     else speed = downStairSpeed;
                 }
                 else speed = outSpeed;
+                if (!outside)
+                {
+                    outside = true;
+                    greeterBot.Outside(true);
+                }
             }
             if (vel > 0.5f)
             {
