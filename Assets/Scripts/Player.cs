@@ -102,6 +102,12 @@ public class Player : MonoBehaviour
         ladderColCount = ladderCols.Length;
         leftDevice = InputSystem.GetDevice<UnityEngine.InputSystem.XR.XRController>(CommonUsages.LeftHand);
         rightDevice = InputSystem.GetDevice<UnityEngine.InputSystem.XR.XRController>(CommonUsages.RightHand);
+        NPC.tileWalk = tileWalk;
+        NPC.concreteWalk = concreteWalk;
+        NPC.grassWalk = grassWalk;
+        NPC.gravelWalk = gravelWalk;
+        NPC.metalWalk = metalWalk;
+        NPC.groundMask = groundMask;
     }
 
     void Start()
