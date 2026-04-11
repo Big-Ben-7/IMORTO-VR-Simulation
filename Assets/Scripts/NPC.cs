@@ -18,7 +18,7 @@ public class NPC : MonoBehaviour
     int idleHash = Animator.StringToHash("Idle");//, walkHash = Animator.StringToHash("Walk"),
     int pointHash = Animator.StringToHash("Point"), talkHash = Animator.StringToHash("Talk"), speedHash = Animator.StringToHash("Speed");
     Transform myT;
-    static List<int> availableIndices = new List<int>() {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
+    static List<int> availableIndices = new List<int>() {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     //WaitForSeconds wait = new WaitForSeconds(0.02f);
     float myVel;
     Vector2 lastPos;

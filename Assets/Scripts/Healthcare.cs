@@ -168,16 +168,18 @@ public class Healthcare : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         //drone.Reset();
+        if (!other.gameObject.CompareTag("Player")) return;
         if (!canPlay) canPlay = true;
     }
 
-    void OnTriggerExit(Collider other)
+    /*void OnTriggerExit(Collider other)
     {
+        if (!other.gameObject.CompareTag("Player")) return;
         if (canPlay) canPlay = false;
         if (playing)
         {
             playing = false;
             videoPlayer.Pause();
         }
-    }
+    }*/
 }
