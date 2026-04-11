@@ -18621,7 +18621,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: -373825525
   m_SortingLayer: 1
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
 --- !u!1 &23204539
@@ -65334,7 +65334,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: -373825525
   m_SortingLayer: 1
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
 --- !u!1 &359917874 stripped
@@ -76154,7 +76154,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: -373825525
   m_SortingLayer: 1
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
 --- !u!1001 &421478167
@@ -89419,7 +89419,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47fbf4267cd07403ca21780cad961552, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  initialPos: {fileID: 20873000}
   initialTime: 3.5
   destinationIndex: 3
   anim: 2
@@ -134630,7 +134629,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47fbf4267cd07403ca21780cad961552, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPC
-  initialPos: {fileID: 2030531899}
   initialTime: 7
   destinationIndex: 5
   anim: 1
@@ -137295,7 +137293,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: -373825525
   m_SortingLayer: 1
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
 --- !u!1 &848413791
@@ -161745,7 +161743,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47fbf4267cd07403ca21780cad961552, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPC
-  initialPos: {fileID: 680357958}
   initialTime: 5
   destinationIndex: 18
   anim: 2
@@ -211226,7 +211223,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: -373825525
   m_SortingLayer: 1
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
 --- !u!1 &1384543574
@@ -215005,7 +215002,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: -373825525
   m_SortingLayer: 1
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
 --- !u!1001 &1412209098
@@ -230820,7 +230817,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: -373825525
   m_SortingLayer: 1
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
 --- !u!111 &1489964230
@@ -244759,7 +244756,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47fbf4267cd07403ca21780cad961552, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPC
-  initialPos: {fileID: 2074073794}
   initialTime: 6
   destinationIndex: 12
   anim: 2
@@ -268742,7 +268738,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47fbf4267cd07403ca21780cad961552, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPC
-  initialPos: {fileID: 1428417215}
   initialTime: 1
   destinationIndex: 8
   anim: 1
@@ -293061,7 +293056,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: -373825525
   m_SortingLayer: 1
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
 --- !u!1 &1950978606
@@ -295870,7 +295865,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47fbf4267cd07403ca21780cad961552, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPC
-  initialPos: {fileID: 680357958}
   initialTime: 5
   destinationIndex: 6
   anim: 2
@@ -371112,7 +371106,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: -373825525
   m_SortingLayer: 1
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
 --- !u!33 &6675639744767197451
