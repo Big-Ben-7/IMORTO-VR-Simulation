@@ -55,7 +55,7 @@ public class Drone : MonoBehaviour
                 {
                     if (nextPoint == pointCount - 1) nextPoint = 0;
                     else nextPoint++;
-                    path[nextPoint].y = Random.Range(2, 4);
+                    path[nextPoint].y = Random.Range(2.3f, 4);
                 }
                 break;
             case State.Reset:
@@ -95,7 +95,7 @@ public class Drone : MonoBehaviour
     {
         if (state == State.Idle || state == State.Reset) return;
         nextPoint = 0;
-        path[nextPoint].y = Random.Range(2, 4);
+        path[nextPoint].y = Random.Range(2.3f, 4);
         state = State.Reset;
         screen.SetActive(false);
     }

@@ -1200,16 +1200,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3017879602858219969, guid: 085ce58b196caa446a8545c9dd388793, type: 3}
-      propertyPath: m_Elasticity
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 3017879602858219969, guid: 085ce58b196caa446a8545c9dd388793, type: 3}
       propertyPath: m_MovementType
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3017879602858219969, guid: 085ce58b196caa446a8545c9dd388793, type: 3}
-      propertyPath: m_ScrollSensitivity
-      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 3060619106468608791, guid: 085ce58b196caa446a8545c9dd388793, type: 3}
       propertyPath: m_PresetInfoIsWorld
