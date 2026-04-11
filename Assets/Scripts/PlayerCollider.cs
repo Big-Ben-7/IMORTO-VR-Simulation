@@ -20,12 +20,16 @@ public class PlayerCollider : MonoBehaviour
         GameObject go = collision.gameObject;
         if ((val & 1 << go.layer) != 0)
         {
-            for (int i = 0; i < tagCount; i++)
+            if (go.layer == 15) Player.instance.Bump();
+            else
             {
-                if (go.CompareTag(tags[i]))
+                for (int i = 0; i < tagCount; i++)
                 {
-                    Player.instance.Bump();
-                    break;
+                    if (go.CompareTag(tags[i]))
+                    {
+                        Player.instance.Bump();
+                        break;
+                    }
                 }
             }
             switch (hand)
