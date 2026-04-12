@@ -20,17 +20,17 @@ public class Healthcare : MonoBehaviour
     Vector3[] needleVectors2 = new Vector3[] {Vector3.back, Vector3.forward, Vector3.back, Vector3.forward};
     GameObject[,,] arrows = new GameObject[4, 3, 2];
 
-    [Header("Triggers")]
+    /*[Header("Triggers")]
     [SerializeField] Camera mainCam;
     [SerializeField] MeshRenderer screen;
     VideoPlayer videoPlayer;
-    [SerializeField] Material videoMat;
+    [SerializeField] Material videoMat;*/
     //[SerializeField] Drone drone;
-    bool canPlay = false, playing = false;
+    //bool canPlay = true, playing = false;
 
     void Awake()
     {
-        videoPlayer = screen.GetComponent<VideoPlayer>();
+        //videoPlayer = screen.GetComponent<VideoPlayer>();
         for (int i = 0; i < 4; i++)
         {
             if (i < 3)
@@ -52,11 +52,13 @@ public class Healthcare : MonoBehaviour
             arrows[i, 2, 0] = needle.GetChild(0).gameObject;
             arrows[i, 2, 1] = low.GetChild(2).gameObject;
         }
+        //screen.material = videoMat;
+        //videoPlayer.Play();
     }
 
     void Update()
     {
-        if (canPlay)
+        /*if (canPlay)
         {
             if (GeometryUtility.TestPlanesAABB(GeometryUtility.CalculateFrustumPlanes(mainCam), screen.bounds))
             {
@@ -72,7 +74,7 @@ public class Healthcare : MonoBehaviour
                 playing = false;
                 videoPlayer.Pause();
             }
-        }
+        }*/
 
         if (arm == -1) return;
         Quaternion needleRot = needles[arm].rotation;
@@ -165,12 +167,12 @@ public class Healthcare : MonoBehaviour
         else cols[i].excludeLayers = 0;
     }
 
-    void OnTriggerEnter(Collider other)
+    /*void OnTriggerEnter(Collider other)
     {
         //drone.Reset();
         if (!other.gameObject.CompareTag("Player")) return;
         if (!canPlay) canPlay = true;
-    }
+    }*/
 
     /*void OnTriggerExit(Collider other)
     {

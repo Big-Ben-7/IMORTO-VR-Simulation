@@ -223808,9 +223808,6 @@ MonoBehaviour:
     m_Bits: 128
   armText: {fileID: 362939583}
   arm: -1
-  mainCam: {fileID: 1628262440841539883}
-  screen: {fileID: 1835992563}
-  videoMat: {fileID: 2100000, guid: cf915d934d8a9447cab76e120c6c1647, type: 2}
 --- !u!65 &1459860782
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -239635,7 +239632,7 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1609455909}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
@@ -267844,7 +267841,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 2936d02eb1dd841f59ae93e8a2e68dd1, type: 2}
+  - {fileID: 2100000, guid: cf915d934d8a9447cab76e120c6c1647, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -267904,7 +267901,7 @@ VideoPlayer:
   m_EnabledAudioTracks: 
   m_DirectAudioMutes: 
   m_ControlledAudioTrackCount: 0
-  m_PlayOnAwake: 0
+  m_PlayOnAwake: 1
   m_SkipOnDrop: 1
   m_Looping: 1
   m_WaitForFirstFrame: 1
