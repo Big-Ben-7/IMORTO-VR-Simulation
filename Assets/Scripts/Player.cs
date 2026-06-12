@@ -4,10 +4,14 @@ using UnityEngine.InputSystem;
 public enum MyHandedness {Left, Right, None};
 public class Player : MonoBehaviour
 {
-    [SerializeField] InputActionProperty leftGripInput, rightGripInput, mapInput;
-    InputAction leftGrip, rightGrip, mapAction;
+    [SerializeField] InputActionProperty leftGripInput, rightGripInput, mapInput, handInput;
+    [SerializeField] Transform[] leftInteractors, rightInteractors;
+    [SerializeField] GameObject[] leftModels, rightModels;
+    [SerializeField] Vector3[] leftPos, rightPos;
+    [SerializeField] Quaternion[] leftRot, rightRot;
+    InputAction leftGrip, rightGrip, mapAction, handAction;
     [SerializeField] Animator leftHand, rightHand;
-    [SerializeField] AudioClip teleport, grab, button, tileWalk, /*woodWalk,*/ metalWalk, concreteWalk, grassWalk, gravelWalk, mapActivate;
+    [SerializeField] AudioClip teleport, grab, button, tileWalk, /*woodWalk,*/ metalWalk, concreteWalk, grassWalk, gravelWalk, mapActivate, switchHands;
     [SerializeField] AudioClip[] tileLands, metalLands, concreteLands, grassLands, gravelLands, objectBumps;
     int tileCount, metalCount, concreteCount, grassCount, gravelCount;
     [SerializeField] CanvasGroup fadeCanvas;
@@ -18,6 +22,7 @@ public class Player : MonoBehaviour
     public static int bumpCount;
     AudioSource walkSource, bgSource;
     WaitForSeconds twentiethSecond = new WaitForSeconds(0.05f);
+    bool hands = true;
     //WaitForSeconds halfSecond = new WaitForSeconds(0.5f);
 
     [Header("Physics")]
@@ -76,6 +81,7 @@ public class Player : MonoBehaviour
         //rightRb = rightJoint.GetComponent<Rigidbody>();
         leftGrip = leftGripInput.action;
         rightGrip = rightGripInput.action;
+        handAction = handInput.action;
         mapAction = mapInput.action;
         moveAction = moveInput.action;
         turnAction = turnInput.action;
@@ -119,6 +125,13 @@ public class Player : MonoBehaviour
         StartCoroutine(Initialize());
         StartCoroutine(CalculateVelocity());
         manuManager = ManuManager.instance;
+
+        /*leftPos = new Vector3[4];
+        leftRot = new Quaternion[4];
+        rightPos = new Vector3[4];
+        rightRot = new Quaternion[4];
+        for (int i = 0; i < 4; i++) leftInteractors[i].GetLocalPositionAndRotation(out leftPos[i], out leftRot[i]);
+        for (int i = 0; i < 4; i++) rightInteractors[i].GetLocalPositionAndRotation(out rightPos[i], out rightRot[i]);*/
     }
 
     void Update()
@@ -258,6 +271,39 @@ public class Player : MonoBehaviour
             Vector3 pos = head.position;
             icon.anchoredPosition = new Vector2(rect.xMin + rect.width * Mathf.Clamp01((15.5f - pos.x) / 31), rect.yMin + rect.height * Mathf.Clamp01((15.035f - pos.z) / 31));
             icon.localRotation = Quaternion.Euler(0, 0, -head.eulerAngles.y + 180);
+        }
+        if (handAction.WasPressedThisFrame())
+        {
+            hands = !hands;
+            if (hands)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    leftInteractors[i].SetLocalPositionAndRotation(leftPos[i], leftRot[i]);
+                    rightInteractors[i].SetLocalPositionAndRotation(rightPos[i], rightRot[i]);
+                }
+                leftModels[1].SetActive(false);
+                rightModels[1].SetActive(false);
+                leftModels[0].SetActive(true);
+                rightModels[0].SetActive(true);
+            }
+            else
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    leftInteractors[i].SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+                    rightInteractors[i].SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+                }
+                leftInteractors[2].SetLocalPositionAndRotation(new Vector3(0, 0, 0.01f), Quaternion.identity);
+                rightInteractors[2].SetLocalPositionAndRotation(new Vector3(0, 0, 0.01f), Quaternion.identity);
+                leftInteractors[3].SetLocalPositionAndRotation(new Vector3(0, -0.02f, -0.035f), Quaternion.identity);
+                rightInteractors[3].SetLocalPositionAndRotation(new Vector3(0, -0.02f, -0.035f), Quaternion.identity);
+                leftModels[0].SetActive(false);
+                rightModels[0].SetActive(false);
+                leftModels[1].SetActive(true);
+                rightModels[1].SetActive(true);
+            }
+            audioSource.PlayOneShot(switchHands);
         }
     }
 

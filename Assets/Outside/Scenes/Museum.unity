@@ -143191,6 +143191,11 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 894037609}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &895413706 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8758423527188247893, guid: 1392f805216c47742996d4742c80721c, type: 3}
+  m_PrefabInstance: {fileID: 2355756444131960995}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &896022700
 GameObject:
   m_ObjectHideFlags: 0
@@ -177909,6 +177914,11 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1198347761}
   m_Mesh: {fileID: 3382784729083442459, guid: fef5b5ccaeb73ae4d92831950dfef29e, type: 3}
+--- !u!1 &1198362430 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5686134208185362930, guid: 1fd3a7c43c8190f4d8c167ebde694364, type: 3}
+  m_PrefabInstance: {fileID: 4438859178673105703}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1200356830
 GameObject:
   m_ObjectHideFlags: 0
@@ -234046,6 +234056,11 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.046152536, y: 0.017381465, z: 0.010000005}
   m_Center: {x: 0, y: -0.0021907606, z: 0.023000011}
+--- !u!1 &1556800871 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 109434732395284509, guid: 65847589f926b734d9eaed6e25f0046b, type: 3}
+  m_PrefabInstance: {fileID: 7823525806554922038}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1558335168
 GameObject:
   m_ObjectHideFlags: 0
@@ -290020,6 +290035,11 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.004, y: 0.07, z: 0.01}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &1972683005 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4283425761326543017, guid: 9f3369e30fbd31f4bb596b1a99babe83, type: 3}
+  m_PrefabInstance: {fileID: 2733774254275262045}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1972838443
 GameObject:
   m_ObjectHideFlags: 0
@@ -322686,6 +322706,54 @@ MonoBehaviour:
       m_SingletonActionBindings: []
       m_Flags: 0
     m_Reference: {fileID: -6287685663350560865, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+  handInput:
+    m_UseReference: 1
+    m_Action:
+      m_Name: Hand Input
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 81779f2c-31ee-4bbe-b38a-57c9f9d8a806
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: -2236196086437507384, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+  leftInteractors:
+  - {fileID: 4244556795742067958}
+  - {fileID: 1034854097}
+  - {fileID: 5716108438794442216}
+  - {fileID: 1611278746}
+  rightInteractors:
+  - {fileID: 688504953324961125}
+  - {fileID: 2121628830}
+  - {fileID: 386420042133083564}
+  - {fileID: 300219149}
+  leftModels:
+  - {fileID: 1556800871}
+  - {fileID: 895413706}
+  rightModels:
+  - {fileID: 1198362430}
+  - {fileID: 1972683005}
+  leftPos:
+  - {x: -0.002, y: -0.024, z: 0.01}
+  - {x: -0.00015, y: -0.02968, z: 0.0311}
+  - {x: 0, y: -0.03, z: -0.085}
+  - {x: 0.002, y: -0.044, z: -0.024}
+  rightPos:
+  - {x: -0.002, y: -0.027, z: 0.011}
+  - {x: -0.00384, y: -0.03266, z: 0.03205}
+  - {x: 0, y: -0.03, z: -0.085}
+  - {x: -0.002, y: -0.047, z: -0.024}
+  leftRot:
+  - {x: 0.13040192, y: 0.043246232, z: -0.005693473, w: 0.9905012}
+  - {x: 0.13040192, y: 0.043246232, z: -0.005693473, w: 0.9905012}
+  - {x: 0.08508985, y: 0.21561599, z: -0.018863963, w: 0.9725809}
+  - {x: 0.13040192, y: 0.043246232, z: -0.005693473, w: 0.9905012}
+  rightRot:
+  - {x: 0.13040192, y: -0.043246232, z: 0.005693473, w: 0.9905012}
+  - {x: 0.13040192, y: -0.043246232, z: 0.005693473, w: 0.9905012}
+  - {x: 0.08508985, y: -0.21561591, z: 0.018863956, w: 0.97258097}
+  - {x: 0.13040192, y: -0.043246232, z: 0.005693473, w: 0.9905012}
   leftHand: {fileID: 1925912088}
   rightHand: {fileID: 542530796}
   teleport: {fileID: 8300000, guid: 66254252e9b6747c0b8024bda202dd8e, type: 3}
@@ -322697,6 +322765,7 @@ MonoBehaviour:
   grassWalk: {fileID: 8300000, guid: 48863a904310c43cc92934cf75a9f2af, type: 3}
   gravelWalk: {fileID: 8300000, guid: d88ab6e595ed74adcba1034c3942f7a1, type: 3}
   mapActivate: {fileID: 8300000, guid: 79145794698174651a6c153feaeafd92, type: 3}
+  switchHands: {fileID: 8300000, guid: 01cee2a514a414a35b7b14af5c27d17f, type: 3}
   tileLands:
   - {fileID: 8300000, guid: 3860cb3ac01af4795b8f3c180f7a9c48, type: 3}
   - {fileID: 8300000, guid: 8459285a93144449db4c7cfb1d10da64, type: 3}
