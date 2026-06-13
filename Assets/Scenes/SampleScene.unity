@@ -1217,6 +1217,8 @@ MonoBehaviour:
     buttonText: Continue
   - stepObject: {fileID: 329674977}
     buttonText: Restart
+  endText: Restart
+  closeOnEnd: 0
 --- !u!1 &168691292
 GameObject:
   m_ObjectHideFlags: 0
@@ -10380,6 +10382,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2243020123108092049, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
       propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4381072889419385576, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4750419573833148750, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}

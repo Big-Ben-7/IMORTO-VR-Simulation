@@ -1,15 +1,25 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.XR.Interaction.Toolkit.Inputs;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
+using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 public enum MyHandedness {Left, Right, None};
 public class Player : MonoBehaviour
 {
-    [SerializeField] InputActionProperty leftGripInput, rightGripInput, mapInput, handInput;
+    [SerializeField] InputActionProperty leftGripInput, rightGripInput, mapInput, handInput, hideTipInput;
     [SerializeField] Transform[] leftInteractors, rightInteractors;
     [SerializeField] GameObject[] leftModels, rightModels;
+    XRPokeInteractor leftPoke, rightPoke;
+    XRInteractorLineVisual leftTP, rightTP;
+    [SerializeField] XRTransformStabilizer leftStabilizer, rightStabilizer;
+    [SerializeField] Transform[] leftPokes, rightPokes;
     [SerializeField] Vector3[] leftPos, rightPos;
     [SerializeField] Quaternion[] leftRot, rightRot;
-    InputAction leftGrip, rightGrip, mapAction, handAction;
+    InputAction leftGrip, rightGrip, mapAction, handAction, hideTipAction;
     [SerializeField] Animator leftHand, rightHand;
     [SerializeField] AudioClip teleport, grab, button, tileWalk, /*woodWalk,*/ metalWalk, concreteWalk, grassWalk, gravelWalk, mapActivate, switchHands;
     [SerializeField] AudioClip[] tileLands, metalLands, concreteLands, grassLands, gravelLands, objectBumps;
@@ -22,7 +32,7 @@ public class Player : MonoBehaviour
     public static int bumpCount;
     AudioSource walkSource, bgSource;
     WaitForSeconds twentiethSecond = new WaitForSeconds(0.05f);
-    bool hands = true;
+    bool hands = false, tips = true;
     //WaitForSeconds halfSecond = new WaitForSeconds(0.5f);
 
     [Header("Physics")]
@@ -64,7 +74,11 @@ public class Player : MonoBehaviour
     ManuManager manuManager;
     public static GreeterBot greeterBot;
     bool outside = true;
-
+    Canvas[] tooltips;
+    MeshRenderer[] tipDots;
+    LineRenderer[] tipLines;
+    int tooltipCount, tipDotCount, tipLineCount;
+    [SerializeField] GameObject[] tooltipParents;
     void Awake()
     {
         instance = this;
@@ -86,6 +100,7 @@ public class Player : MonoBehaviour
         moveAction = moveInput.action;
         turnAction = turnInput.action;
         jumpAction = jumpInput.action;
+        hideTipAction = hideTipInput.action;
         fadeCanvas.alpha = 0;
         grabClip = grab;
         buttonClip = button;
@@ -116,6 +131,10 @@ public class Player : MonoBehaviour
         NPC.gravelWalk = gravelWalk;
         NPC.metalWalk = metalWalk;
         NPC.groundMask = groundMask;
+        leftPoke = leftInteractors[0].GetComponent<XRPokeInteractor>();
+        rightPoke = rightInteractors[0].GetComponent<XRPokeInteractor>();
+        leftTP = leftInteractors[3].GetComponent<XRInteractorLineVisual>();
+        rightTP = rightInteractors[3].GetComponent<XRInteractorLineVisual>();
     }
 
     void Start()
@@ -125,7 +144,12 @@ public class Player : MonoBehaviour
         StartCoroutine(Initialize());
         StartCoroutine(CalculateVelocity());
         manuManager = ManuManager.instance;
-
+        tooltips = tooltipParents[0].GetComponentsInChildren<Canvas>().Concat(tooltipParents[1].GetComponentsInChildren<Canvas>()).ToArray();
+        tipDots = tooltipParents[0].GetComponentsInChildren<MeshRenderer>().Concat(tooltipParents[1].GetComponentsInChildren<MeshRenderer>()).ToArray();
+        tipLines = tooltipParents[0].GetComponentsInChildren<LineRenderer>().Concat(tooltipParents[1].GetComponentsInChildren<LineRenderer>()).ToArray();
+        tooltipCount = tooltips.Length;
+        tipDotCount = tipDots.Length;
+        tipLineCount = tipLines.Length;
         /*leftPos = new Vector3[4];
         leftRot = new Quaternion[4];
         rightPos = new Vector3[4];
@@ -136,8 +160,11 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        leftHand.SetFloat("Grip", leftGrip.ReadValue<float>());
-        rightHand.SetFloat("Grip", rightGrip.ReadValue<float>());
+        if (hands)
+        {
+            leftHand.SetFloat("Grip", leftGrip.ReadValue<float>());
+            rightHand.SetFloat("Grip", rightGrip.ReadValue<float>());
+        }
         moveAxis = sitting? Vector2.zero : moveAction.ReadValue<Vector2>();
         turnAxis = turnAction.ReadValue<Vector2>().x;
 
@@ -159,7 +186,7 @@ public class Player : MonoBehaviour
                     walkSource.clip = tileWalk;
                 }
                 //else play = false;
-                if (!isGrounded) audioSource.PlayOneShot(tileLands[Random.Range(0, tileCount)], 0.6f);
+                if (!isGrounded) audioSource.PlayOneShot(tileLands[UnityEngine.Random.Range(0, tileCount)], 0.6f);
                 speed = inSpeed;
                 if (outside)
                 {
@@ -175,7 +202,7 @@ public class Player : MonoBehaviour
                     walkSource.clip = metalWalk;
                 }
                 //else play = false;
-                if (!isGrounded) audioSource.PlayOneShot(metalLands[Random.Range(0, metalCount)]);
+                if (!isGrounded) audioSource.PlayOneShot(metalLands[UnityEngine.Random.Range(0, metalCount)]);
                 speed = inSpeed;
                 if (outside)
                 {
@@ -193,7 +220,7 @@ public class Player : MonoBehaviour
                         walkSource.clip = gravelWalk;
                     }
                     //else play = false;
-                    if (!isGrounded) audioSource.PlayOneShot(gravelLands[Random.Range(0, gravelCount)], 0.5f);
+                    if (!isGrounded) audioSource.PlayOneShot(gravelLands[UnityEngine.Random.Range(0, gravelCount)], 0.5f);
                 }
                 else
                 {
@@ -203,7 +230,7 @@ public class Player : MonoBehaviour
                         walkSource.clip = grassWalk;
                     }
                     //else play = false;
-                    if (!isGrounded) audioSource.PlayOneShot(grassLands[Random.Range(0, grassCount)], 0.4f);
+                    if (!isGrounded) audioSource.PlayOneShot(grassLands[UnityEngine.Random.Range(0, grassCount)], 0.4f);
                 }
                 speed = outSpeed;
                 if (!outside)
@@ -220,7 +247,7 @@ public class Player : MonoBehaviour
                     walkSource.clip = concreteWalk;
                 }
                 //else play = false;
-                if (!isGrounded) audioSource.PlayOneShot(concreteLands[Random.Range(0, concreteCount)], 0.7f);
+                if (!isGrounded) audioSource.PlayOneShot(concreteLands[UnityEngine.Random.Range(0, concreteCount)], 0.7f);
                 if (go.CompareTag("Stair"))
                 {
                     if (Vector3.Dot(head.forward, head.position) > 0) speed = stairSpeed;
@@ -272,6 +299,12 @@ public class Player : MonoBehaviour
             icon.anchoredPosition = new Vector2(rect.xMin + rect.width * Mathf.Clamp01((15.5f - pos.x) / 31), rect.yMin + rect.height * Mathf.Clamp01((15.035f - pos.z) / 31));
             icon.localRotation = Quaternion.Euler(0, 0, -head.eulerAngles.y + 180);
         }
+        if (hideTipAction.WasPressedThisFrame() && !hands)
+        {
+            tips = !tips;
+            toggleTips(tips);
+            audioSource.PlayOneShot(switchHands);
+        }
         if (handAction.WasPressedThisFrame())
         {
             hands = !hands;
@@ -284,8 +317,19 @@ public class Player : MonoBehaviour
                 }
                 leftModels[1].SetActive(false);
                 rightModels[1].SetActive(false);
+                leftPokes[1].gameObject.SetActive(false);
+                rightPokes[1].gameObject.SetActive(false);
                 leftModels[0].SetActive(true);
                 rightModels[0].SetActive(true);
+                //leftPokes[0].gameObject.SetActive(true);
+                //rightPokes[0].gameObject.SetActive(true);
+                leftPoke.attachTransform = leftPokes[0];
+                leftStabilizer.targetTransform = leftPokes[0];
+                rightPoke.attachTransform = rightPokes[0];
+                rightStabilizer.targetTransform = rightPokes[0];
+                leftTP.lineOriginTransform = leftPokes[0];
+                rightTP.lineOriginTransform = rightPokes[0];
+                if (tips) toggleTips(false);
             }
             else
             {
@@ -300,10 +344,37 @@ public class Player : MonoBehaviour
                 rightInteractors[3].SetLocalPositionAndRotation(new Vector3(0, -0.02f, -0.035f), Quaternion.identity);
                 leftModels[0].SetActive(false);
                 rightModels[0].SetActive(false);
+                //leftPokes[0].gameObject.SetActive(false);
+                //rightPokes[0].gameObject.SetActive(false);
                 leftModels[1].SetActive(true);
                 rightModels[1].SetActive(true);
+                leftPokes[1].gameObject.SetActive(true);
+                rightPokes[1].gameObject.SetActive(true);
+                leftPoke.attachTransform = leftPokes[1];
+                leftStabilizer.targetTransform = leftPokes[1];
+                rightPoke.attachTransform = rightPokes[1];
+                rightStabilizer.targetTransform = rightPokes[1];
+                leftTP.lineOriginTransform = leftPokes[1];
+                rightTP.lineOriginTransform = rightPokes[1];
+                if (tips) toggleTips(true);
             }
             audioSource.PlayOneShot(switchHands);
+        }
+    }
+
+    void toggleTips(bool activate)
+    {
+        if (activate)
+        {
+            for (int i = 0; i < tooltipCount; i++) tooltips[i].enabled = true;
+            for (int i = 0; i < tipDotCount; i++) tipDots[i].enabled = true;
+            for (int i = 0; i < tipLineCount; i++) tipLines[i].enabled = true;
+        }
+        else
+        {
+            for (int i = 0; i < tooltipCount; i++) tooltips[i].enabled = false;
+            for (int i = 0; i < tipDotCount; i++) tipDots[i].enabled = false;
+            for (int i = 0; i < tipLineCount; i++) tipLines[i].enabled = false;
         }
     }
 
@@ -413,7 +484,7 @@ public class Player : MonoBehaviour
         if (!canBump) return;
         canBump = false;
         StartCoroutine(BumpCooldown());
-        audioSource.PlayOneShot(bumpClips[Random.Range(0, bumpCount)], 0.4f);
+        audioSource.PlayOneShot(bumpClips[UnityEngine.Random.Range(0, bumpCount)], 0.4f);
     }
 
     public static void SendHapticsLeft(float amplitude, float duration)
