@@ -123,7 +123,7 @@ public class Healthcare : MonoBehaviour
         switch(arm)
         {
             case -1:
-                armText.SetText("Press a button to select an arm");
+                armText.SetText("Push button to select arm");
                 break;
             case 0:
                 armText.SetText("Selected Arm: Bottom-Left");

@@ -1,9 +1,9 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 using UnityEngine.XR.Interaction.Toolkit.Inputs;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
@@ -56,6 +56,11 @@ public class Player : MonoBehaviour
     InputAction moveAction, turnAction, jumpAction;
     Vector2 moveAxis;
     float turnAxis;
+    bool isTurning;
+    float nextTurnTime;
+    float cooldownTime = 0.25f;
+    float deadzone = 0.5f;
+    public static float snapTurn = 0;
     bool isGrounded;
     Vector2 lastPos;
     float vel;
@@ -79,6 +84,8 @@ public class Player : MonoBehaviour
     LineRenderer[] tipLines;
     int tooltipCount, tipDotCount, tipLineCount;
     [SerializeField] GameObject[] tooltipParents;
+    bool mapTriggered;
+    [SerializeField] SortingGroup windowSG;
     void Awake()
     {
         instance = this;
@@ -191,6 +198,7 @@ public class Player : MonoBehaviour
                 if (outside)
                 {
                     outside = false;
+                    windowSG.enabled = false;
                     greeterBot.Outside(false);
                 }
             }
@@ -207,6 +215,7 @@ public class Player : MonoBehaviour
                 if (outside)
                 {
                     outside = false;
+                    windowSG.enabled = false;
                     greeterBot.Outside(false);
                 }
             }
@@ -236,6 +245,7 @@ public class Player : MonoBehaviour
                 if (!outside)
                 {
                     outside = true;
+                    windowSG.enabled = true;
                     greeterBot.Outside(true);
                 }
             }
@@ -257,6 +267,7 @@ public class Player : MonoBehaviour
                 if (!outside)
                 {
                     outside = true;
+                    windowSG.enabled = true;
                     greeterBot.Outside(true);
                 }
             }
@@ -292,6 +303,7 @@ public class Player : MonoBehaviour
         {
             mapCanvas.enabled = mapCol.enabled = !mapCanvas.enabled;
             audioSource.PlayOneShot(mapActivate);
+            mapTriggered = true;
         }
         if (mapCanvas.enabled)
         {
@@ -299,66 +311,88 @@ public class Player : MonoBehaviour
             icon.anchoredPosition = new Vector2(rect.xMin + rect.width * Mathf.Clamp01((15.5f - pos.x) / 31), rect.yMin + rect.height * Mathf.Clamp01((15.035f - pos.z) / 31));
             icon.localRotation = Quaternion.Euler(0, 0, -head.eulerAngles.y + 180);
         }
-        if (hideTipAction.WasPressedThisFrame() && !hands)
+        if (hideTipAction.WasPressedThisFrame())
         {
-            tips = !tips;
-            toggleTips(tips);
+            if (!hands)
+            {
+                tips = !tips;
+                toggleTips(tips);
+            }
+            else
+            {
+                hands = false;
+                tips = true;
+                toggleHands(false);
+                toggleTips(true);
+            }
             audioSource.PlayOneShot(switchHands);
         }
         if (handAction.WasPressedThisFrame())
         {
             hands = !hands;
-            if (hands)
-            {
-                for (int i = 0; i < 4; i++)
-                {
-                    leftInteractors[i].SetLocalPositionAndRotation(leftPos[i], leftRot[i]);
-                    rightInteractors[i].SetLocalPositionAndRotation(rightPos[i], rightRot[i]);
-                }
-                leftModels[1].SetActive(false);
-                rightModels[1].SetActive(false);
-                leftPokes[1].gameObject.SetActive(false);
-                rightPokes[1].gameObject.SetActive(false);
-                leftModels[0].SetActive(true);
-                rightModels[0].SetActive(true);
-                //leftPokes[0].gameObject.SetActive(true);
-                //rightPokes[0].gameObject.SetActive(true);
-                leftPoke.attachTransform = leftPokes[0];
-                leftStabilizer.targetTransform = leftPokes[0];
-                rightPoke.attachTransform = rightPokes[0];
-                rightStabilizer.targetTransform = rightPokes[0];
-                leftTP.lineOriginTransform = leftPokes[0];
-                rightTP.lineOriginTransform = rightPokes[0];
-                if (tips) toggleTips(false);
-            }
-            else
-            {
-                for (int i = 0; i < 2; i++)
-                {
-                    leftInteractors[i].SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-                    rightInteractors[i].SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-                }
-                leftInteractors[2].SetLocalPositionAndRotation(new Vector3(0, 0, 0.01f), Quaternion.identity);
-                rightInteractors[2].SetLocalPositionAndRotation(new Vector3(0, 0, 0.01f), Quaternion.identity);
-                leftInteractors[3].SetLocalPositionAndRotation(new Vector3(0, -0.02f, -0.035f), Quaternion.identity);
-                rightInteractors[3].SetLocalPositionAndRotation(new Vector3(0, -0.02f, -0.035f), Quaternion.identity);
-                leftModels[0].SetActive(false);
-                rightModels[0].SetActive(false);
-                //leftPokes[0].gameObject.SetActive(false);
-                //rightPokes[0].gameObject.SetActive(false);
-                leftModels[1].SetActive(true);
-                rightModels[1].SetActive(true);
-                leftPokes[1].gameObject.SetActive(true);
-                rightPokes[1].gameObject.SetActive(true);
-                leftPoke.attachTransform = leftPokes[1];
-                leftStabilizer.targetTransform = leftPokes[1];
-                rightPoke.attachTransform = rightPokes[1];
-                rightStabilizer.targetTransform = rightPokes[1];
-                leftTP.lineOriginTransform = leftPokes[1];
-                rightTP.lineOriginTransform = rightPokes[1];
-                if (tips) toggleTips(true);
-            }
+            toggleHands(hands);
             audioSource.PlayOneShot(switchHands);
+        }
+    }
+
+    public void showMap()
+    {
+        if (mapTriggered) return;
+        mapCanvas.enabled = mapCol.enabled = true;
+        audioSource.PlayOneShot(mapActivate);
+    }
+
+    void toggleHands(bool activate)
+    {
+        if (activate)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                leftInteractors[i].SetLocalPositionAndRotation(leftPos[i], leftRot[i]);
+                rightInteractors[i].SetLocalPositionAndRotation(rightPos[i], rightRot[i]);
+            }
+            leftModels[1].SetActive(false);
+            rightModels[1].SetActive(false);
+            leftPokes[1].gameObject.SetActive(false);
+            rightPokes[1].gameObject.SetActive(false);
+            leftModels[0].SetActive(true);
+            rightModels[0].SetActive(true);
+            //leftPokes[0].gameObject.SetActive(true);
+            //rightPokes[0].gameObject.SetActive(true);
+            leftPoke.attachTransform = leftPokes[0];
+            leftStabilizer.targetTransform = leftPokes[0];
+            rightPoke.attachTransform = rightPokes[0];
+            rightStabilizer.targetTransform = rightPokes[0];
+            leftTP.lineOriginTransform = leftPokes[0];
+            rightTP.lineOriginTransform = rightPokes[0];
+            if (tips) toggleTips(false);
+        }
+        else
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                leftInteractors[i].SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+                rightInteractors[i].SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            }
+            leftInteractors[2].SetLocalPositionAndRotation(new Vector3(0, 0, 0.01f), Quaternion.identity);
+            rightInteractors[2].SetLocalPositionAndRotation(new Vector3(0, 0, 0.01f), Quaternion.identity);
+            leftInteractors[3].SetLocalPositionAndRotation(new Vector3(0, -0.02f, -0.035f), Quaternion.identity);
+            rightInteractors[3].SetLocalPositionAndRotation(new Vector3(0, -0.02f, -0.035f), Quaternion.identity);
+            leftModels[0].SetActive(false);
+            rightModels[0].SetActive(false);
+            //leftPokes[0].gameObject.SetActive(false);
+            //rightPokes[0].gameObject.SetActive(false);
+            leftModels[1].SetActive(true);
+            rightModels[1].SetActive(true);
+            leftPokes[1].gameObject.SetActive(true);
+            rightPokes[1].gameObject.SetActive(true);
+            leftPoke.attachTransform = leftPokes[1];
+            leftStabilizer.targetTransform = leftPokes[1];
+            rightPoke.attachTransform = rightPokes[1];
+            rightStabilizer.targetTransform = rightPokes[1];
+            leftTP.lineOriginTransform = leftPokes[1];
+            rightTP.lineOriginTransform = rightPokes[1];
+            if (tips) toggleTips(true);
         }
     }
 
@@ -399,8 +433,26 @@ public class Player : MonoBehaviour
         Quaternion yaw = Quaternion.Euler(0, head.eulerAngles.y, 0);
         Vector3 direction = yaw * new Vector3(moveAxis.x, 0, moveAxis.y);
         Vector3 targetPos = rb.position + direction * speed * Time.fixedDeltaTime;
-        Quaternion q = Quaternion.AngleAxis(turnSpeed * Time.fixedDeltaTime * turnAxis, Vector3.up);
-        rb.MoveRotation(rb.rotation * q);
+        Quaternion q = quaternion.identity;
+        if (snapTurn == 0)
+        {
+            q = Quaternion.AngleAxis(turnSpeed * Time.fixedDeltaTime * turnAxis, Vector3.up);
+            rb.MoveRotation(rb.rotation * q);
+        }
+        else
+        {
+            if (!isTurning && Time.time >= nextTurnTime && Mathf.Abs(turnAxis) > deadzone)
+            {
+                q = Quaternion.AngleAxis(Mathf.Sign(turnAxis) * snapTurn, Vector3.up);
+                rb.MoveRotation(rb.rotation * q);
+                isTurning = true;
+                nextTurnTime = Time.time + cooldownTime;
+            }
+            else
+            {
+                isTurning = false;
+            }
+        }
         Vector3 newPosition = q * (targetPos - head.position) + head.position;
         rb.MovePosition(newPosition);
     }

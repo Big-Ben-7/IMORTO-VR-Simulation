@@ -45,6 +45,10 @@ public class Rotate : MonoBehaviour
         }
         else rotate = b;
     }
+    public void SetRotate(bool b)
+    {
+        rotate = b;
+    }
     IEnumerator EaseIn(float easeSpeed)
     {
         if (rot == initialRot) rot = Vector3.zero;

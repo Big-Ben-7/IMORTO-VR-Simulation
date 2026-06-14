@@ -17,6 +17,7 @@ public class Seat : MonoBehaviour
     [SerializeField] Canvas canvas;
     [SerializeField] TMP_Text seatText;
     [SerializeField] AudioClip sitClip, exitClip;
+    [SerializeField] GameObject tooltip;
     void Awake()
     {
         cols = GetComponentsInChildren<Collider>();
@@ -25,7 +26,7 @@ public class Seat : MonoBehaviour
         attachForward = attach.forward;
         attachRight = attach.right;
         attachDir = new Vector2(attachForward.x, attachForward.z);
-        seatText.SetText("[CLICK ICON TO SIT]");
+        seatText.SetText("<CLICK ICON TO SIT>");
     }
 
     void Start()
@@ -44,12 +45,14 @@ public class Seat : MonoBehaviour
         Vector3 camPos = cam.position, pos = rb.position;
         //rb.linearVelocity = Vector3.zero;
         Player.seat = this;
-        seatText.SetText("[JUMP (A) TO EXIT SEAT]");
+        seatText.SetText("<JUMP (A) TO EXIT SEAT>");
         initialPos = camOffset.localPosition;
         rb.position = new Vector3(attachPos.x - camPos.x + pos.x, pos.y, attachPos.z - camPos.z + pos.z);
         camOffset.localPosition = new Vector3(0, sitHeight, 0);
         StartCoroutine(ResetRB(resetFrames));
         Player.audioSource.PlayOneShot(sitClip, 0.2f);
+        tooltip.SetActive(false);
+        //SettingsMenu.instance.RemoveIndex(3);
     }
     IEnumerator ResetRB(int n)
     {
@@ -99,6 +102,8 @@ public class Seat : MonoBehaviour
         seatText.SetText("[CLICK ICON TO SIT]");
         Player.seat = null;
         StartCoroutine(ResetRB2(resetFrames2, d));
+        tooltip.SetActive(true);
+        //SettingsMenu.instance.AddIndex(3);
         //rb.isKinematic = false;
     }
 }

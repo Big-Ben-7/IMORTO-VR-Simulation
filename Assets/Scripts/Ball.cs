@@ -45,7 +45,7 @@ public class Ball : MonoBehaviour
     [SerializeField] bool hitting;
     [SerializeField] bool farSide;
     [SerializeField] bool serving = true;
-    public static LayerMask body, defaultLayer;
+    public static LayerMask body, launcherLayer;
     public static bool collidingTable;
     bool grabbed;
     string lastCollision = "";
@@ -101,7 +101,7 @@ public class Ball : MonoBehaviour
         serving = true;
         rb.linearVelocity = Vector3.zero;
         rb.isKinematic = true;
-        col.excludeLayers = defaultLayer;
+        col.excludeLayers = launcherLayer;
         rb.position = pos;
         rb.isKinematic = false;
         rb.linearVelocity = vel;

@@ -1,8 +1,7 @@
 using System.Collections;
+using UnityEditor;
 using UnityEngine;
-using UnityEngine.InputSystem.LowLevel;
-using UnityEngine.UIElements;
-using UnityEngine.XR.Interaction.Toolkit.Samples.Hands;
+using UnityEngine.Rendering;
 
 public class GreeterBot : MonoBehaviour
 {
@@ -14,6 +13,7 @@ public class GreeterBot : MonoBehaviour
     //bool started;
     bool paused;
     //float entryZ;
+    bool triggered;
     void Awake()
     {
         Player.greeterBot = this;
@@ -26,11 +26,19 @@ public class GreeterBot : MonoBehaviour
         outsideSource = GetComponent<AudioSource>();
     }
 
-    /*void OnTriggerEnter(Collider other)
+    void OnTriggerEnter(Collider other)
     {
         if (!other.gameObject.CompareTag("Player")) return;
-        entryZ = other.transform.position.z;
-    }*/
+        //entryZ = other.transform.position.z;*/
+        if (triggered) return;
+        triggered = true;
+        Player.instance.showMap();
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (!other.gameObject.CompareTag("Player")) return;
+    }
 
     public void Outside(bool outside)
     {

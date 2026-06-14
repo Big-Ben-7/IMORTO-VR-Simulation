@@ -14,7 +14,7 @@ public class BallLauncher : XRGrabInteractable
     [SerializeField] float netHeight, tableHeight, baseDistance;
     [SerializeField] Transform returnMarker1, returnMarker2, farMarker1, farMarker2;
     [SerializeField] Transform leftCornerMarker, rightCornerMarker;
-    [SerializeField] LayerMask body, defaultLayer;
+    [SerializeField] LayerMask body, launcherLayer;
 
     [Header("Bot")]
     [SerializeField] Transform baseMarker;
@@ -97,7 +97,7 @@ public class BallLauncher : XRGrabInteractable
         Ball.launch = launch;
         Ball.racketLength = racketHits.Length;
         Ball.body = body;
-        Ball.defaultLayer = defaultLayer;
+        Ball.launcherLayer = launcherLayer;
         Ball.nextActive = new List<Ball>();
         selectedColor = diffButtons[0].color;
         normalColor = diffButtons[1].color;
