@@ -17,6 +17,7 @@ public class PlayerCollider : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
+        //Debug.Log(gameObject.name + collision.gameObject.name);
         GameObject go = collision.gameObject;
         if ((val & 1 << go.layer) != 0)
         {

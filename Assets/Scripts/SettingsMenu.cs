@@ -29,8 +29,8 @@ public class SettingsMenu : MonoBehaviour
     public void UpdateValue()
     {
         float value = audioLevel.value;
-        valueText.SetText(value.ToString("0.00"));
-        AudioListener.volume = value;;
+        valueText.SetText(value.ToString("0") + "%");
+        AudioListener.volume = value / 100f;
     }
 
     public void ToggleVignette()

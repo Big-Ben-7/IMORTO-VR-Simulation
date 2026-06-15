@@ -176,7 +176,7 @@ public class ManuManager : MonoBehaviour
         for (int i = 0; i < row1; i++)
         {
             Transform t = buttonParent.GetChild(i);
-            t.GetComponent<RectTransform>().anchoredPosition = new Vector2(pos, -0.155f);
+            t.GetComponent<RectTransform>().anchoredPosition = new Vector2(pos, -0.175f);
             buttonNames[i] = t.gameObject.name;
             buttonColors[i] = t.GetComponent<Image>().color;
             pos += inc;

@@ -71,7 +71,7 @@ public class NPC : MonoBehaviour
         {
             //bool play = true;
             GameObject go = hit.transform.gameObject;
-            if (go.CompareTag("Floor") || Vector2.SqrMagnitude(new Vector2(pos.x, pos.z)) <= 20.930625)
+            if (go.CompareTag("Floor") || go.CompareTag("Entertainment") || go.CompareTag("Healthcare") || go.CompareTag("Exploration") || Vector2.SqrMagnitude(new Vector2(pos.x, pos.z)) <= 20.930625)
             {
                 if (audioSource.clip != tileWalk)
                 {

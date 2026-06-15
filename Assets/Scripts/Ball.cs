@@ -247,7 +247,7 @@ public class Ball : MonoBehaviour
             }
             return;
         }
-        else if (go.CompareTag("Floor"))
+        else if (go.CompareTag("Floor") || go.CompareTag("Entertainment") || go.CompareTag("Healthcare") || go.CompareTag("Exploration"))
         {
             if (!grabbed && lastCollision != name)
             {

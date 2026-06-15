@@ -18,6 +18,9 @@ TagManager:
   - PokeInteractable
   - Bumpable
   - Bot
+  - Entertainment
+  - Healthcare
+  - Exploration
   layers:
   - Default
   - TransparentFX

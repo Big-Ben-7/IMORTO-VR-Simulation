@@ -14,6 +14,9 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
     [SerializeField] Transform[] scans;
     Canvas[] scanCanvases = new Canvas[5];
     [SerializeField] Transform target;
+    Transform leopard;
+    Vector3 leopardPos, leopardScale;
+    Quaternion leopardRot;
     [SerializeField] RectTransform targetRing;
     [SerializeField] GameObject[] mapColors;
     RectTransform[] colorRects = new RectTransform[5];
@@ -120,6 +123,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         second = Player.one;
         halfSecond = Player.half;
         fifthSecond = Player.fifth;
+        leopard = target.GetChild(0);
     }
     
     void Start()
@@ -133,6 +137,8 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         yMax = bounds2.position.y;
         zMin = bounds1.position.z;
         zMax = bounds2.position.z;
+        leopard.GetPositionAndRotation(out leopardPos, out leopardRot);
+        leopardScale = leopard.localScale;
     }
 
     void Update()
@@ -353,6 +359,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
     IEnumerator Drill()
     {
         inCoroutine = true;
+        roverAnim.Rewind();
         roverAnim.Play();
         yield return new WaitForSeconds(0.75f);
         roverSource.PlayOneShot(drillClip, 0.15f);
@@ -363,7 +370,7 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         roverCam.enabled = false;
         if ((rover.position - target.position).sqrMagnitude < 1)
         {
-            target.GetChild(0).gameObject.SetActive(true);
+            leopard.gameObject.SetActive(true);
             roverSource.PlayOneShot(foundClip, 0.1f);
             roverSource.PlayOneShot(uiClip, 0.1f);
             yield return halfSecond;
@@ -474,6 +481,14 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
         roverSource.PlayOneShot(gravel, 0.2f);
         StartCoroutine(ToggleCamera());
         instructions.enabled = false;
+        if (leopard.gameObject.activeSelf)
+        {
+            leopard.gameObject.SetActive(false);
+            leopard.parent = target;
+            leopard.SetPositionAndRotation(leopardPos, leopardRot);
+            leopard.localScale = leopardScale;
+            leopard.GetChild(1).GetComponent<Canvas>().enabled = true;
+        }
     }
 
     public void Grab(int i)
@@ -518,6 +533,14 @@ public class ExplorationManager : MonoBehaviour, IPointerClickHandler
             roverSource.PlayOneShot(gravel, 0.2f);
             StartCoroutine(ToggleCamera());
             instructions.enabled = false;
+            if (leopard.gameObject.activeSelf)
+            {
+                leopard.gameObject.SetActive(false);
+                leopard.parent = target;
+                leopard.SetPositionAndRotation(leopardPos, leopardRot);
+                leopard.localScale = leopardScale;
+                leopard.GetChild(1).GetComponent<Canvas>().enabled = true;
+            }
         }
     }
 

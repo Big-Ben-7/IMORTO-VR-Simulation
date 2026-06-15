@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Linq;
 using Unity.Mathematics;
@@ -8,6 +9,7 @@ using UnityEngine.XR.Interaction.Toolkit.Inputs;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 public enum MyHandedness {Left, Right, None};
+public enum Location {Entertainment, Healthcare, Exploration, Manufacturing, Outside, Inside};
 public class Player : MonoBehaviour
 {
     [SerializeField] InputActionProperty leftGripInput, rightGripInput, mapInput, handInput, hideTipInput;
@@ -42,6 +44,7 @@ public class Player : MonoBehaviour
     Transform colT;
     [SerializeField] Transform head, leftController, rightController;
     [SerializeField] ConfigurableJoint headJoint, leftJoint, rightJoint;
+    BoxCollider leftCol, rightCol;
     [SerializeField] float minHeight = 0.5f, maxHeight = 2;
 
     [Header("Movement")]
@@ -49,7 +52,7 @@ public class Player : MonoBehaviour
     [SerializeField] float outSpeed, inSpeed, stairSpeed, downStairSpeed, turnSpeed, jumpHeight;
     [SerializeField] RectTransform rectT, icon;
     Canvas mapCanvas;
-    Collider mapCol;
+    GameObject mapCol;
     Rect rect;
     float speed;
     [SerializeField] InputActionProperty moveInput, turnInput, jumpInput;
@@ -70,7 +73,7 @@ public class Player : MonoBehaviour
     [SerializeField] Transform piano;
     //[SerializeField] GameObject lobby, ent, health, expl, manu;
     public static Player instance;
-    bool canBump = true, climbing;
+    bool canBump = true, climbing, airClimbing;
     public static UnityEngine.InputSystem.XR.XRController leftDevice, rightDevice;
     [SerializeField] Transform ladder;
     Collider[] ladderCols;
@@ -78,7 +81,6 @@ public class Player : MonoBehaviour
     [SerializeField] LayerMask body;
     ManuManager manuManager;
     public static GreeterBot greeterBot;
-    bool outside = true;
     Canvas[] tooltips;
     MeshRenderer[] tipDots;
     LineRenderer[] tipLines;
@@ -86,10 +88,17 @@ public class Player : MonoBehaviour
     [SerializeField] GameObject[] tooltipParents;
     bool mapTriggered;
     [SerializeField] SortingGroup windowSG;
+    [SerializeField] Canvas[] enterUI, healthUI, explUI, manuUI;
+    String[] enterNames, healthNames, explNames, manuNames;
+    int[] enterOrder, healthOrder, explOrder, manuOrder;
+    int enterCount, healthCount, explCount, manuCount;
+    Location location = Location.Outside;
+    Transform xr;
+
     void Awake()
     {
         instance = this;
-        Transform xr = transform.GetChild(0);
+        xr = transform.GetChild(0);
         rb = xr.GetComponent<Rigidbody>();
         col = xr.GetChild(2).GetComponent<CapsuleCollider>();
         colT = col.transform;
@@ -98,6 +107,8 @@ public class Player : MonoBehaviour
         walkSource = sources[1];
         bgSource = xr.GetChild(0).GetChild(7).GetComponent<AudioSource>();
         bgSource.volume = 0.03f;
+        leftCol = leftJoint.GetComponentInChildren<BoxCollider>();
+        rightCol = rightJoint.GetComponentInChildren<BoxCollider>();
         //leftRb = leftJoint.GetComponent<Rigidbody>();
         //rightRb = rightJoint.GetComponent<Rigidbody>();
         leftGrip = leftGripInput.action;
@@ -126,8 +137,9 @@ public class Player : MonoBehaviour
         //expl.SetActive(false);
         //manu.SetActive(false);
         rect = rectT.rect;
-        mapCanvas = rectT.parent.GetComponent<Canvas>();
-        mapCol = mapCanvas.GetComponent<Collider>();
+        Transform mapT = rectT.parent;
+        mapCanvas = mapT.GetComponent<Canvas>();
+        mapCol = mapT.GetChild(4).gameObject;
         ladderCols = ladder.GetComponentsInChildren<Collider>();
         ladderColCount = ladderCols.Length;
         leftDevice = InputSystem.GetDevice<UnityEngine.InputSystem.XR.XRController>(CommonUsages.LeftHand);
@@ -157,12 +169,124 @@ public class Player : MonoBehaviour
         tooltipCount = tooltips.Length;
         tipDotCount = tipDots.Length;
         tipLineCount = tipLines.Length;
+        enterCount = enterUI.Length;
+        healthCount = healthUI.Length;
+        explCount = explUI.Length;
+        manuCount = manuUI.Length;
+        enterNames = new string[enterCount];
+        healthNames = new string[healthCount];
+        explNames = new string[explCount];
+        manuNames = new string[manuCount];
+        enterOrder = new int[enterCount];
+        healthOrder = new int[healthCount];
+        explOrder = new int[explCount];
+        manuOrder = new int[manuCount];
+        for (int i = 0; i < enterCount; i++)
+        {
+            Canvas canv = enterUI[i];
+            enterNames[i] = canv.sortingLayerName;
+            enterOrder[i] = canv.sortingOrder;
+        }
+        for (int i = 0; i < healthCount; i++)
+        {
+            Canvas canv = healthUI[i];
+            healthNames[i] = canv.sortingLayerName;
+            healthOrder[i] = canv.sortingOrder;
+        }
+        for (int i = 0; i < explCount; i++)
+        {
+            Canvas canv = explUI[i];
+            explNames[i] = canv.sortingLayerName;
+            explOrder[i] = canv.sortingOrder;
+        }
+        for (int i = 0; i < manuCount; i++)
+        {
+            Canvas canv = manuUI[i];
+            manuNames[i] = canv.sortingLayerName;
+            manuOrder[i] = canv.sortingOrder;
+        }
         /*leftPos = new Vector3[4];
         leftRot = new Quaternion[4];
         rightPos = new Vector3[4];
         rightRot = new Quaternion[4];
         for (int i = 0; i < 4; i++) leftInteractors[i].GetLocalPositionAndRotation(out leftPos[i], out leftRot[i]);
         for (int i = 0; i < 4; i++) rightInteractors[i].GetLocalPositionAndRotation(out rightPos[i], out rightRot[i]);*/
+    }
+
+    void updateSG(Location loc)
+    {
+        Canvas canv;
+        switch (location)
+        {
+            case Location.Entertainment:
+                for (int i = 0; i < enterCount; i++)
+                {
+                    canv = enterUI[i];
+                    canv.sortingLayerName = enterNames[i];
+                    canv.sortingOrder = enterOrder[i];
+                }
+                break;
+            case Location.Healthcare:
+                for (int i = 0; i < healthCount; i++)
+                {
+                    canv = healthUI[i];
+                    canv.sortingLayerName = healthNames[i];
+                    canv.sortingOrder = healthOrder[i];
+                }
+                break;
+            case Location.Exploration:
+                for (int i = 0; i < explCount; i++)
+                {
+                    canv = explUI[i];
+                    canv.sortingLayerName = explNames[i];
+                    canv.sortingOrder = explOrder[i];
+                }
+                break;
+            case Location.Manufacturing:
+                for (int i = 0; i < manuCount; i++)
+                {
+                    canv = manuUI[i];
+                    canv.sortingLayerName = manuNames[i];
+                    canv.sortingOrder = manuOrder[i];
+                }
+                break;
+        }
+        location = loc;
+        switch (location)
+        {
+            case Location.Entertainment:
+                for (int i = 0; i < enterCount; i++)
+                {
+                    canv = enterUI[i];
+                    canv.sortingLayerName = "Sorting";
+                    canv.sortingOrder = 4;
+                }
+                break;
+            case Location.Healthcare:
+                for (int i = 0; i < healthCount; i++)
+                {
+                    canv = healthUI[i];
+                    canv.sortingLayerName = "Sorting";
+                    canv.sortingOrder = 4;
+                }
+                break;
+            case Location.Exploration:
+                for (int i = 0; i < explCount; i++)
+                {
+                    canv = explUI[i];
+                    canv.sortingLayerName = "Sorting";
+                    canv.sortingOrder = 4;
+                }
+                break;
+            case Location.Manufacturing:
+                for (int i = 0; i < manuCount; i++)
+                {
+                    canv = manuUI[i];
+                    canv.sortingLayerName = "Sorting";
+                    canv.sortingOrder = 4;
+                }
+                break;
+        }
     }
 
     void Update()
@@ -180,6 +304,7 @@ public class Player : MonoBehaviour
         if (!cast)
         {
             if (walkSource.isPlaying) walkSource.Stop();
+            if (climbing) airClimbing = true;
         }
         else
         {
@@ -195,12 +320,45 @@ public class Player : MonoBehaviour
                 //else play = false;
                 if (!isGrounded) audioSource.PlayOneShot(tileLands[UnityEngine.Random.Range(0, tileCount)], 0.6f);
                 speed = inSpeed;
-                if (outside)
+                if (location != Location.Inside)
                 {
-                    outside = false;
+                    updateSG(Location.Inside);
                     windowSG.enabled = false;
                     greeterBot.Outside(false);
                 }
+            }
+            else if (go.CompareTag("Entertainment"))
+            {
+                if (walkSource.clip != tileWalk)
+                {
+                    walkSource.volume = 0.3f;
+                    walkSource.clip = tileWalk;
+                }
+                if (!isGrounded) audioSource.PlayOneShot(tileLands[UnityEngine.Random.Range(0, tileCount)], 0.6f);
+                speed = inSpeed;
+                if (location != Location.Entertainment) updateSG(Location.Entertainment);
+            }
+            else if (go.CompareTag("Healthcare"))
+            {
+                if (walkSource.clip != tileWalk)
+                {
+                    walkSource.volume = 0.3f;
+                    walkSource.clip = tileWalk;
+                }
+                if (!isGrounded) audioSource.PlayOneShot(tileLands[UnityEngine.Random.Range(0, tileCount)], 0.6f);
+                speed = inSpeed;
+                if (location != Location.Healthcare) updateSG(Location.Healthcare);
+            }
+            else if (go.CompareTag("Exploration"))
+            {
+                if (walkSource.clip != tileWalk)
+                {
+                    walkSource.volume = 0.3f;
+                    walkSource.clip = tileWalk;
+                }
+                if (!isGrounded) audioSource.PlayOneShot(tileLands[UnityEngine.Random.Range(0, tileCount)], 0.6f);
+                speed = inSpeed;
+                if (location != Location.Exploration) updateSG(Location.Exploration);
             }
             else if (go.CompareTag("Metal"))
             {
@@ -212,12 +370,7 @@ public class Player : MonoBehaviour
                 //else play = false;
                 if (!isGrounded) audioSource.PlayOneShot(metalLands[UnityEngine.Random.Range(0, metalCount)]);
                 speed = inSpeed;
-                if (outside)
-                {
-                    outside = false;
-                    windowSG.enabled = false;
-                    greeterBot.Outside(false);
-                }
+                if (location != Location.Manufacturing) updateSG(Location.Manufacturing);
             }
             else if (go.CompareTag("Grass"))
             {
@@ -242,9 +395,9 @@ public class Player : MonoBehaviour
                     if (!isGrounded) audioSource.PlayOneShot(grassLands[UnityEngine.Random.Range(0, grassCount)], 0.4f);
                 }
                 speed = outSpeed;
-                if (!outside)
+                if (location != Location.Outside)
                 {
-                    outside = true;
+                    location = Location.Outside;
                     windowSG.enabled = true;
                     greeterBot.Outside(true);
                 }
@@ -264,9 +417,9 @@ public class Player : MonoBehaviour
                     else speed = downStairSpeed;
                 }
                 else speed = outSpeed;
-                if (!outside)
+                if (location != Location.Outside)
                 {
-                    outside = true;
+                    location = Location.Outside;
                     windowSG.enabled = true;
                     greeterBot.Outside(true);
                 }
@@ -290,25 +443,29 @@ public class Player : MonoBehaviour
                 if (!sitting) rb.linearVelocity = Vector3.up * Mathf.Sqrt(2 * -Physics.gravity.y * jumpHeight);
                 else seat.Exit(true);
             }
-            if (climbing)
-            {
-                climbing = false;
-                for (int i = 0; i < ladderColCount; i++) ladderCols[i].excludeLayers = 0;
-            }
+            airClimbing = false;
         }
         isGrounded = cast;
         bgSource.volume = Mathf.Clamp(0.002f * (Vector3.SqrMagnitude(piano.position - head.position) - 3), 0, 0.03f);
         
         if (mapAction.WasPressedThisFrame())
         {
-            mapCanvas.enabled = mapCol.enabled = !mapCanvas.enabled;
+            bool mapBool = !mapCanvas.enabled;
+            mapCanvas.enabled = mapBool;
+            mapCol.SetActive(mapBool);
             audioSource.PlayOneShot(mapActivate);
             mapTriggered = true;
         }
         if (mapCanvas.enabled)
         {
             Vector3 pos = head.position;
-            icon.anchoredPosition = new Vector2(rect.xMin + rect.width * Mathf.Clamp01((15.5f - pos.x) / 31), rect.yMin + rect.height * Mathf.Clamp01((15.035f - pos.z) / 31));
+            float h = (15.035f - pos.z) / 31;
+            if (h > 0.97f) h = 0.97f;
+            else if (h < 0.03f) h = 0.03f;
+            float w = (15.5f - pos.x) / 31;
+            if (w > 0.97f) w = 0.97f;
+            else if (w < 0.03f) w = 0.03f;
+            icon.anchoredPosition = new Vector2(rect.xMin + rect.width * w, rect.yMin + rect.height * h);
             icon.localRotation = Quaternion.Euler(0, 0, -head.eulerAngles.y + 180);
         }
         if (hideTipAction.WasPressedThisFrame())
@@ -338,7 +495,8 @@ public class Player : MonoBehaviour
     public void showMap()
     {
         if (mapTriggered) return;
-        mapCanvas.enabled = mapCol.enabled = true;
+        mapCanvas.enabled = true;
+        mapCol.SetActive(true);
         audioSource.PlayOneShot(mapActivate);
     }
 
@@ -365,6 +523,10 @@ public class Player : MonoBehaviour
             rightStabilizer.targetTransform = rightPokes[0];
             leftTP.lineOriginTransform = leftPokes[0];
             rightTP.lineOriginTransform = rightPokes[0];
+            leftCol.center = new Vector3(-0.005f, -0.05f, -0.07f);
+            leftCol.transform.localRotation = Quaternion.Euler(10, 0, 0);
+            rightCol.center = new Vector3(0.005f, -0.05f, -0.07f);
+            rightCol.transform.localRotation = Quaternion.Euler(10, 0, 0);
             if (tips) toggleTips(false);
         }
         else
@@ -392,6 +554,10 @@ public class Player : MonoBehaviour
             rightStabilizer.targetTransform = rightPokes[1];
             leftTP.lineOriginTransform = leftPokes[1];
             rightTP.lineOriginTransform = rightPokes[1];
+            leftCol.center = new Vector3(-0.005f, -0.02f, -0.07f);
+            leftCol.transform.localRotation = Quaternion.identity;
+            rightCol.center = new Vector3(0.005f, -0.02f, -0.07f);
+            rightCol.transform.localRotation = Quaternion.identity;
             if (tips) toggleTips(true);
         }
     }
@@ -415,20 +581,16 @@ public class Player : MonoBehaviour
     void FixedUpdate()
     {
         colT.localPosition = new Vector3(head.localPosition.x, 0, head.localPosition.z);
-        if (!climbing)
+        if (!airClimbing)
         {
             col.height = Mathf.Clamp(head.position.y, minHeight, maxHeight);
             col.center = new Vector3(0, col.height / 2, 0);
         }
-
-        Vector3 localPos = leftController.localPosition;
-        leftJoint.targetPosition = new Vector3(localPos.x, leftController.position.y, localPos.z);
+        leftJoint.targetPosition = xr.InverseTransformPoint(leftController.position);
         leftJoint.targetRotation = leftController.localRotation;
-        localPos = rightController.localPosition;
-        rightJoint.targetPosition = new Vector3(localPos.x, rightController.position.y, localPos.z);
+        rightJoint.targetPosition = xr.InverseTransformPoint(rightController.position);
         rightJoint.targetRotation = rightController.localRotation;
-        localPos = head.localPosition;
-        headJoint.targetPosition = new Vector3(localPos.x, head.position.y, localPos.z);
+        headJoint.targetPosition = xr.InverseTransformPoint(head.position);
         
         Quaternion yaw = Quaternion.Euler(0, head.eulerAngles.y, 0);
         Vector3 direction = yaw * new Vector3(moveAxis.x, 0, moveAxis.y);
@@ -479,11 +641,19 @@ public class Player : MonoBehaviour
         StartCoroutine(Fade());
     }
 
-    public void SetClimb()
+    public void SetClimb(bool b)
     {
-        climbing = true;
-        for (int i = 0; i < ladderColCount; i++) ladderCols[i].excludeLayers = body;
-        if (!manuManager.carSwapped && manuManager.lastAssembled) manuManager.SwapCar();
+        if (b)
+        {
+            climbing = true;
+            for (int i = 0; i < ladderColCount; i++) ladderCols[i].excludeLayers = body;
+            if (!manuManager.carSwapped && manuManager.lastAssembled) manuManager.SwapCar();
+        }
+        else
+        {
+            climbing = false;
+            for (int i = 0; i < ladderColCount; i++) ladderCols[i].excludeLayers = 0;
+        }
     }
 
     IEnumerator Fade(float duration = 0.2f)
