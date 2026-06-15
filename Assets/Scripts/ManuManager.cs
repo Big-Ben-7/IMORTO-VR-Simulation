@@ -1,8 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Tutorials.Core.Editor;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Text.RegularExpressions;
+using Microsoft.MixedReality.Toolkit.Experimental.UI;
 
 public class ManuManager : MonoBehaviour
 {
@@ -30,6 +34,7 @@ public class ManuManager : MonoBehaviour
     [SerializeField] Transform stamper, painter, lasercutter, startMarker/*, endMarker, */, buttonParent, destinationParent, assemblyParent, suction1, suction2;
     [SerializeField] TMP_Text colorText, startText, paintQueueText;
     [SerializeField] Color[] masterButtonColors;
+    [SerializeField] Color disabledColor;
     Transform tireParent, wholeCar, suctionParts1, suctionParts2;
     Material[][] wholeCarMats;
     List<int>[] partMats = new List<int>[] 
@@ -79,7 +84,7 @@ public class ManuManager : MonoBehaviour
     int barCount;
     AudioSource beltSource, painterSource, stamperSource, laserSource, carSource;
     public AudioSource tireSource;
-    [SerializeField] AudioClip paint, stamp, startUp, shutDown, tireSwap, carStart, carMove;
+    [SerializeField] AudioClip paint, stamp, startUp, shutDown, tireSwap;//, carStart, carMove;
     List<string> paintQueue = new List<string>();
     public static ManuManager instance;
     public int tiresReady;
@@ -88,6 +93,7 @@ public class ManuManager : MonoBehaviour
     bool tireAssembled;
     public bool stampTrigger;
     public bool carSwapped;
+    [SerializeField] TMP_Text licenseInput, licensePlate, licenseKeyboard;
 
     void Awake()
     {
@@ -537,6 +543,10 @@ public class ManuManager : MonoBehaviour
         startText.transform.parent.GetComponent<Button>().interactable = false;
         startText.SetText("Assembly Complete");
         startText.color = masterButtonColors[2];
+        Transform t = licenseInput.transform.parent.parent;
+        t.GetComponent<Button>().interactable = false;
+        NonNativeKeyboard.Instance.Close();
+        t.GetComponent<Image>().color = disabledColor;
         if (buttonPaused) return;
         buttonPaused = true;
         for (int j = 0; j < barCount; j++) bars[j].SetRotate(false, 360);
@@ -592,5 +602,17 @@ public class ManuManager : MonoBehaviour
         carSwapped = true;
         carParent.gameObject.SetActive(false);
         wholeCar.gameObject.SetActive(true);
+    }
+
+    public void SetLicense()
+    {
+        string str = Regex.Replace(licenseKeyboard.text, @"[\x00-\x1F\u200B\uFEFF]", "");
+        //Debug.Log(str + str.IsNullOrWhiteSpace());
+        if (!str.IsNullOrWhiteSpace()) str = str.Substring(0, Math.Min(str.Length, 9)).Trim();
+        else str = "IMORTO";
+        //Debug.Log(str);
+        licenseInput.SetText(str);
+        str = string.Join(" ", str.ToCharArray());
+        licensePlate.SetText(str);
     }
 }

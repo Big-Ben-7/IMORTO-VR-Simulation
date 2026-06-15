@@ -124,7 +124,7 @@ public class Player : MonoBehaviour
         buttonClip = button;
         bumpClips = objectBumps;
         //Door.rooms = new GameObject[] {lobby, ent, health, expl, manu};
-        UIPanel.audioSource = audioSource;
+        UIPanel.audioSource = UIButtonAudio.audioSource = audioSource;
         tileCount = tileLands.Length;
         metalCount = metalLands.Length;
         concreteCount = concreteLands.Length;
@@ -523,9 +523,9 @@ public class Player : MonoBehaviour
             rightStabilizer.targetTransform = rightPokes[0];
             leftTP.lineOriginTransform = leftPokes[0];
             rightTP.lineOriginTransform = rightPokes[0];
-            leftCol.center = new Vector3(-0.005f, -0.05f, -0.07f);
+            leftCol.center = new Vector3(-0.005f, -0.05f, -0.067f);
             leftCol.transform.localRotation = Quaternion.Euler(10, 0, 0);
-            rightCol.center = new Vector3(0.005f, -0.05f, -0.07f);
+            rightCol.center = new Vector3(0.005f, -0.05f, -0.067f);
             rightCol.transform.localRotation = Quaternion.Euler(10, 0, 0);
             if (tips) toggleTips(false);
         }
@@ -554,9 +554,9 @@ public class Player : MonoBehaviour
             rightStabilizer.targetTransform = rightPokes[1];
             leftTP.lineOriginTransform = leftPokes[1];
             rightTP.lineOriginTransform = rightPokes[1];
-            leftCol.center = new Vector3(-0.005f, -0.02f, -0.07f);
+            leftCol.center = new Vector3(-0.005f, -0.02f, -0.08f);
             leftCol.transform.localRotation = Quaternion.identity;
-            rightCol.center = new Vector3(0.005f, -0.02f, -0.07f);
+            rightCol.center = new Vector3(0.005f, -0.02f, -0.08f);
             rightCol.transform.localRotation = Quaternion.identity;
             if (tips) toggleTips(true);
         }
