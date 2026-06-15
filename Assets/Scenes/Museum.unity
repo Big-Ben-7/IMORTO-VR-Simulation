@@ -227674,7 +227674,7 @@ MonoBehaviour:
   - {r: 0.30588236, g: 1, b: 0.6627451, a: 1}
   - {r: 1, g: 0.38039216, b: 0.30588236, a: 1}
   - {r: 0.5882353, g: 0.5882353, b: 0.5882353, a: 1}
-  disabledColor: {r: 0, g: 0, b: 0, a: 0}
+  disabledColor: {r: 0.7058824, g: 0.7058824, b: 0.7058824, a: 1}
   blackColor: {r: 0.27450982, g: 0.27450982, b: 0.27450982, a: 1}
   tireSource: {fileID: 0}
   paint: {fileID: 8300000, guid: a02f94e93ac1045be88e1904e4d300a6, type: 3}
@@ -227689,6 +227689,7 @@ MonoBehaviour:
   licenseInput: {fileID: 717394050}
   licensePlate: {fileID: 164272482}
   licenseKeyboard: {fileID: 1876788728}
+  licensePlaceholder: {fileID: 1917387150}
 --- !u!1 &1373425904
 GameObject:
   m_ObjectHideFlags: 0
@@ -260971,7 +260972,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.9411765, g: 0.98039216, b: 1, a: 1}
+  m_Color: {r: 0.8726415, g: 0.9484855, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -301401,8 +301402,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 2150773298
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 0.5}
+    rgba: 4285427310
+  m_fontColor: {r: 0.43137255, g: 0.43137255, b: 0.43137255, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:

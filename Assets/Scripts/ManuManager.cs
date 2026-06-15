@@ -93,6 +93,7 @@ public class ManuManager : MonoBehaviour
     public bool stampTrigger;
     public bool carSwapped;
     [SerializeField] TMP_Text licenseInput, licensePlate, licenseKeyboard;
+    [SerializeField] GameObject licensePlaceholder;
 
     void Awake()
     {
@@ -546,6 +547,12 @@ public class ManuManager : MonoBehaviour
         t.GetComponent<Button>().interactable = false;
         NonNativeKeyboard.Instance.Close();
         t.GetComponent<Image>().color = disabledColor;
+        if (licensePlaceholder.activeSelf)
+        {
+            licensePlaceholder.SetActive(false);
+            licenseInput.SetText("IMORTO");
+            licenseInput.gameObject.SetActive(true);
+        }
         if (buttonPaused) return;
         buttonPaused = true;
         for (int j = 0; j < barCount; j++) bars[j].SetRotate(false, 360);
