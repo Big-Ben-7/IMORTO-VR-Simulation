@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.Tutorials.Core.Editor;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Text.RegularExpressions;
@@ -608,7 +607,7 @@ public class ManuManager : MonoBehaviour
     {
         string str = Regex.Replace(licenseKeyboard.text, @"[\x00-\x1F\u200B\uFEFF]", "");
         //Debug.Log(str + str.IsNullOrWhiteSpace());
-        if (!str.IsNullOrWhiteSpace()) str = str.Substring(0, Math.Min(str.Length, 9)).Trim();
+        if (!string.IsNullOrWhiteSpace(str)) str = str.Substring(0, Math.Min(str.Length, 9)).Trim();
         else str = "IMORTO";
         //Debug.Log(str);
         licenseInput.SetText(str);
