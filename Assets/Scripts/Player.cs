@@ -125,6 +125,7 @@ public class Player : MonoBehaviour
         bumpClips = objectBumps;
         //Door.rooms = new GameObject[] {lobby, ent, health, expl, manu};
         UIPanel.audioSource = UIButtonAudio.audioSource = audioSource;
+        UIAudio.target = head;
         tileCount = tileLands.Length;
         metalCount = metalLands.Length;
         concreteCount = concreteLands.Length;

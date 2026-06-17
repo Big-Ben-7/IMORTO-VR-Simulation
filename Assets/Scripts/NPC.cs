@@ -205,18 +205,4 @@ public class NPC : MonoBehaviour
             availableIndices.Remove(destinationIndex);
         }
     }
-
-    IEnumerator CalculateVelocity()
-    {
-        lastPos = new Vector2(myT.position.x, myT.position.z);
-        while (true)
-        {
-            lastVel = myVel;
-            Vector3 pos = myT.position;
-            Vector2 currentPos = new Vector2(pos.x, pos.z);
-            myVel = ((currentPos - lastPos) / Time.deltaTime).magnitude;
-            lastPos = currentPos;
-            yield return Time.deltaTime;
-        }
-    }
 }
