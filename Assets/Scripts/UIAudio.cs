@@ -30,6 +30,7 @@ public class UIAudio : MonoBehaviour
         else
         {
             isPlaying = true;
+            isPaused = false;
             if (isPaused) audioSource.UnPause();
             else audioSource.Play();
             image.sprite = pause;
@@ -44,12 +45,11 @@ public class UIAudio : MonoBehaviour
             Vector2 pos = new Vector2(pos3.x, pos3.z);
             pos3 = target.position;
             Vector2 targetPos = new Vector2(pos3.x, pos3.z);
-            audioSource.volume = Mathf.Clamp(maxVol - volFactor * (Vector2.SqrMagnitude(targetPos - pos) - 3), 0, maxVol);
-            Debug.Log(Vector2.SqrMagnitude(targetPos - pos));
+            audioSource.volume = Mathf.Clamp(maxVol - volFactor * (Vector2.SqrMagnitude(targetPos - pos) - 3.5f), 0, maxVol);
         }
         else if (isPlaying)
         {
-            isPlaying = false;
+            isPlaying = isPaused = false;
             image.sprite = play;
         }
     }

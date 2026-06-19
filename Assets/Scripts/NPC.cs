@@ -8,10 +8,11 @@ public class NPC : MonoBehaviour
     //[SerializeField] Transform initialPos;
     [SerializeField] float initialTime;
     [SerializeField] int destinationIndex, anim;
+    int initialDestinationIndex, initialAnim;
     [SerializeField] Transform destinationParent;
     [SerializeField] float minTime, maxTime, minAnimTime, maxAnimTime, rotSpeed;
     NavMeshAgent agent;
-    NavMeshObstacle obstacle;
+    //NavMeshObstacle obstacle;
     Animator animator;
     Vector3[] destinationPos, destinationDir;
     int destinationCount;
@@ -26,12 +27,18 @@ public class NPC : MonoBehaviour
     AudioSource audioSource;
     public static LayerMask groundMask;
     public static AudioClip tileWalk, concreteWalk, gravelWalk, metalWalk, grassWalk;
+    Vector3 initialPos;
+    Quaternion initialRot;
+
     void Awake()
     {
         myT = transform;
+        myT.GetPositionAndRotation(out initialPos, out initialRot);
+        initialDestinationIndex = destinationIndex;
+        initialAnim = anim;
         audioSource = GetComponent<AudioSource>();
         agent = GetComponent<NavMeshAgent>();
-        obstacle = GetComponent<NavMeshObstacle>();
+        //obstacle = GetComponent<NavMeshObstacle>();
         animator = GetComponent<Animator>();
         destinationCount = destinationParent.childCount;
         destinationPos = new Vector3[destinationCount];
@@ -45,15 +52,25 @@ public class NPC : MonoBehaviour
             destinationDir[j] = t.forward;
             j++;
         }
-        availableIndices.Remove(destinationIndex);
     }
 
-    void Start()
+    void OnEnable()
     {
         //myT.SetPositionAndRotation(initialPos.position, initialPos.rotation);
         //StartCoroutine(CalculateVelocity());
+        availableIndices.Remove(destinationIndex);
         lastPos = new Vector2(myT.position.x, myT.position.z);
         StartCoroutine(Move());
+    }
+
+    public void Disable()
+    {
+        StopAllCoroutines();
+        availableIndices =  new List<int>() {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+        destinationIndex = initialDestinationIndex;
+        anim = initialAnim;
+        myT.SetPositionAndRotation(initialPos, initialRot);
+        gameObject.SetActive(false);
     }
 
     void Update()

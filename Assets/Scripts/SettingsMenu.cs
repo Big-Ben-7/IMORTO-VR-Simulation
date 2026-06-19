@@ -7,13 +7,15 @@ public class SettingsMenu : MonoBehaviour
 {
     [SerializeField] Slider audioLevel;
     [SerializeField] TMP_Text valueText;
-    [SerializeField] Toggle hints, vignette;
+    [SerializeField] Toggle hints, vignette, npc;
     [SerializeField] TMP_Dropdown rotation;
     [SerializeField] GameObject[] hintTips;
     int tipCount;
     List<int> hintIndices = new List<int>();
     [SerializeField] GameObject tvc;
     [SerializeField] GameObject turnProvider;
+    [SerializeField] NPC[] npcs;
+    int npcCount;
     //public static SettingsMenu instance;
 
     void Awake()
@@ -24,6 +26,7 @@ public class SettingsMenu : MonoBehaviour
         {
             hintTips[i] = hintTips[i].transform.parent.gameObject;
         }
+        npcCount = npcs.Length;
     }
 
     public void UpdateValue()
@@ -36,6 +39,12 @@ public class SettingsMenu : MonoBehaviour
     public void ToggleVignette()
     {
         tvc.gameObject.SetActive(vignette.isOn);
+    }
+
+    public void ToggleNPCs()
+    {
+        if (!npc.isOn) for (int i = 0; i < npcCount; i++) npcs[i].Disable();
+        else for (int i = 0; i < npcCount; i++) npcs[i].gameObject.SetActive(true);
     }
 
     public void ToggleHints()
