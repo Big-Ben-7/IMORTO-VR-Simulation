@@ -117,6 +117,7 @@ public class Healthcare : MonoBehaviour
 
     public void SetArm(int a)
     {
+        int lastArm = arm;
         if (arm != a) arm = a;
         else arm = -1;
         switch(arm)
@@ -136,6 +137,16 @@ public class Healthcare : MonoBehaviour
             case 3:
                 armText.SetText("Selected Arm: Top-Right");
                 break;
+        }
+        if (lastArm != -1)
+        {
+            for (int n = 0; n < 3; n++)
+            {
+                GameObject go = arrows[lastArm, n, 0];
+                if (go.activeSelf) go.SetActive(false);
+                go = arrows[lastArm, n, 1];
+                if (go.activeSelf) go.SetActive(false);
+            }
         }
         Player.Click();
     }
