@@ -10,6 +10,8 @@ public class UIPanel : XRGrabInteractable
     public static AudioSource audioSource;
     [SerializeField] protected AudioClip toggle, hover;
     [SerializeField] GameObject socket;
+    [SerializeField] GameObject[] toggleObjects;
+    int toggleCount;
     GameObject mySocket;
     bool initialFollow;
     //int play;
@@ -27,6 +29,7 @@ public class UIPanel : XRGrabInteractable
         initialFollow = lf.enabled;
         myT.GetPositionAndRotation(out Vector3 pos, out initialRot);
         mySocket = Instantiate(socket, pos, initialRot);
+        toggleCount = toggleObjects.Length;
     }
 
     /*protected override void OnEnable()
@@ -39,6 +42,14 @@ public class UIPanel : XRGrabInteractable
     {
         base.OnActivated(args);
         canvas.enabled = !canvas.enabled;
+        if (toggleCount > 0)
+        {
+            for (int i = 0; i < toggleCount; i++)
+            {
+                GameObject go = toggleObjects[i];
+                go.SetActive(!go.activeSelf);
+            }
+        }
         audioSource.PlayOneShot(toggle);
     }
 

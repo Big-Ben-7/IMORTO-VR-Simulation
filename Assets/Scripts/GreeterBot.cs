@@ -60,7 +60,7 @@ public class GreeterBot : MonoBehaviour
 
     IEnumerator Play()
     {
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(3f);
         while (true)
         {
             while (paused) yield return null;
